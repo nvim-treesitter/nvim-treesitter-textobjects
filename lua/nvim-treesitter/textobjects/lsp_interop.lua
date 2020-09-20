@@ -39,17 +39,19 @@ function M.make_preview_location_callback(textobject)
     if vim.tbl_islist(result) then
       result = result[1]
     end
-    if not result.uri or not result.range then
+    local uri = result.uri or result.targetUri
+    local range = result.range or result.targetRange
+    if not uri or not range then
       return
     end
 
-    local buf = vim.uri_to_bufnr(result.uri)
+    local buf = vim.uri_to_bufnr(uri)
     if not vim.api.nvim_buf_is_loaded(buf) then
       vim.fn.bufload(buf)
     end
 
     local _, textobject_at_definition =
-      shared.textobject_at_point(textobject, {result.range.start.line + 1, result.range.start.character}, buf)
+      shared.textobject_at_point(textobject, {range.start.line + 1, range.start.character}, buf)
 
     if textobject_at_definition then
       context = textobject_at_definition[3] - textobject_at_definition[1]

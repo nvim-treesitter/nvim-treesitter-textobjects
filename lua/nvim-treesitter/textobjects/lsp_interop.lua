@@ -43,7 +43,7 @@ function M.make_preview_location_callback(textobject)
   return vim.schedule_wrap(function(err, method, result)
     if err then error(tostring(err)) end
     if result == nil or vim.tbl_isempty(result) then
-      print("No location found: " .. (method or "unknown error" ))
+      print("No location found: " .. (method or "unknown error"))
       return
     end
 

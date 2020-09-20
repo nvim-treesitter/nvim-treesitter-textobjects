@@ -1,5 +1,6 @@
 -- Execute as `nvim --headless -c "luafile ./scripts/update-readme.lua"`
 local parsers = require 'nvim-treesitter.parsers'.get_parser_configs()
+local query = require 'nvim-treesitter.query'
 local sorted_parsers = {}
 
 for k, v in pairs(parsers) do
@@ -8,27 +9,46 @@ end
 
 table.sort(sorted_parsers, function(a, b) return a.name < b.name end)
 
+local textobjects = {}
+for m in table.concat(vim.fn.readfile("CONTRIBUTING.md"), '\n'):gmatch('@[%w.]*') do
+  table.insert(textobjects, m)
+end
+table.sort(textobjects)
+
 local generated_text = ''
+for i, o in ipairs(textobjects) do
+  generated_text = generated_text..i..'. '..o..'\n'
+end
+
+local generated_text = generated_text..'<table>\n'
+
+generated_text = generated_text..'<th>\n'
+for i, _ in ipairs(textobjects) do
+  generated_text = generated_text..'<td>'..i..'</td> '
+end
+generated_text = generated_text..'</th>\n'
 
 for _, v in ipairs(sorted_parsers) do
-  local link = '['..(v.parser.readme_name or v.name)..']('..v.parser.install_info.url..')'
+  local lang = (v.parser.readme_name or v.name)
+  generated_text = generated_text..'<tr>\n'
+  generated_text = generated_text..'<td>'..lang..'</td>'
 
-  if v.parser.maintainers then
-    generated_text = generated_text..
-      '- [x] '..link..' (maintained by '..table.concat(v.parser.maintainers, ', ')..')\n'
-  else
-    generated_text = generated_text..
-      '- [ ] '..link..'\n'
+  for _, o in ipairs(textobjects) do
+    local query_string = query.get_query_string(lang, 'textobjects')
+    local found = query_string:find(o, 1, true)
+    generated_text = generated_text..'<td>'..(found and '✅' or ' ')..'</td> '
   end
+  generated_text = generated_text..'</tr>\n'
 end
+generated_text = generated_text..'</table>\n'
 
 print(generated_text)
 print("\n")
 
 local readme_text = table.concat(vim.fn.readfile('README.md'), '\n')
 
-local new_readme_text = string.gsub(readme_text, "<!%-%-parserinfo%-%->.*<!%-%-parserinfo%-%->",
-                                                 "<!--parserinfo-->\n"..generated_text.."<!--parserinfo-->")
+local new_readme_text = string.gsub(readme_text, "<!%-%-textobjectinfo%-%->.*<!%-%-textobjectinfo%-%->",
+                                                 "<!--textobjectinfo-->\n"..generated_text.."<!--textobjectinfo-->")
 vim.fn.writefile(vim.fn.split(new_readme_text, '\n'), "README.md")
 
 if string.find(readme_text, generated_text, 1, 'plain') then
@@ -36,6 +56,6 @@ if string.find(readme_text, generated_text, 1, 'plain') then
   vim.cmd('q')
 else
   print("New README.md was written. Please commit that change! Old text was: ")
-  print(string.sub(readme_text, string.find(readme_text, "<!%-%-parserinfo%-%->.*<!%-%-parserinfo%-%->")))
+  print(string.sub(readme_text, string.find(readme_text, "<!%-%-textobjectinfo%-%->.*<!%-%-textobjectinfo%-%->")))
   vim.cmd('cq')
 end

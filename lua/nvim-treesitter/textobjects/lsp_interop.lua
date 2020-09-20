@@ -46,9 +46,7 @@ function M.make_preview_location_callback(textobject)
     end
 
     local buf = vim.uri_to_bufnr(uri)
-    if not vim.api.nvim_buf_is_loaded(buf) then
-      vim.fn.bufload(buf)
-    end
+    vim.fn.bufload(buf)
 
     local _, textobject_at_definition =
       shared.textobject_at_point(textobject, {range.start.line + 1, range.start.character}, buf)

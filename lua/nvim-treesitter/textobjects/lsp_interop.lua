@@ -21,6 +21,10 @@ function M.preview_location(location, context)
   end
 
   local range = location.targetRange or location.range
+  -- don't include a exclusive 0 character line
+  if range['end'].character == 0 then
+    range['end'].line = range['end'].line - 1
+  end
   if type(context) == 'table' then
     range.start.line = math.min(range.start.line, context[1])
     range['end'].line = math.max(range['end'].line, context[3])

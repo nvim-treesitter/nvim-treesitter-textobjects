@@ -33,7 +33,7 @@ function M.make_preview_location_callback(textobject)
   return vim.schedule_wrap(function(_, method, result)
     if result == nil or vim.tbl_isempty(result) then
       print("No location found: " .. method)
-      return nil
+      return
     end
 
     if vim.tbl_islist(result) then

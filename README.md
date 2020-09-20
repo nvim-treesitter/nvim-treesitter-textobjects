@@ -2,6 +2,18 @@
 
 Create your own textobjects using tree-sitter queries!
 
+## Installation
+
+You can install nvim-treesitter-textobjects with your favorite package manager, or using the default pack feature of Neovim!
+
+### Using a package manager
+
+If you are using vim-plug, put this in your init.vim file:
+
+```vim
+Plug 'nvim-treesitter/nvim-treesitter-refactor'
+```
+
 ## Text objects: select
 
 Define your own text objects mappings

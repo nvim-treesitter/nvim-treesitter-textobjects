@@ -4,7 +4,7 @@ on: push
 
 jobs:
   update-readme:
-    name: Check README parser info
+    name: Update README.md
     runs-on: ubuntu-latest
     if: github.ref != 'master'
     steps:
@@ -16,8 +16,11 @@ jobs:
           sudo add-apt-repository universe
           wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
           chmod u+x nvim.appimage
+          mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
+          ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/start
-          ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter/start
+          cd ~/.local/share/nvim/site/pack/nvim-treesitter/start
+          git clone https://github.com/nvim-treesitter/nvim-treesitter.git
 
       # inspired by nvim-lspconfigs
       - name: Check README

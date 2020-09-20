@@ -119,8 +119,9 @@ Supported options:
     },
   }
   EOF
+<
 
-                                    *nvim-treesitter-lsp_interop-submod*
+                                   *nvim-treesitter-textobjects-lsp_interop-submod*
 LSP interop~
 
 - peek_definition_code: show textobject surrounding definition as determined

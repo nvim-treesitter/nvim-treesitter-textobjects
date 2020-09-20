@@ -1,11 +1,12 @@
 local queries = require "nvim-treesitter.query"
+local configs = require "nvim-treesitter.configs"
 
 local M = {}
 
 M.has_textobjects = function(lang) return queries.has_query_files(lang, 'textobjects') end
 
 local function has_some_textobject_mapping(lang)
-  for _, v in pairs(M.get_module('textobjects.select').keymaps) do
+  for _, v in pairs(configs.get_module('textobjects.select').keymaps) do
     if type(v) == 'table' then
       if v[lang] then
         return true

@@ -11,5 +11,5 @@
   (arguments) @call.inner)
 (function_call) @call.outer
 
-(argument
+(arguments
  (_) @parameter.inner)

@@ -36,7 +36,7 @@ for _, v in ipairs(sorted_parsers) do
   for _, o in ipairs(textobjects) do
     local query_string = query.get_query_string(lang, 'textobjects')
     local found = query_string:find(o, 1, true)
-    generated_text = generated_text..'<td>'..(found and '✅' or ' ')..'</td> '
+    generated_text = generated_text..'<td>'..(found and '👍' or ' ')..'</td> '
   end
   generated_text = generated_text..'</tr>\n'
 end

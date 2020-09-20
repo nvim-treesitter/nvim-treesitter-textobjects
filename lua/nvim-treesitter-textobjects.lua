@@ -44,6 +44,13 @@ function M.init()
         is_supported = M.has_textobjects,
         swap_next = {},
         swap_previous = {}
+      },
+      lsp_interop = {
+        module_path = "nvim-treesitter.textobjects.lsp_interop",
+        enable = false,
+        disable = {},
+        is_supported = M.has_textobjects,
+        peek_definition_code = {},
       }
     }
   }

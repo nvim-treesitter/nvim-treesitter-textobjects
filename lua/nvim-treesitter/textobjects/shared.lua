@@ -7,12 +7,12 @@ local ts_utils = require'nvim-treesitter.ts_utils'
 
 local M = {}
 
-function M.textobject_at_point(query_string)
-  local bufnr = vim.api.nvim_get_current_buf()
+function M.textobject_at_point(query_string, pos, bufnr)
+  bufnr =  bufnr or vim.api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
   if not lang then return end
 
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local row, col = unpack(pos or vim.api.nvim_win_get_cursor(0))
   row = row - 1
 
   local matches = {}

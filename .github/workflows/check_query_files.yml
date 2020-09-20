@@ -1,0 +1,28 @@
+name: Check loading of syntax files
+
+on: [push, pull_request]
+
+jobs:
+  luacheck:
+    name: Check Query Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Prepare
+        run: |
+          sudo apt-get update
+          sudo add-apt-repository universe
+          wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
+          chmod u+x nvim.appimage
+          mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
+          ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
+          mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/start
+          cd ~/.local/share/nvim/site/pack/nvim-treesitter/start
+          git clone https://github.com/nvim-treesitter/nvim-treesitter.git
+
+      - name: Compile parsers
+        run: ./nvim.appimage --headless -c "TSInstallSync all" -c "q"
+
+      - name: Check query files
+        run: ./nvim.appimage --headless -c "luafile ./scripts/check-queries.lua" -c "q"

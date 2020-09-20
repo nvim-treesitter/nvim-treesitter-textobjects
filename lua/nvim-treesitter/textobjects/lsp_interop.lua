@@ -38,8 +38,8 @@ function M.preview_location(location, context)
   return vim.lsp.util.open_floating_preview(contents, filetype)
 end
 
-function M.make_preview_location_callback(textobject)
-  local context = 1
+function M.make_preview_location_callback(textobject, context)
+  local context = context or 0
   return vim.schedule_wrap(function(err, method, result)
     if err then error(tostring(err)) end
     if result == nil or vim.tbl_isempty(result) then
@@ -70,13 +70,13 @@ function M.make_preview_location_callback(textobject)
   end)
 end
 
-function M.peek_definition_code(textobject, lsp_request)
+function M.peek_definition_code(textobject, lsp_request, context)
   lsp_request = lsp_request or "textDocument/definition"
   if vim.tbl_contains(vim.api.nvim_list_wins(), floating_win) then
     vim.api.nvim_set_current_win(floating_win)
   else
     local params = vim.lsp.util.make_position_params()
-    return vim.lsp.buf_request(0, lsp_request, params, M.make_preview_location_callback(textobject))
+    return vim.lsp.buf_request(0, lsp_request, params, M.make_preview_location_callback(textobject, context))
   end
 end
 

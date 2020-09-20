@@ -12,7 +12,7 @@ function M.textobject_at_point(query_string, pos, bufnr)
   local lang = parsers.get_buf_lang(bufnr)
   if not lang then return end
 
-  local row, col = unpack(pos or vim.api.nvim_win_get_cursor(bufnr))
+  local row, col = unpack(pos or vim.api.nvim_win_get_cursor(0))
   row = row - 1
 
   local matches = {}

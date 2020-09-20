@@ -65,12 +65,13 @@ function M.make_preview_location_callback(textobject)
   end)
 end
 
-function M.peek_definition_code(textobject)
+function M.peek_definition_code(textobject, lsp_request)
+  lsp_request = lsp_request or "textDocument/definition"
   if vim.tbl_contains(vim.api.nvim_list_wins(), floating_win) then
     vim.api.nvim_set_current_win(floating_win)
   else
     local params = vim.lsp.util.make_position_params()
-    return vim.lsp.buf_request(0, "textDocument/definition", params, M.make_preview_location_callback(textobject))
+    return vim.lsp.buf_request(0, lsp_request, params, M.make_preview_location_callback(textobject))
   end
 end
 

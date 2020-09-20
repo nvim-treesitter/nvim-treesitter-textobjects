@@ -9,9 +9,8 @@ local normal_mode_functions = {
   "peek_definition_code"
 }
 
-function M.preview_location(location, context, before_context)
+function M.preview_location(location, context)
   -- location may be LocationLink or Location (more useful for the former)
-  before_context = before_context or 0
   local uri = location.targetUri or location.uri
   if uri == nil then
     return
@@ -20,9 +19,17 @@ function M.preview_location(location, context, before_context)
   if not vim.api.nvim_buf_is_loaded(bufnr) then
     vim.fn.bufload(bufnr)
   end
+
   local range = location.targetRange or location.range
+  if type(context) == 'table' then
+    range.start.line = math.min(range.start.line, context[1])
+    range['end'].line = math.max(range['end'].line, context[3])
+  elseif type(context) == 'number' then
+    range['end'].line = math.max(range['end'].line, range.start.line + context)
+  end
+
   local contents =
-    vim.api.nvim_buf_get_lines(bufnr, range.start.line - before_context, range["end"].line + 1 + context, false)
+    vim.api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 1, false)
   local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
   return vim.lsp.util.open_floating_preview(contents, filetype)
 end
@@ -51,7 +58,7 @@ function M.make_preview_location_callback(textobject)
       shared.textobject_at_point(textobject, {range.start.line + 1, range.start.character}, buf)
 
     if textobject_at_definition then
-      context = textobject_at_definition[3] - textobject_at_definition[1]
+      context = textobject_at_definition
     end
 
     _, floating_win = M.preview_location(result, context)

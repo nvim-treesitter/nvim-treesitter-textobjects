@@ -56,3 +56,6 @@
 
 (parameter_list
   (parameter_declaration) @parameter.inner)
+
+(argument_list
+  (_) @parameter.inner)

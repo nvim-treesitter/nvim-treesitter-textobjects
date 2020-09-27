@@ -16,3 +16,6 @@
 
 (parameter_list
   (optional_parameter_declaration) @parameter.inner)
+
+(new_expression
+  (argument_list) @call.inner) @call.outer

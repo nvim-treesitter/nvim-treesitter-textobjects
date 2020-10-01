@@ -71,3 +71,18 @@
 
 ;; statements
 (block (_) @statement.outer)
+
+;; parameter
+(parameter) @parameter.inner
+
+(tuple_pattern
+  (identifier) @parameter.inner) 
+
+(tuple_struct_pattern
+  (identifier) @parameter.inner)
+
+(closure_parameters
+  (_) @parameter.inner)
+
+(arguments
+  (_) @parameter.inner)

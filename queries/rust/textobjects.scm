@@ -86,3 +86,6 @@
 
 (arguments
   (_) @parameter.inner)
+
+(meta_arguments
+  (_) @parameter.inner)

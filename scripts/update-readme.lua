@@ -33,9 +33,11 @@ for _, v in ipairs(sorted_parsers) do
   generated_text = generated_text..'<tr>\n'
   generated_text = generated_text..'<td>'..lang..'</td>'
 
+  local parsed_queries = query.get_query(lang, 'textobjects')
+  local found_textobjects = parsed_queries and parsed_queries.captures or {}
+
   for _, o in ipairs(textobjects) do
-    local query_string = query.get_query_string(lang, 'textobjects')
-    local found = query_string:find(o, 1, true)
+    local found = vim.tbl_contains(found_textobjects, o:sub(2))
     generated_text = generated_text..'<td>'..(found and '👍' or ' ')..'</td> '
   end
   generated_text = generated_text..'</tr>\n'

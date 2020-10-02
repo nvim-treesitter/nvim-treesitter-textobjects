@@ -74,7 +74,7 @@ end
 
 function M.get_adjacent(forward, node, query_string, same_parent, overlapping_range_ok, bufnr)
   local fn = forward and M.next_textobject or M.previous_textobject
-  return fn(node,  query_string, same_parent, overlapping_range_ok, bufnr)
+  return fn(node, query_string, same_parent, overlapping_range_ok, bufnr)
 end
 
 function M.next_textobject(node, query_string, same_parent, overlapping_range_ok, bufnr)

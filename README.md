@@ -11,6 +11,7 @@ You can install nvim-treesitter-textobjects with your favorite package manager, 
 If you are using vim-plug, put this in your init.vim file:
 
 ```vim
+Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 ```
 

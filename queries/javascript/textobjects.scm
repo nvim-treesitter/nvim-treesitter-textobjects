@@ -1,3 +1,4 @@
+; inherits: (jsx)
 (function_declaration
   body: (statement_block) @function.inner) @function.outer
 

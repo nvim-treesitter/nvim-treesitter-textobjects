@@ -16,4 +16,7 @@
 (arguments
  (_) @parameter.inner)
 
+(parameters
+ (_) @parameter.inner)
+
 (comment) @comment.outer

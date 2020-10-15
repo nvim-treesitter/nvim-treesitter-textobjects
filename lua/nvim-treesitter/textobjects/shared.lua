@@ -7,6 +7,31 @@ local ts_utils = require'nvim-treesitter.ts_utils'
 
 local M = {}
 
+local function is_in_node_range(node1, node2, line, col)
+  if not node2 then return end
+  local start_line, start_col, end_line, end_col
+  if node1 and node2 then
+   start_line, start_col = node1:start()
+   end_line, end_col = node2:end_()
+  else
+   start_line, start_col, end_line, end_col = node2:range()
+  end
+
+  if line >= start_line and line <= end_line then
+    if line == start_line and line == end_line then
+      return col >= start_col and col < end_col
+    elseif line == start_line then
+      return col >= start_col
+    elseif line == end_line then
+      return col < end_col
+    else
+      return true
+    end
+  else
+    return false
+  end
+end
+
 function M.textobject_at_point(query_string, pos, bufnr)
   bufnr =  bufnr or vim.api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
@@ -40,8 +65,8 @@ function M.textobject_at_point(query_string, pos, bufnr)
   local earliest_start
 
   for _, m in pairs(matches) do
-    if m.node and ts_utils.is_in_node_range(m.node, row, col) then
-      local length = ts_utils.node_length(m.node)
+    if is_in_node_range(m.start and m.start.node, m.node or (m['end'] and m['end'].node), row, col) then
+      local length = ts_utils.node_length(m['end'] and m['end'].node or m.node)
       if not match_length or length < match_length then
         smallest_range = m
         match_length = length
@@ -64,7 +89,7 @@ function M.textobject_at_point(query_string, pos, bufnr)
   if smallest_range then
     if smallest_range.start then
       local start_range = {smallest_range.start.node:range()}
-      local node_range = {smallest_range.node:range()}
+      local node_range = {(smallest_range.node or smallest_range['end'].node):range()}
       return bufnr, {start_range[1], start_range[2], node_range[3], node_range[4]}, smallest_range.node
     else
       return bufnr, {smallest_range.node:range()}, smallest_range.node

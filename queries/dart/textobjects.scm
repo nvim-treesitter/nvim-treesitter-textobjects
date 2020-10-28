@@ -8,6 +8,14 @@
   body: (extension_body) @class.inner) @class.outer
 
 ; function/method
+(( 
+  (marker_annotation)? @function.outer.start .
+  [(method_signature) (function_signature)] @_start
+  .
+  (function_body) @_end
+)
+(make-range! "function.outer" @_start @_end))
+
 (function_body) @function.inner
 (type_alias (function_type) @function.inner) @function.outer
 

@@ -182,8 +182,6 @@ EOF
 <tr>
 <td>lua</td><td> </td> <td> </td> <td>👍</td> <td>👍</td> <td> </td> <td> </td> <td>👍</td> <td> </td> <td>👍</td> <td> </td> <td>👍</td> <td> </td> <td>👍</td> <td>👍</td> <td> </td> </tr>
 <tr>
-<td>markdown</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
-<tr>
 <td>nix</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr>
 <td>ocaml</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
@@ -219,6 +217,8 @@ EOF
 <td>tsx</td><td> </td> <td> </td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td> </td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td> </td> <td> </td> </tr>
 <tr>
 <td>typescript</td><td> </td> <td> </td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td> </td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td> </td> <td> </td> </tr>
+<tr>
+<td>verilog</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr>
 <td>vue</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr>

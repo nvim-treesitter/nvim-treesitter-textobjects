@@ -48,3 +48,22 @@
 
 ;; calls
 (call_expression (_)? @call.inner) @call.outer
+
+;; parameters
+(parameter_list
+  (parameter_declaration) @parameter.inner)
+
+(parameter_declaration
+  (identifier)
+  (identifier) @parameter.inner)
+
+(parameter_declaration
+  (identifier) @parameter.inner
+  (identifier))
+
+(parameter_list
+  (variadic_parameter_declaration) @parameter.inner)
+
+;; arguments
+(argument_list
+  (_) @parameter.inner)

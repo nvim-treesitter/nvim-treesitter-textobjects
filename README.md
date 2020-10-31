@@ -164,7 +164,7 @@ EOF
 <tr>
 <td>fennel</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr>
-<td>go</td><td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td> </td> <td>👍</td> </tr>
+<td>go</td><td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> </tr>
 <tr>
 <td>haskell</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr>

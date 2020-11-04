@@ -38,3 +38,11 @@
 
 ;; blocks
 (_ (statement_block) @block.inner) @block.outer
+
+;; parameters
+(formal_parameters
+  (identifier) @parameter.inner)
+
+;; arguments
+(arguments
+  (identifier) @parameter.inner)

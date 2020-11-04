@@ -35,3 +35,6 @@
 
 (call_expression) @call.outer
 (call_expression (arguments) @call.inner)
+
+;; blocks
+(_ (statement_block) @block.inner) @block.outer

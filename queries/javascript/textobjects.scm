@@ -45,4 +45,4 @@
 
 ;; arguments
 (arguments
-  (identifier) @parameter.inner)
+  (_) @parameter.inner)

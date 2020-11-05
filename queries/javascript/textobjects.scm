@@ -43,6 +43,18 @@
 (formal_parameters
   (identifier) @parameter.inner)
 
+; function (v = default_value)
+(formal_parameters
+  (assignment_pattern) @parameter.inner)
+
+; function ({ x }) ...
+(formal_parameters
+  (object_pattern) @paremeter.inner)
+
+; function ([ x ]) ...
+(formal_parameters
+  (array_pattern) @paremeter.inner)
+
 ;; arguments
 (arguments
   (_) @parameter.inner)

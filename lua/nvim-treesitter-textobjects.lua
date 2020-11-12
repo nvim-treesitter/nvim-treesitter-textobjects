@@ -1,5 +1,6 @@
 local queries = require "nvim-treesitter.query"
 local configs = require "nvim-treesitter.configs"
+local utils = require "nvim-treesitter.utils"
 
 local M = {}
 
@@ -55,6 +56,9 @@ function M.init()
       }
     }
   }
+  for _, m in ipairs({'select', 'move', 'swap', 'lsp_interop'}) do
+    utils.setup_commands('textobjects.'..m, require ('nvim-treesitter.textobjects.'..m).commands)
+  end
 end
 
 return M

@@ -1,5 +1,6 @@
 local api = vim.api
 local configs = require'nvim-treesitter.configs'
+local utils = require'nvim-treesitter.utils'
 local parsers = require'nvim-treesitter.parsers'
 local queries = require'nvim-treesitter.query'
 
@@ -32,6 +33,7 @@ function M.attach(bufnr, lang)
       api.nvim_buf_set_keymap(buf, "x", mapping, cmd, {silent = true, noremap = true })
     end
   end
+  utils.setup_commands('textobjects.select', M.commands)
 end
 
 function M.detach(bufnr)
@@ -51,5 +53,15 @@ function M.detach(bufnr)
     end
   end
 end
+
+M.commands = {
+  TSTextobjectSelect = {
+    run = M.select_textobject,
+    args = {
+      "-nargs=1",
+      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
+    },
+  },
+}
 
 return M

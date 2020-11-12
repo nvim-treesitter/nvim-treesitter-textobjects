@@ -7,6 +7,13 @@ local ts_utils = require'nvim-treesitter.ts_utils'
 
 local M = {}
 
+function M.available_textobjects(lang)
+  lang = lang or parsers.get_buf_lang()
+  local parsed_queries = queries.get_query(lang, 'textobjects')
+  local found_textobjects = parsed_queries and parsed_queries.captures or {}
+  return found_textobjects
+end
+
 function M.textobject_at_point(query_string, pos, bufnr)
   bufnr =  bufnr or vim.api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)

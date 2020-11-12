@@ -30,7 +30,7 @@ local normal_mode_functions = {"swap_next",
                                "swap_previous"}
 
 M.attach = attach.make_attach(normal_mode_functions, "swap")
-M.deattach = attach.make_detach(normal_mode_functions, "swap")
+M.detach = attach.make_detach(normal_mode_functions, "swap")
 M.commands = {}
 
 return M

@@ -59,5 +59,6 @@ local normal_mode_functions = {"goto_next_start",
 
 M.attach = attach.make_attach(normal_mode_functions, "move")
 M.deattach = attach.make_detach(normal_mode_functions, "move")
+M.commands = {}
 
 return M

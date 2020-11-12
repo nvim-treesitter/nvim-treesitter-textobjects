@@ -82,5 +82,6 @@ end
 
 M.attach = attach.make_attach(normal_mode_functions, "lsp_interop")
 M.deattach = attach.make_detach(normal_mode_functions, "lsp_interop")
+M.commands = {}
 
 return M

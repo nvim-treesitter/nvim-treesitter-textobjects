@@ -1,4 +1,5 @@
 local configs = require'nvim-treesitter.configs'
+local utils = require'nvim-treesitter.utils'
 local parsers = require'nvim-treesitter.parsers'
 local queries = require'nvim-treesitter.query'
 local api = vim.api
@@ -6,6 +7,7 @@ local M = {}
 
 function M.make_attach(normal_mode_functions, submodule)
   return function(bufnr, lang)
+    utils.setup_commands(submodule, M.commands)
     local config = configs.get_module("textobjects."..submodule)
     local lang = lang or parsers.get_buf_lang(bufnr)
 

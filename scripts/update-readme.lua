@@ -1,6 +1,6 @@
 -- Execute as `nvim --headless -c "luafile ./scripts/update-readme.lua"`
 local parsers = require 'nvim-treesitter.parsers'.get_parser_configs()
-local query = require 'nvim-treesitter.query'
+local shared = require 'nvim-treesitter.textobjects.shared'
 local sorted_parsers = {}
 
 for k, v in pairs(parsers) do
@@ -33,8 +33,7 @@ for _, v in ipairs(sorted_parsers) do
   generated_text = generated_text..'<tr>\n'
   generated_text = generated_text..'<td>'..lang..'</td>'
 
-  local parsed_queries = query.get_query(lang, 'textobjects')
-  local found_textobjects = parsed_queries and parsed_queries.captures or {}
+  local found_textobjects = shared.available_textobjects(lang)
 
   for _, o in ipairs(textobjects) do
     local found = vim.tbl_contains(found_textobjects, o:sub(2))

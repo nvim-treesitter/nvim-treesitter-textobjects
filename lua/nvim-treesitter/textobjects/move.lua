@@ -59,6 +59,36 @@ local normal_mode_functions = {"goto_next_start",
 
 M.attach = attach.make_attach(normal_mode_functions, "move")
 M.detach = attach.make_detach(normal_mode_functions, "move")
-M.commands = {}
+
+M.commands = {
+  TSTextobjectGotoNextStart = {
+    run = M.goto_next_start,
+    args = {
+      "-nargs=1",
+      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
+    },
+  },
+  TSTextobjectGotoNextEnd = {
+    run = M.goto_next_end,
+    args = {
+      "-nargs=1",
+      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
+    },
+  },
+  TSTextobjectGotoPreviousStart = {
+    run = M.goto_previous_start,
+    args = {
+      "-nargs=1",
+      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
+    },
+  },
+  TSTextobjectGotoPreviousEnd = {
+    run = M.goto_previous_end,
+    args = {
+      "-nargs=1",
+      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
+    },
+  },
+}
 
 return M

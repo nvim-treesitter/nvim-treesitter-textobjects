@@ -31,6 +31,23 @@ local normal_mode_functions = {"swap_next",
 
 M.attach = attach.make_attach(normal_mode_functions, "swap")
 M.detach = attach.make_detach(normal_mode_functions, "swap")
-M.commands = {}
+
+M.commands = {
+  TSTextobjectSwapNext = {
+    run = M.swap_next,
+    args = {
+      "-nargs=1",
+      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
+    },
+  },
+  TSTextobjectSwapPrevious = {
+    run = M.swap_previous,
+    args = {
+      "-nargs=1",
+      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
+    },
+  },
+}
+
 
 return M

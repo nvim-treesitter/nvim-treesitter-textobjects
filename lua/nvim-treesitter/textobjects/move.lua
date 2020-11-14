@@ -45,12 +45,10 @@ local function move(query_string, forward, start, bufnr)
   ts_utils.goto_node(match and match.node, not start)
 end
 
--- luacheck: push ignore 631
 M.goto_next_start = function(query_string) move(query_string, 'forward', 'start') end
 M.goto_next_end = function(query_string) move(query_string, 'forward', not 'start') end
 M.goto_previous_start = function(query_string) move(query_string, not 'forward', 'start') end
 M.goto_previous_end = function(query_string) move(query_string, not 'forward', not 'start') end
--- luacheck: pop
 
 local normal_mode_functions = {"goto_next_start",
                                "goto_next_end",

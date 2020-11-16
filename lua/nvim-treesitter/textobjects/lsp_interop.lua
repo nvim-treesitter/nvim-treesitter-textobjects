@@ -81,6 +81,15 @@ function M.peek_definition_code(textobject, lsp_request, context)
 end
 
 M.attach = attach.make_attach(normal_mode_functions, "lsp_interop")
-M.deattach = attach.make_detach(normal_mode_functions, "lsp_interop")
+M.detach = attach.make_detach(normal_mode_functions, "lsp_interop")
+M.commands = {
+  TSTextobjectPeekDefinitionCode = {
+    run = M.peek_definition_code,
+    args = {
+      "-nargs=+",
+      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
+    },
+  },
+}
 
 return M

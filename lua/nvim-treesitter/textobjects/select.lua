@@ -52,4 +52,14 @@ function M.detach(bufnr)
   end
 end
 
+M.commands = {
+  TSTextobjectSelect = {
+    run = M.select_textobject,
+    args = {
+      "-nargs=1",
+      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
+    },
+  },
+}
+
 return M

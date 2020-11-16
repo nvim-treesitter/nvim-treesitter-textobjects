@@ -54,8 +54,10 @@
 (preproc_else
   (_) @statement.outer)
 
-(parameter_list
-  (parameter_declaration) @parameter.inner)
+((parameter_list
+  (parameter_declaration) @parameter.inner . ","? @_end)
+ (make-range! "parameter.outer" @parameter.inner @_end))
 
-(argument_list
-  (_) @parameter.inner)
+((argument_list
+  (_) @parameter.inner . ","? @_end)
+ (make-range! "parameter.outer" @parameter.inner @_end))

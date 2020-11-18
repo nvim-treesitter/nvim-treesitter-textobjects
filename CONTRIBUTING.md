@@ -17,13 +17,14 @@ Each capture group can be declared as `inner` or `outer`.
 @call.outer
 @block.inner
 @block.outer
+@parameter.inner
+@parameter.outer
 ```
 
 Some nodes only have one type:
 
 ```
 @comment.outer
-@parameter.inner
 @statement.outer
 ```
 

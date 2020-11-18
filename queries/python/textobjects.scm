@@ -43,7 +43,7 @@
    (list_splat)
    (dictionary_splat)] @parameter.inner)
    . ","? @_end)
-  (make-range! "parameter.outer" @parameter.inner @_end))
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((lambda_parameters
   [(identifier)
@@ -54,8 +54,8 @@
    (list_splat)
    (dictionary_splat)] @parameter.inner
    . ","? @_end)
-  (make-range! "parameter.outer" @parameter.inner @_end))
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ; TODO: exclude comments using the future negate syntax from tree-sitter
 ((argument_list (_) @parameter.inner . ","? @_end)
- (make-range! "parameter.outer" @parameter.inner @_end))
+ (#make-range! "parameter.outer" @parameter.inner @_end))

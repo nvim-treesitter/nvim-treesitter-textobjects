@@ -9,7 +9,7 @@
 
 ; function/method
 (( 
-  (marker_annotation)? @function.outer.start .
+  [(marker_annotation)? (annotation)?] @function.outer.start .
   [(method_signature) (function_signature)] @_start
   .
   (function_body) @_end

@@ -73,19 +73,25 @@
 (block (_) @statement.outer)
 
 ;; parameter
-(parameter) @parameter.inner
+(((parameter) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
-(tuple_pattern
-  (identifier) @parameter.inner) 
+((tuple_pattern
+  (identifier) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
-(tuple_struct_pattern
-  (identifier) @parameter.inner)
+((tuple_struct_pattern
+  (identifier) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
-(closure_parameters
-  (_) @parameter.inner)
+((closure_parameters
+  (_) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
-(arguments
-  (_) @parameter.inner)
+(((arguments
+  (_) @parameter.inner . ","? @_end))
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
-(meta_arguments
-  (_) @parameter.inner)
+((meta_arguments
+  (_) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 

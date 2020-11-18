@@ -14,8 +14,9 @@
 (template_declaration
   (class_specifier) @class.outer) @class.outer.start
 
-(parameter_list
-  (optional_parameter_declaration) @parameter.inner)
+((parameter_list
+  (optional_parameter_declaration) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 (new_expression
   (argument_list) @call.inner) @call.outer

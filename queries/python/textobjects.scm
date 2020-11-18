@@ -34,23 +34,28 @@
 (call (_) @call.inner)
 
 ;; Parameters
-(parameters
-  [(identifier)
+((parameters
+  ([(identifier)
    (tuple)
    (typed_parameter)
    (default_parameter)
    (typed_default_parameter)
    (list_splat)
    (dictionary_splat)] @parameter.inner)
+   . ","? @_end)
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
-(lambda_parameters
+((lambda_parameters
   [(identifier)
    (tuple)
    (typed_parameter)
    (default_parameter)
    (typed_default_parameter)
    (list_splat)
-   (dictionary_splat)] @parameter.inner)
+   (dictionary_splat)] @parameter.inner
+   . ","? @_end)
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ; TODO: exclude comments using the future negate syntax from tree-sitter
-(argument_list (_) @parameter.inner)
+((argument_list (_) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end))

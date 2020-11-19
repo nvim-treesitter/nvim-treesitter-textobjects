@@ -21,9 +21,7 @@
 (type_alias (function_type)? @function.inner) @function.outer
 
 ; parameter
-(formal_parameter_list) @parameter.outer
-(optional_formal_parameters) @parameter.outer
-(arguments (_)? @parameter.inner) @parameter.outer
+(arguments (_)? @parameter.inner)
 [
   (formal_parameter)
   (normal_parameter_type)

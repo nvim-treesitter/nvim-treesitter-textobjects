@@ -189,7 +189,7 @@ EOF
 <tr>
 <td>kotlin</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr>
-<td>lua</td><td> </td> <td> </td> <td>👍</td> <td>👍</td> <td> </td> <td> </td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td>👍</td> <td> </td> <td> </td> </tr>
+<td>lua</td><td> </td> <td> </td> <td>👍</td> <td>👍</td> <td> </td> <td> </td> <td>👍</td> <td> </td> <td>👍</td> <td> </td> <td>👍</td> <td> </td> <td>👍</td> <td>👍</td> <td> </td> <td> </td> </tr>
 <tr>
 <td>nix</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr>

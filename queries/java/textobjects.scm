@@ -4,6 +4,9 @@
 (method_declaration
   body: (_) @function.inner) @function.outer
 
+(constructor_declaration) @function.outer
+(constructor_body) @function.inner
+
 (for_statement
   body: (_)? @loop.inner) @loop.outer
 

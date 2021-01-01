@@ -4,6 +4,9 @@
   ;body:  (compound_statement
                           ;("{" (_)* @function.inner "}"))?) @function.outer
 
+(declaration
+  declarator: (function_declarator)) @function.outer
+
 (function_definition
   body:  (compound_statement) @function.inner) @function.outer
 
@@ -20,7 +23,7 @@
   condition: (_) @conditional.inner)
 
 ; loops
-(for_statement 
+(for_statement
   (_)? @loop.inner) @loop.outer
 (while_statement
   (_)? @loop.inner) @loop.outer
@@ -36,7 +39,7 @@
 
 ; Statements
 
-;(expression_statement ;; this is what we actually want to capture in most cases (";" is missing) probaly 
+;(expression_statement ;; this is what we actually want to capture in most cases (";" is missing) probaly
   ;(_) @statement.inner) ;; the otther statement like node type is declaration but declaration has a ";"
 
 (compound_statement

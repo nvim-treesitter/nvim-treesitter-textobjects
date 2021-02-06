@@ -8,10 +8,20 @@ local ts_utils = require'nvim-treesitter.ts_utils'
 
 local M = {}
 
-function M.select_textobject(query_string)
+function M.select_textobject(query_string, keymap_mode)
   local bufnr, textobject = shared.textobject_at_point(query_string)
   if textobject then
+    -- Detect if selection should be made linewise depending keymaping mode.
+    -- This should be done before calling `ts_utils.update_selection()` because
+    -- it forces 'v' mode.
+    local force_linewise = (keymap_mode == "x" and vim.fn.visualmode() == "V") or
+      (keymap_mode == "o" and vim.fn.mode(1) == "noV")
+    -- Make regular selection
     ts_utils.update_selection(bufnr, textobject)
+    -- Possibly make selection linewise
+    if force_linewise then
+      vim.fn.nvim_exec("normal! V", false)
+    end
   end
 end
 
@@ -27,9 +37,10 @@ function M.attach(bufnr, lang)
       query = nil
     end
     if query then
-      local cmd = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('"..query.."')<CR>"
-      api.nvim_buf_set_keymap(buf, "o", mapping, cmd, {silent = true, noremap = true })
-      api.nvim_buf_set_keymap(buf, "x", mapping, cmd, {silent = true, noremap = true })
+      local cmd_o = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('"..query.."', 'o')<CR>"
+      api.nvim_buf_set_keymap(buf, "o", mapping, cmd_o, {silent = true, noremap = true })
+      local cmd_x = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('"..query.."', 'x')<CR>"
+      api.nvim_buf_set_keymap(buf, "x", mapping, cmd_x, {silent = true, noremap = true })
     end
   end
 end

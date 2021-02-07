@@ -11,23 +11,31 @@ local M = {}
 function M.select_textobject(query_string, keymap_mode)
   local bufnr, textobject = shared.textobject_at_point(query_string)
   if textobject then
-    local selection_mode = "charwise"
+    ts_utils.update_selection(bufnr, textobject, M.detect_selection_mode(keymap_mode))
+  end
+end
 
-    -- Update selection mode based on keymapping mode
+function M.detect_selection_mode(keymap_mode)
+    local selection_mode = "charwise"
     local ctrl_v = vim.api.nvim_replace_termcodes("<C-v>", true, true, true)
-    if keymap_mode == "x" then
+
+    -- Update selection mode with different methods based on keymapping mode
+    local keymap_to_method = {
+      o = "operator-pending", s = "visual", v = "visual", x = "visual"
+    }
+    local method = keymap_to_method[keymap_mode]
+
+    if method == "visual" then
       local t = { V = "linewise"}
       t[ctrl_v] = "blockwise"
       selection_mode = t[vim.fn.visualmode()]
-    elseif keymap_mode == "o" then
+    elseif method == "operator-pending" then
       local t = { noV = "linewise" }
       t["no" .. ctrl_v] = "blockwise"
       selection_mode = t[vim.fn.mode(1)]
     end
 
-    -- Make selection
-    ts_utils.update_selection(bufnr, textobject, selection_mode)
-  end
+    return selection_mode
 end
 
 function M.attach(bufnr, lang)

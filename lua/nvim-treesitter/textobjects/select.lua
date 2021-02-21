@@ -26,9 +26,7 @@ function M.detect_selection_mode(keymap_mode)
     local method = keymap_to_method[keymap_mode]
 
     if method == "visual" then
-      local t = { V = "linewise"}
-      t[ctrl_v] = "blockwise"
-      selection_mode = t[vim.fn.visualmode()]
+      selection_mode = vim.fn.visualmode()
     elseif method == "operator-pending" then
       local t = { noV = "linewise" }
       t["no" .. ctrl_v] = "blockwise"

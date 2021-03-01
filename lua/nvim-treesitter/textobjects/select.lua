@@ -16,24 +16,24 @@ function M.select_textobject(query_string, keymap_mode)
 end
 
 function M.detect_selection_mode(keymap_mode)
-    local selection_mode = "charwise"
-    local ctrl_v = vim.api.nvim_replace_termcodes("<C-v>", true, true, true)
+  local selection_mode = "charwise"
+  local ctrl_v = vim.api.nvim_replace_termcodes("<C-v>", true, true, true)
 
-    -- Update selection mode with different methods based on keymapping mode
-    local keymap_to_method = {
-      o = "operator-pending", s = "visual", v = "visual", x = "visual"
-    }
-    local method = keymap_to_method[keymap_mode]
+  -- Update selection mode with different methods based on keymapping mode
+  local keymap_to_method = {
+    o = "operator-pending", s = "visual", v = "visual", x = "visual"
+  }
+  local method = keymap_to_method[keymap_mode]
 
-    if method == "visual" then
-      selection_mode = vim.fn.visualmode()
-    elseif method == "operator-pending" then
-      local t = { noV = "linewise" }
-      t["no" .. ctrl_v] = "blockwise"
-      selection_mode = t[vim.fn.mode(1)]
-    end
+  if method == "visual" then
+    selection_mode = vim.fn.visualmode()
+  elseif method == "operator-pending" then
+    local t = { noV = "linewise" }
+    t["no" .. ctrl_v] = "blockwise"
+    selection_mode = t[vim.fn.mode(1)]
+  end
 
-    return selection_mode
+  return selection_mode
 end
 
 function M.attach(bufnr, lang)

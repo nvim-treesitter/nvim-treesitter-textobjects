@@ -27,6 +27,6 @@
   link: (link) @block.inner) @block.outer
 
 (substitution_definition
-  body: (body) @block.inner) @block.outer
+  body: (directive) @block.inner) @block.outer
 
 (comment) @comment.outer

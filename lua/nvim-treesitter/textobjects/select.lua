@@ -8,11 +8,32 @@ local ts_utils = require'nvim-treesitter.ts_utils'
 
 local M = {}
 
-function M.select_textobject(query_string)
+function M.select_textobject(query_string, keymap_mode)
   local bufnr, textobject = shared.textobject_at_point(query_string)
   if textobject then
-    ts_utils.update_selection(bufnr, textobject)
+    ts_utils.update_selection(bufnr, textobject, M.detect_selection_mode(keymap_mode))
   end
+end
+
+function M.detect_selection_mode(keymap_mode)
+  local selection_mode = "charwise"
+  local ctrl_v = vim.api.nvim_replace_termcodes("<C-v>", true, true, true)
+
+  -- Update selection mode with different methods based on keymapping mode
+  local keymap_to_method = {
+    o = "operator-pending", s = "visual", v = "visual", x = "visual"
+  }
+  local method = keymap_to_method[keymap_mode]
+
+  if method == "visual" then
+    selection_mode = vim.fn.visualmode()
+  elseif method == "operator-pending" then
+    local t = { noV = "linewise" }
+    t["no" .. ctrl_v] = "blockwise"
+    selection_mode = t[vim.fn.mode(1)]
+  end
+
+  return selection_mode
 end
 
 function M.attach(bufnr, lang)
@@ -27,9 +48,10 @@ function M.attach(bufnr, lang)
       query = nil
     end
     if query then
-      local cmd = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('"..query.."')<CR>"
-      api.nvim_buf_set_keymap(buf, "o", mapping, cmd, {silent = true, noremap = true })
-      api.nvim_buf_set_keymap(buf, "x", mapping, cmd, {silent = true, noremap = true })
+      local cmd_o = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('"..query.."', 'o')<CR>"
+      api.nvim_buf_set_keymap(buf, "o", mapping, cmd_o, {silent = true, noremap = true })
+      local cmd_x = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('"..query.."', 'x')<CR>"
+      api.nvim_buf_set_keymap(buf, "x", mapping, cmd_x, {silent = true, noremap = true })
     end
   end
 end

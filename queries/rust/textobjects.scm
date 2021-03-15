@@ -18,6 +18,9 @@
 (impl_item
   (_) @class.inner) @class.outer
 
+(mod_item
+  (_) @class.inner) @class.outer
+
 ;; conditionals
 (if_expression
   alternative: (_ (_) @conditional.inner)?

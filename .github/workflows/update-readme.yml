@@ -1,6 +1,9 @@
 name: Check README parser info
 
-on: push
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   update-readme:

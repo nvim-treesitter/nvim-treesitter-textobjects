@@ -19,6 +19,10 @@ Each capture group can be declared as `inner` or `outer`.
 @block.outer
 @parameter.inner
 @parameter.outer
+
+# For LaTeX frames
+@frame.inner
+@frame.outer
 ```
 
 Some nodes only have one type:

@@ -1,6 +1,7 @@
 local ts_utils = require'nvim-treesitter.ts_utils'
 local attach = require'nvim-treesitter.textobjects.attach'
 local queries = require'nvim-treesitter.query'
+local configs = require'nvim-treesitter.configs'
 
 local M = {}
 
@@ -42,7 +43,8 @@ local function move(query_string, forward, start, bufnr)
   end
 
   local match = queries.find_best_match(bufnr, query_string, 'textobjects', filter_function, scoring_function)
-  ts_utils.goto_node(match and match.node, not start)
+  local config = configs.get_module('textobjects.move')
+  ts_utils.goto_node(match and match.node, not start, not config.set_jumps)
 end
 
 M.goto_next_start = function(query_string) move(query_string, 'forward', 'start') end

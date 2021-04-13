@@ -34,6 +34,7 @@ function M.init()
         enable = false,
         disable = {},
         is_supported = M.has_textobjects,
+        set_jumps = true,
         goto_next_start = {},
         goto_next_end = {},
         goto_previous_start = {},

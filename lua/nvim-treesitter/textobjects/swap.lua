@@ -4,6 +4,8 @@ local attach = require'nvim-treesitter.textobjects.attach'
 
 local M = {}
 
+local CR = vim.api.nvim_replace_termcodes("<cr>", true, true, true)
+
 local function swap_textobject(query_string, direction)
   local bufnr, textobject_range, node = shared.textobject_at_point(query_string)
   if not node then return end
@@ -20,10 +22,12 @@ end
 
 function M.swap_next(query_string)
   swap_textobject(query_string, 1)
+  pcall(vim.fn["repeat#set"], ":TSTextobjectSwapNext "..query_string..CR)
 end
 
 function M.swap_previous(query_string)
   swap_textobject(query_string, -1)
+  pcall(vim.fn["repeat#set"], ":TSTextobjectSwapPrevious "..query_string..CR)
 end
 
 local normal_mode_functions = {"swap_next",

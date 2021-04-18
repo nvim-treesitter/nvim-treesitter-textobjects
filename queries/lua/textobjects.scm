@@ -20,3 +20,23 @@
  (_) @parameter.inner)
 
 (comment) @comment.outer
+
+((function
+  . (function_name) . (parameters) . (_) @_start
+  (_) @_end .)
+ (#make-range! "function.inner" @_start @_end))
+((local_function
+  . (identifier) . (parameters) . (_) @_start
+  (_) @_end .)
+ (#make-range! "function.inner" @_start @_end))
+((function_definition
+  . (parameters) . (_) @_start
+  (_) @_end .)
+ (#make-range! "function.inner" @_start @_end))
+
+((function
+  . (function_name) . (parameters) . (_) @function.inner .))
+((local_function
+  . (identifier) . (parameters) . (_) @function.inner .))
+((function_definition
+  . (parameters) . (_) @function.inner .))

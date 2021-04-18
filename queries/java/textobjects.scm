@@ -20,14 +20,14 @@
   body: (_)? @loop.inner) @loop.outer
 
 (if_statement
-  condition: (_ (expression) @conditional.inner)  @conditional.outer)
+  condition: (_ (parenthesized_expression) @conditional.inner)  @conditional.outer)
 
 (if_statement
   consequence: (_)? @conditional.inner
   alternative: (_)? @conditional.inner
   ) @conditional.outer
 
-(switch_statement
+(switch_expression
   body: (_)? @conditional.inner) @conditional.outer
 
 ;; blocks

@@ -30,5 +30,6 @@ Some nodes only have one type:
 ```
 @comment.outer
 @statement.outer
+@scopename.inner
 ```
 

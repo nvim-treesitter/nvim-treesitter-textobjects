@@ -38,7 +38,7 @@ function M.preview_location(location, context)
   return vim.lsp.util.open_floating_preview(contents, filetype)
 end
 
-function M.make_preview_location_callback(textobject, context)
+function M.make_preview_location_callback(textobject, query_group, context)
   local context = context or 0
   return vim.schedule_wrap(function(err, method, result)
     if err then error(tostring(err)) end
@@ -60,7 +60,7 @@ function M.make_preview_location_callback(textobject, context)
     vim.fn.bufload(buf)
 
     local _, textobject_at_definition =
-      shared.textobject_at_point(textobject, {range.start.line + 1, range.start.character}, buf)
+      shared.textobject_at_point(textobject, query_group, {range.start.line + 1, range.start.character}, buf)
 
     if textobject_at_definition then
       context = textobject_at_definition
@@ -70,13 +70,13 @@ function M.make_preview_location_callback(textobject, context)
   end)
 end
 
-function M.peek_definition_code(textobject, lsp_request, context)
+function M.peek_definition_code(textobject, query_group, lsp_request, context)
   lsp_request = lsp_request or "textDocument/definition"
   if vim.tbl_contains(vim.api.nvim_list_wins(), floating_win) then
     vim.api.nvim_set_current_win(floating_win)
   else
     local params = vim.lsp.util.make_position_params()
-    return vim.lsp.buf_request(0, lsp_request, params, M.make_preview_location_callback(textobject, context))
+    return vim.lsp.buf_request(0, lsp_request, params, M.make_preview_location_callback(textobject, query_group, context))
   end
 end
 

@@ -4,8 +4,8 @@ local attach = require'nvim-treesitter.textobjects.attach'
 
 local M = {}
 
-local function swap_textobject(query_string, direction)
-  local bufnr, textobject_range, node = shared.textobject_at_point(query_string)
+local function swap_textobject(query_string, query_group, direction)
+  local bufnr, textobject_range, node = shared.textobject_at_point(query_string, query_group)
   if not node then return end
 
   local step = direction > 0 and 1 or -1
@@ -18,12 +18,12 @@ local function swap_textobject(query_string, direction)
   end
 end
 
-function M.swap_next(query_string)
-  swap_textobject(query_string, 1)
+function M.swap_next(query_string, query_group)
+  swap_textobject(query_string, query_group, 1)
 end
 
-function M.swap_previous(query_string)
-  swap_textobject(query_string, -1)
+function M.swap_previous(query_string, query_group)
+  swap_textobject(query_string, query_group, -1)
 end
 
 local normal_mode_functions = {"swap_next",
@@ -36,14 +36,14 @@ M.commands = {
   TSTextobjectSwapNext = {
     run = M.swap_next,
     args = {
-      "-nargs=1",
+      "-nargs=+",
       "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
     },
   },
   TSTextobjectSwapPrevious = {
     run = M.swap_previous,
     args = {
-      "-nargs=1",
+      "-nargs=+",
       "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
     },
   },

@@ -126,6 +126,27 @@ Supported options:
   EOF
 <
 
+Again, you can also map captures from other query groups
+e.g. cycle through function names defined in `locals.scm`.
+
+
+>
+  lua <<EOF
+  require'nvim-treesitter.configs'.setup {
+    textobjects = {
+       move = {
+        enable = true,
+        goto_next_start = {
+          ["]F"] = { "@definition.function", "locals" },
+        },
+        goto_previous_start = {
+          ["[F"] = { "@definition.function", "locals" },
+        },
+      }
+    }
+  }
+<
+
                                    *nvim-treesitter-textobjects-lsp_interop-submod*
 LSP interop~
 

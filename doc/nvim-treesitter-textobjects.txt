@@ -29,6 +29,9 @@ Supported options:
           ["ac"] = "@class.outer",
           ["ic"] = "@class.inner",
 
+          -- You can also take textobjects from other query groups
+          ["aS"] = { "@scope", "locals" }, -- selects `@scope` from locals.scm
+
           -- Or you can define your own textobjects like this
           ["iF"] = {
             python = "(function_definition) @function",
@@ -121,6 +124,27 @@ Supported options:
     },
   }
   EOF
+<
+
+Again, you can also map captures from other query groups
+e.g. cycle through function names defined in `locals.scm`.
+
+
+>
+  lua <<EOF
+  require'nvim-treesitter.configs'.setup {
+    textobjects = {
+       move = {
+        enable = true,
+        goto_next_start = {
+          ["]F"] = { "@definition.function", "locals" },
+        },
+        goto_previous_start = {
+          ["[F"] = { "@definition.function", "locals" },
+        },
+      }
+    }
+  }
 <
 
                                    *nvim-treesitter-textobjects-lsp_interop-submod*

@@ -1,15 +1,15 @@
 local api = vim.api
-local configs = require'nvim-treesitter.configs'
-local parsers = require'nvim-treesitter.parsers'
-local queries = require'nvim-treesitter.query'
+local configs = require "nvim-treesitter.configs"
+local parsers = require "nvim-treesitter.parsers"
+local queries = require "nvim-treesitter.query"
 
-local shared = require'nvim-treesitter.textobjects.shared'
-local ts_utils = require'nvim-treesitter.ts_utils'
+local shared = require "nvim-treesitter.textobjects.shared"
+local ts_utils = require "nvim-treesitter.ts_utils"
 
 local M = {}
 
-function M.select_textobject(query_string, keymap_mode)
-  local bufnr, textobject = shared.textobject_at_point(query_string)
+function M.select_textobject(query_string, query_group, keymap_mode)
+  local bufnr, textobject = shared.textobject_at_point(query_string, query_group)
   if textobject then
     ts_utils.update_selection(bufnr, textobject, M.detect_selection_mode(keymap_mode))
   end
@@ -21,14 +21,17 @@ function M.detect_selection_mode(keymap_mode)
 
   -- Update selection mode with different methods based on keymapping mode
   local keymap_to_method = {
-    o = "operator-pending", s = "visual", v = "visual", x = "visual"
+    o = "operator-pending",
+    s = "visual",
+    v = "visual",
+    x = "visual"
   }
   local method = keymap_to_method[keymap_mode]
 
   if method == "visual" then
     selection_mode = vim.fn.visualmode()
   elseif method == "operator-pending" then
-    local t = { noV = "linewise" }
+    local t = {noV = "linewise"}
     t["no" .. ctrl_v] = "blockwise"
     selection_mode = t[vim.fn.mode(1)]
   end
@@ -42,16 +45,26 @@ function M.attach(bufnr, lang)
   local lang = lang or parsers.get_buf_lang(buf)
 
   for mapping, query in pairs(config.keymaps) do
-    if type(query) == 'table' then
-      query = query[lang]
-    elseif not queries.get_query(lang, 'textobjects') then
+    local query_group = "textobjects"
+    if type(query) == "table" then
+      if #query == 2 then
+        query_group = query[2]
+        query = query[1]
+      else
+        query = query[lang]
+      end
+    elseif not queries.get_query(lang, "textobjects") then
       query = nil
     end
     if query then
-      local cmd_o = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('"..query.."', 'o')<CR>"
-      api.nvim_buf_set_keymap(buf, "o", mapping, cmd_o, {silent = true, noremap = true })
-      local cmd_x = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('"..query.."', 'x')<CR>"
-      api.nvim_buf_set_keymap(buf, "x", mapping, cmd_x, {silent = true, noremap = true })
+      local cmd_o =
+        ":lua require'nvim-treesitter.textobjects.select'.select_textobject('" ..
+        query .. "','" .. query_group .. "', 'o')<CR>"
+      api.nvim_buf_set_keymap(buf, "o", mapping, cmd_o, {silent = true, noremap = true})
+      local cmd_x =
+        ":lua require'nvim-treesitter.textobjects.select'.select_textobject('" ..
+        query .. "','" .. query_group .. "', 'x')<CR>"
+      api.nvim_buf_set_keymap(buf, "x", mapping, cmd_x, {silent = true, noremap = true})
     end
   end
 end
@@ -62,9 +75,9 @@ function M.detach(bufnr)
   local lang = parsers.get_buf_lang(bufnr)
 
   for mapping, query in pairs(config.keymaps) do
-    if type(query) == 'table' then
+    if type(query) == "table" then
       query = query[lang]
-    elseif not queries.get_query(lang, 'textobjects') then
+    elseif not queries.get_query(lang, "textobjects") then
       query = nil
     end
     if query then
@@ -78,10 +91,10 @@ M.commands = {
   TSTextobjectSelect = {
     run = M.select_textobject,
     args = {
-      "-nargs=1",
-      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
-    },
-  },
+      "-nargs=+",
+      "-complete=custom,nvim_treesitter_textobjects#available_textobjects"
+    }
+  }
 }
 
 return M

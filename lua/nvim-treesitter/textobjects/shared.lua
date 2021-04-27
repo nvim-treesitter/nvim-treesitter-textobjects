@@ -13,7 +13,8 @@ function M.available_textobjects(lang)
   return found_textobjects
 end
 
-function M.textobject_at_point(query_string, pos, bufnr)
+function M.textobject_at_point(query_string, query_group, pos, bufnr)
+  query_group = query_group or 'textobjects'
   bufnr =  bufnr or vim.api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
   if not lang then return end
@@ -24,14 +25,14 @@ function M.textobject_at_point(query_string, pos, bufnr)
   local matches = {}
 
   if string.match(query_string, '^@.*') then
-    matches = queries.get_capture_matches_recursively(bufnr, query_string, 'textobjects')
+    matches = queries.get_capture_matches_recursively(bufnr, query_string, query_group)
   else
     local parser = parsers.get_parser(bufnr, lang)
 
     parser:for_each_tree(function(tree, lang_tree)
       local lang = lang_tree:lang()
       local start_row, _, end_row, _ = tree:root():range()
-      local query = queries.get_query(lang, 'textobjects')
+      local query = queries.get_query(lang, query_group)
       for m in queries.iter_prepared_matches(query, tree:root(), bufnr, start_row, end_row) do
         for _, n in pairs(m) do
           if n.node then

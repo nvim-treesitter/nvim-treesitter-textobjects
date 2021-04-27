@@ -33,6 +33,9 @@ require'nvim-treesitter.configs'.setup {
         ["ac"] = "@class.outer",
         ["ic"] = "@class.inner",
 
+        -- You can also take textobjects from other query groups
+        ["aS"] = { "@scope", "locals" }, -- selects `@scope` from locals.scm
+
         -- Or you can define your own textobjects like this
         ["iF"] = {
           python = "(function_definition) @function",

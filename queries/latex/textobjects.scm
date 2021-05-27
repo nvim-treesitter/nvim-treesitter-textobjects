@@ -26,3 +26,6 @@
   (paragraph)
   (subparagraph)
 ] @class.outer
+
+(generic_command) @call.outer
+(generic_command (_) @call.inner)

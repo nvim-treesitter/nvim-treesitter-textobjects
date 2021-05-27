@@ -3,6 +3,7 @@ local api = vim.api
 local parsers = require "nvim-treesitter.parsers"
 local queries = require'nvim-treesitter.query'
 local ts_utils = require'nvim-treesitter.ts_utils'
+local tsq = require'vim.treesitter.query'
 
 local M = {}
 
@@ -13,7 +14,7 @@ function M.available_textobjects(lang)
   return found_textobjects
 end
 
-function M.textobject_at_point(query_string, pos, bufnr)
+function M.textobject_at_point(query, pos, bufnr)
   bufnr =  bufnr or vim.api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
   if not lang then return end
@@ -23,19 +24,21 @@ function M.textobject_at_point(query_string, pos, bufnr)
 
   local matches = {}
 
-  if string.match(query_string, '^@.*') then
-    matches = queries.get_capture_matches_recursively(bufnr, query_string, 'textobjects')
+  if type(query) == 'string' then
+    matches = queries.get_capture_matches_recursively(bufnr, query, 'textobjects')
   else
     local parser = parsers.get_parser(bufnr, lang)
 
     parser:for_each_tree(function(tree, lang_tree)
       local lang = lang_tree:lang()
       local start_row, _, end_row, _ = tree:root():range()
-      local query = queries.get_query(lang, 'textobjects')
-      for m in queries.iter_prepared_matches(query, tree:root(), bufnr, start_row, end_row) do
-        for _, n in pairs(m) do
-          if n.node then
-            table.insert(matches, n)
+      local parsed_query = tsq.parse_query(query[lang])
+      if parsed_query then
+        for m in queries.iter_prepared_matches(parsed_query, tree:root(), bufnr, start_row, end_row) do
+          for _, n in pairs(m) do
+            if n.node then
+              table.insert(matches, n)
+            end
           end
         end
       end

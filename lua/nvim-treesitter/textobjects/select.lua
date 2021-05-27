@@ -42,9 +42,7 @@ function M.attach(bufnr, lang)
   local lang = lang or parsers.get_buf_lang(buf)
 
   for mapping, query in pairs(config.keymaps) do
-    if type(query) == 'table' then
-      query = query[lang]
-    elseif not queries.get_query(lang, 'textobjects') then
+    if type(query) ~= 'table' and not queries.get_query(lang, 'textobjects') then
       query = nil
     end
     if query then
@@ -62,9 +60,7 @@ function M.detach(bufnr)
   local lang = parsers.get_buf_lang(bufnr)
 
   for mapping, query in pairs(config.keymaps) do
-    if type(query) == 'table' then
-      query = query[lang]
-    elseif not queries.get_query(lang, 'textobjects') then
+    if type(query) ~= 'table' and not queries.get_query(lang, 'textobjects') then
       query = nil
     end
     if query then

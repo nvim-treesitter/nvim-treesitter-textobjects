@@ -13,6 +13,7 @@ Query files: `textobjects.scm`.
 Supported options:
 - enable: `true` or `false`.
 - disable: list of languages.
+- lookahead: `true` or `false`, whether or not to look ahead for the textobject
 - keymaps: map of keymaps to a tree-sitter query
   (`(function_definition) @function`) or capture group (`@function.inner`).
 

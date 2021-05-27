@@ -27,6 +27,7 @@ function M.init()
         is_supported = function(lang)
           return M.has_textobjects(lang) or has_some_textobject_mapping(lang)
         end,
+        lookahead = false,
         keymaps = {}
       },
       move = {

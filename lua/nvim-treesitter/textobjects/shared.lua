@@ -13,7 +13,7 @@ function M.available_textobjects(lang)
   return found_textobjects
 end
 
-function M.textobject_at_point(query_string, pos, bufnr)
+function M.textobject_at_point(query_string, pos, bufnr, lookahead)
   bufnr =  bufnr or vim.api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
   if not lang then return end
@@ -46,6 +46,10 @@ function M.textobject_at_point(query_string, pos, bufnr)
   local smallest_range
   local earliest_start
 
+  local lookahead_match_length
+  local lookahead_largest_range
+  local lookahead_earliest_start
+
   for _, m in pairs(matches) do
     if m.node and ts_utils.is_in_node_range(m.node, row, col) then
       local length = ts_utils.node_length(m.node)
@@ -65,6 +69,18 @@ function M.textobject_at_point(query_string, pos, bufnr)
           end
         end
       end
+    elseif lookahead then
+      local start_line, start_col, start_byte = m.node:start()
+      if start_line > row or start_line == row and start_col > col then
+        local length = ts_utils.node_length(m.node)
+        if not lookahead_earliest_start
+          or lookahead_earliest_start > start_byte
+          or (lookahead_earliest_start == start_byte and lookahead_match_length < length) then
+          lookahead_match_length = length
+          lookahead_largest_range = m
+          lookahead_earliest_start = start_byte
+        end
+      end
     end
   end
 
@@ -76,6 +92,8 @@ function M.textobject_at_point(query_string, pos, bufnr)
     else
       return bufnr, {smallest_range.node:range()}, smallest_range.node
     end
+  elseif lookahead_largest_range then
+    return bufnr, {lookahead_largest_range.node:range()}, lookahead_largest_range.node
   end
 end
 

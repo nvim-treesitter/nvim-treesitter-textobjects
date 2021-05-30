@@ -13,7 +13,8 @@ function M.available_textobjects(lang)
   return found_textobjects
 end
 
-function M.textobject_at_point(query_string, pos, bufnr, lookahead)
+function M.textobject_at_point(query_string, pos, bufnr, opts)
+  opts = opts or {}
   bufnr =  bufnr or vim.api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
   if not lang then return end
@@ -69,7 +70,7 @@ function M.textobject_at_point(query_string, pos, bufnr, lookahead)
           end
         end
       end
-    elseif lookahead then
+    elseif opts.lookahead then
       local start_line, start_col, start_byte = m.node:start()
       if start_line > row or start_line == row and start_col > col then
         local length = ts_utils.node_length(m.node)

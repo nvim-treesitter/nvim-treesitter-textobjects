@@ -12,11 +12,13 @@
   (case)
 ] @conditional.outer
 
-(while) @loop.outer
-(while_modifier) @loop.outer
-(until) @loop.outer
-(while_modifier) @loop.outer
-(for) @loop.outer
+[
+  (while)
+  (while_modifier)
+  (until)
+  (until_modifier)
+  (for)
+] @loop.outer
 
 (call) @call.outer
 

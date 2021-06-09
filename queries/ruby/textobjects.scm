@@ -4,3 +4,5 @@
 (class
     name: (_)*) @class.outer
 
+(module
+    name: (_)*) @class.outer

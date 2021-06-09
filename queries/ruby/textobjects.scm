@@ -16,3 +16,5 @@
 (until) @loop.outer
 (while_modifier) @loop.outer
 (for) @loop.outer
+
+(call) @call.outer

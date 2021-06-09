@@ -1,11 +1,10 @@
-(method
-    name: (_)) @function.outer
+(method) @function.outer
 
-(class
-    name: (_)*) @class.outer
+(singleton_method) @function.outer
 
-(module
-    name: (_)*) @class.outer
+(class) @class.outer
+
+(module) @class.outer
 
 (if) @conditional.outer
 (unless) @conditional.outer
@@ -20,4 +19,4 @@
 (call) @call.outer
 
 (call
-    block: (_)) @block.outer
+  block: (_)) @block.outer

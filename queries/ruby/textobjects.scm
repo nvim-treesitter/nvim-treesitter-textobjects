@@ -18,3 +18,6 @@
 (for) @loop.outer
 
 (call) @call.outer
+
+(call
+    block: (_)) @block.outer

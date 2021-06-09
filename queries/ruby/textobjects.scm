@@ -6,9 +6,11 @@
 
 (module) @class.outer
 
-(if) @conditional.outer
-(unless) @conditional.outer
-(case) @conditional.outer
+[
+  (if)
+  (unless)
+  (case)
+] @conditional.outer
 
 (while) @loop.outer
 (while_modifier) @loop.outer

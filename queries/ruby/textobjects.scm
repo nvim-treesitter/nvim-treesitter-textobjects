@@ -1,2 +1,6 @@
 (method
-    name: (_)) * @function.outer
+    name: (_)) @function.outer
+
+(class
+    name: (_)*) @class.outer
+

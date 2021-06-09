@@ -10,3 +10,9 @@
 (if) @conditional.outer
 (unless) @conditional.outer
 (case) @conditional.outer
+
+(while) @loop.outer
+(while_modifier) @loop.outer
+(until) @loop.outer
+(while_modifier) @loop.outer
+(for) @loop.outer

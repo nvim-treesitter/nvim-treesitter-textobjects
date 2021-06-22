@@ -41,6 +41,13 @@ require'nvim-treesitter.configs'.setup {
           java = "(method_declaration) @function",
         },
       },
+      -- You can choose the select mode (default is charwise 'v')
+      selection_modes = {
+        ['@parameter.outer'] = 'v', -- charwise
+        ['@function.outer'] = 'V', -- linewise
+        ['@class.outer'] = '<c-v>', -- blockwise
+      },
+    },
     },
   },
 }

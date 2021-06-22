@@ -18,18 +18,7 @@ function M.select_textobject(query_string, keymap_mode)
   end
 end
 
-local textobject_modes = {
-    ['@function.outer'] = 'linewise',
-    ['@function.inner'] = 'linewise',
-    ['@class.outer'] = 'linewise',
-    ['@class.inner'] = 'linewise',
-    ['@parameter.outer'] = 'charwise',
-    ['@parameter.inner'] = 'charwise',
-}
-
 function M.detect_selection_mode(query_string, keymap_mode)
-  local selection_mode = textobject_modes[query_string]
-  local ctrl_v = vim.api.nvim_replace_termcodes("<C-v>", true, true, true)
 
   -- Update selection mode with different methods based on keymapping mode
   local keymap_to_method = {
@@ -40,15 +29,25 @@ function M.detect_selection_mode(query_string, keymap_mode)
   }
   local method = keymap_to_method[keymap_mode]
 
+  local config = configs.get_module("textobjects.select")
+  local selection_mode = config.selection_modes[query_string]
   if method == "visual" then
     selection_mode = vim.fn.visualmode()
   elseif method == "operator-pending" then
-    local t = { noV = "linewise" }
-    t["no" .. ctrl_v] = "blockwise"
+  local ctrl_v = vim.api.nvim_replace_termcodes("<c-v>", true, true, true)
+    local t = {
+        noV = "V",
+        ["no" .. ctrl_v] = "<c-v>",
+    }
     selection_mode = t[vim.fn.mode(1)] or selection_mode
   end
 
-  return selection_mode
+  local t = {
+      v = 'charwise',
+      V = 'linewise',
+      ['<c-v>'] = 'blockwise',
+  }
+  return t[selection_mode]
 end
 
 function M.attach(bufnr, lang)

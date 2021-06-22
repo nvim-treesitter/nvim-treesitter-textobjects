@@ -32,6 +32,14 @@ function M.init()
         lookahead = false,
         lookbehind = false,
         keymaps = {},
+        selection_modes = {
+            ['@function.outer'] = 'v',
+            ['@function.inner'] = 'v',
+            ['@class.outer'] = 'v',
+            ['@class.inner'] = 'v',
+            ['@parameter.outer'] = 'v',
+            ['@parameter.inner'] = 'v',
+        }
       },
       move = {
         module_path = "nvim-treesitter.textobjects.move",

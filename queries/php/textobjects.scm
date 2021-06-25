@@ -25,3 +25,6 @@
 ;; parameters
 (formal_parameters
   (simple_parameter) @parameter.inner)
+
+(arguments
+  (argument) @parameter.inner)

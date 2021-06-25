@@ -27,4 +27,4 @@
   (simple_parameter) @parameter.inner)
 
 (arguments
-  (argument) @parameter.outer)
+  (argument) @parameter.inner)

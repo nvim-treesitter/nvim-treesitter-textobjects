@@ -30,7 +30,7 @@ function M.detect_selection_mode(query_string, keymap_mode)
   local method = keymap_to_method[keymap_mode]
 
   local config = configs.get_module("textobjects.select")
-  local selection_mode = config.selection_modes[query_string]
+  local selection_mode = config.selection_modes[query_string] or 'v'
   if method == "visual" then
     selection_mode = vim.fn.visualmode()
   elseif method == "operator-pending" then

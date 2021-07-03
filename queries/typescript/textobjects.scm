@@ -45,4 +45,4 @@
 
 ;; parameters
 (formal_parameters
-  (required_parameter) @parameter.inner)
+  (_) @parameter.inner)

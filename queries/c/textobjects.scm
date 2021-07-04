@@ -42,8 +42,8 @@
 
 ; Statements
 
-;(expression_statement ;; this is what we actually want to capture in most cases (";" is missing) probaly
-  ;(_) @statement.inner) ;; the otther statement like node type is declaration but declaration has a ";"
+;(expression_statement ;; this is what we actually want to capture in most cases (";" is missing) probably
+  ;(_) @statement.inner) ;; the other statement like node type is declaration but declaration has a ";"
 
 (compound_statement
   (_) @statement.outer)

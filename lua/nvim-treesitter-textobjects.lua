@@ -28,7 +28,8 @@ function M.init()
           return M.has_textobjects(lang) or has_some_textobject_mapping(lang)
         end,
         lookahead = false,
-        keymaps = {}
+        keymaps = {},
+        selection_modes = {},
       },
       move = {
         module_path = "nvim-treesitter.textobjects.move",

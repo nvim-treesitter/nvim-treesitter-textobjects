@@ -12,13 +12,11 @@ function M.select_textobject(query_string, keymap_mode)
   local lookahead = configs.get_module("textobjects.select").lookahead
   local bufnr, textobject = shared.textobject_at_point(query_string, nil, nil, {lookahead = lookahead})
   if textobject then
-    ts_utils.update_selection(bufnr, textobject, M.detect_selection_mode(keymap_mode))
+    ts_utils.update_selection(bufnr, textobject, M.detect_selection_mode(query_string, keymap_mode))
   end
 end
 
-function M.detect_selection_mode(keymap_mode)
-  local selection_mode = "charwise"
-  local ctrl_v = vim.api.nvim_replace_termcodes("<C-v>", true, true, true)
+function M.detect_selection_mode(query_string, keymap_mode)
 
   -- Update selection mode with different methods based on keymapping mode
   local keymap_to_method = {
@@ -26,15 +24,25 @@ function M.detect_selection_mode(keymap_mode)
   }
   local method = keymap_to_method[keymap_mode]
 
+  local config = configs.get_module("textobjects.select")
+  local selection_mode = config.selection_modes[query_string] or 'v'
   if method == "visual" then
     selection_mode = vim.fn.visualmode()
   elseif method == "operator-pending" then
-    local t = { noV = "linewise" }
-    t["no" .. ctrl_v] = "blockwise"
-    selection_mode = t[vim.fn.mode(1)]
+    local ctrl_v = vim.api.nvim_replace_termcodes("<c-v>", true, true, true)
+    local t = {
+        noV = "V",
+        ["no" .. ctrl_v] = "<c-v>",
+    }
+    selection_mode = t[vim.fn.mode(1)] or selection_mode
   end
 
-  return selection_mode
+  local t = {
+      v = 'charwise',
+      V = 'linewise',
+      ['<c-v>'] = 'blockwise',
+  }
+  return t[selection_mode]
 end
 
 function M.attach(bufnr, lang)

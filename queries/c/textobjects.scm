@@ -13,6 +13,9 @@
 (struct_specifier
   body: (_) @class.inner) @class.outer
 
+(enum_specifier
+  body: (_) @class.inner) @class.outer
+
 ; conditional
 (if_statement
   consequence: (_)? @conditional.inner

@@ -2,6 +2,10 @@
 (class_specifier
   body: (_) @class.inner) @class.outer
 
+(field_declaration
+  type: (enum_specifier)
+  default_value: (initializer_list) @class.inner) @class.outer
+
 (for_range_loop 
   (_)? @loop.inner) @loop.outer
 

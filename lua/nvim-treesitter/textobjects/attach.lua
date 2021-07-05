@@ -4,7 +4,7 @@ local queries = require'nvim-treesitter.query'
 local api = vim.api
 local M = {}
 
-function M.make_attach(normal_mode_functions, submodule)
+function M.make_attach(normal_mode_functions, submodule, repeatable)
   return function(bufnr, lang)
     local config = configs.get_module("textobjects."..submodule)
     local lang = lang or parsers.get_buf_lang(bufnr)
@@ -18,7 +18,13 @@ function M.make_attach(normal_mode_functions, submodule)
         end
         if query then
           local cmd = ":lua require'nvim-treesitter.textobjects."..submodule.."'."..function_call.."('"..query.."')<CR>"
-          api.nvim_buf_set_keymap(bufnr, "n", mapping, cmd, {silent = true, noremap = true })
+
+          if repeatable then
+            local fn = 'nvim_treesitter_textobjects#repeatable("'..cmd..'")'
+            api.nvim_buf_set_keymap(bufnr, "n", mapping, fn, {silent = true, noremap = true, expr = true })
+          else
+            api.nvim_buf_set_keymap(bufnr, "n", mapping, cmd, {silent = true, noremap = true })
+          end
         end
       end
     end

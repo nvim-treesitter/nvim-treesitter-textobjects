@@ -30,7 +30,7 @@ function M.make_detach(normal_mode_functions, submodule)
     local config = configs.get_module("textobjects."..submodule)
     local lang = parsers.get_buf_lang(bufnr)
 
-    for mapping, query in pairs(config.keymaps) do
+    for mapping, query in pairs(config.keymaps or {}) do
       if type(query) == 'table' then
         query = query[lang]
       elseif not queries.get_query(lang, 'textobjects') then

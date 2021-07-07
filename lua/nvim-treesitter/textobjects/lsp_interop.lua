@@ -1,5 +1,6 @@
 local attach = require "nvim-treesitter.textobjects.attach"
 local shared = require "nvim-treesitter.textobjects.shared"
+local configs = require'nvim-treesitter.configs'
 
 local M = {}
 
@@ -32,10 +33,16 @@ function M.preview_location(location, context)
     range['end'].line = math.max(range['end'].line, range.start.line + context)
   end
 
+
+  local config = configs.get_module('textobjects.lsp_interop')
+  local opts = {}
+  if config.border ~= "none" then
+	opts.border = config.border
+  end
   local contents =
     vim.api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 1, false)
   local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
-  return vim.lsp.util.open_floating_preview(contents, filetype)
+  return vim.lsp.util.open_floating_preview(contents, filetype, opts)
 end
 
 function M.make_preview_location_callback(textobject, context)

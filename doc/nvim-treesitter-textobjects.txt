@@ -131,7 +131,9 @@ LSP interop~
   using Neovim's built-in LSP in a floating window. Press the shortcut twice
   to enter the floating window (when https://github.com/neovim/neovim/pull/12720
   or its successor is merged)
-
+Supported options:
+- enable: `true` or `false`.
+- border: 'none', 'single', 'double', 'rounded', 'solid', 'shadow'
 >
   lua <<EOF
   require'nvim-treesitter.configs'.setup {

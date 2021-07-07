@@ -37,7 +37,7 @@ function M.preview_location(location, context)
   local config = configs.get_module('textobjects.lsp_interop')
   local opts = {}
   if config.border ~= "none" then
-	opts.border = config.border
+    opts.border = config.border
   end
   local contents =
     vim.api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 1, false)

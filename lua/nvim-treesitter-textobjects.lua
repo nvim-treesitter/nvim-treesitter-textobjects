@@ -52,7 +52,7 @@ function M.init()
       lsp_interop = {
         module_path = "nvim-treesitter.textobjects.lsp_interop",
         enable = false,
-		    border = "none",
+        border = "none",
         disable = {},
         is_supported = M.has_textobjects,
         peek_definition_code = {},

@@ -1,13 +1,13 @@
 local attach = require "nvim-treesitter.textobjects.attach"
 local shared = require "nvim-treesitter.textobjects.shared"
-local configs = require'nvim-treesitter.configs'
+local configs = require "nvim-treesitter.configs"
 
 local M = {}
 
 local floating_win
 
 local normal_mode_functions = {
-  "peek_definition_code"
+  "peek_definition_code",
 }
 
 function M.preview_location(location, context)
@@ -23,24 +23,22 @@ function M.preview_location(location, context)
 
   local range = location.targetRange or location.range
   -- don't include a exclusive 0 character line
-  if range['end'].character == 0 then
-    range['end'].line = range['end'].line - 1
+  if range["end"].character == 0 then
+    range["end"].line = range["end"].line - 1
   end
-  if type(context) == 'table' then
+  if type(context) == "table" then
     range.start.line = math.min(range.start.line, context[1])
-    range['end'].line = math.max(range['end'].line, context[3])
-  elseif type(context) == 'number' then
-    range['end'].line = math.max(range['end'].line, range.start.line + context)
+    range["end"].line = math.max(range["end"].line, context[3])
+  elseif type(context) == "number" then
+    range["end"].line = math.max(range["end"].line, range.start.line + context)
   end
 
-
-  local config = configs.get_module('textobjects.lsp_interop')
+  local config = configs.get_module "textobjects.lsp_interop"
   local opts = {}
   if config.border ~= "none" then
     opts.border = config.border
   end
-  local contents =
-    vim.api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 1, false)
+  local contents = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 1, false)
   local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
   return vim.lsp.util.open_floating_preview(contents, filetype, opts)
 end
@@ -48,7 +46,9 @@ end
 function M.make_preview_location_callback(textobject, context)
   local context = context or 0
   return vim.schedule_wrap(function(err, method, result)
-    if err then error(tostring(err)) end
+    if err then
+      error(tostring(err))
+    end
     if result == nil or vim.tbl_isempty(result) then
       print("No location found: " .. (method or "unknown error"))
       return
@@ -66,8 +66,11 @@ function M.make_preview_location_callback(textobject, context)
     local buf = vim.uri_to_bufnr(uri)
     vim.fn.bufload(buf)
 
-    local _, textobject_at_definition =
-      shared.textobject_at_point(textobject, {range.start.line + 1, range.start.character}, buf)
+    local _, textobject_at_definition = shared.textobject_at_point(
+      textobject,
+      { range.start.line + 1, range.start.character },
+      buf
+    )
 
     if textobject_at_definition then
       context = textobject_at_definition

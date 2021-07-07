@@ -1,38 +1,40 @@
 local api = vim.api
 
 local parsers = require "nvim-treesitter.parsers"
-local queries = require'nvim-treesitter.query'
-local ts_utils = require'nvim-treesitter.ts_utils'
+local queries = require "nvim-treesitter.query"
+local ts_utils = require "nvim-treesitter.ts_utils"
 
 local M = {}
 
 function M.available_textobjects(lang)
   lang = lang or parsers.get_buf_lang()
-  local parsed_queries = queries.get_query(lang, 'textobjects')
+  local parsed_queries = queries.get_query(lang, "textobjects")
   local found_textobjects = parsed_queries and parsed_queries.captures or {}
   return found_textobjects
 end
 
 function M.textobject_at_point(query_string, pos, bufnr, opts)
   opts = opts or {}
-  bufnr =  bufnr or vim.api.nvim_get_current_buf()
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
-  if not lang then return end
+  if not lang then
+    return
+  end
 
   local row, col = unpack(pos or vim.api.nvim_win_get_cursor(0))
   row = row - 1
 
   local matches = {}
 
-  if string.match(query_string, '^@.*') then
-    matches = queries.get_capture_matches_recursively(bufnr, query_string, 'textobjects')
+  if string.match(query_string, "^@.*") then
+    matches = queries.get_capture_matches_recursively(bufnr, query_string, "textobjects")
   else
     local parser = parsers.get_parser(bufnr, lang)
 
     parser:for_each_tree(function(tree, lang_tree)
       local lang = lang_tree:lang()
       local start_row, _, end_row, _ = tree:root():range()
-      local query = queries.get_query(lang, 'textobjects')
+      local query = queries.get_query(lang, "textobjects")
       for m in queries.iter_prepared_matches(query, tree:root(), bufnr, start_row, end_row) do
         for _, n in pairs(m) do
           if n.node then
@@ -74,9 +76,11 @@ function M.textobject_at_point(query_string, pos, bufnr, opts)
       local start_line, start_col, start_byte = m.node:start()
       if start_line > row or start_line == row and start_col > col then
         local length = ts_utils.node_length(m.node)
-        if not lookahead_earliest_start
+        if
+          not lookahead_earliest_start
           or lookahead_earliest_start > start_byte
-          or (lookahead_earliest_start == start_byte and lookahead_match_length < length) then
+          or (lookahead_earliest_start == start_byte and lookahead_match_length < length)
+        then
           lookahead_match_length = length
           lookahead_largest_range = m
           lookahead_earliest_start = start_byte
@@ -87,14 +91,14 @@ function M.textobject_at_point(query_string, pos, bufnr, opts)
 
   if smallest_range then
     if smallest_range.start then
-      local start_range = {smallest_range.start.node:range()}
-      local node_range = {smallest_range.node:range()}
-      return bufnr, {start_range[1], start_range[2], node_range[3], node_range[4]}, smallest_range.node
+      local start_range = { smallest_range.start.node:range() }
+      local node_range = { smallest_range.node:range() }
+      return bufnr, { start_range[1], start_range[2], node_range[3], node_range[4] }, smallest_range.node
     else
-      return bufnr, {smallest_range.node:range()}, smallest_range.node
+      return bufnr, { smallest_range.node:range() }, smallest_range.node
     end
   elseif lookahead_largest_range then
-    return bufnr, {lookahead_largest_range.node:range()}, lookahead_largest_range.node
+    return bufnr, { lookahead_largest_range.node:range() }, lookahead_largest_range.node
   end
 end
 
@@ -106,7 +110,9 @@ end
 function M.next_textobject(node, query_string, same_parent, overlapping_range_ok, bufnr)
   local node = node or ts_utils.get_node_at_cursor()
   local bufnr = bufnr or api.nvim_get_current_buf()
-  if not node then return end
+  if not node then
+    return
+  end
 
   local _, _, node_end = node:end_()
   local search_start, _
@@ -116,7 +122,9 @@ function M.next_textobject(node, query_string, same_parent, overlapping_range_ok
     _, _, search_start = node:end_()
   end
   local function filter_function(match)
-    if match.node == node then return end
+    if match.node == node then
+      return
+    end
     if not same_parent or node:parent() == match.node:parent() then
       local _, _, start = match.node:start()
       local _, _, end_ = match.node:end_()
@@ -128,7 +136,7 @@ function M.next_textobject(node, query_string, same_parent, overlapping_range_ok
     return -node_start
   end
 
-  local next_node = queries.find_best_match(bufnr, query_string, 'textobjects', filter_function, scoring_function)
+  local next_node = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
 
   return next_node and next_node.node
 end
@@ -136,7 +144,9 @@ end
 function M.previous_textobject(node, query_string, same_parent, overlapping_range_ok, bufnr)
   local node = node or ts_utils.get_node_at_cursor()
   local bufnr = bufnr or api.nvim_get_current_buf()
-  if not node then return end
+  if not node then
+    return
+  end
 
   local _, _, node_start = node:start()
   local search_end, _
@@ -160,7 +170,7 @@ function M.previous_textobject(node, query_string, same_parent, overlapping_rang
     return node_end
   end
 
-  local previous_node = queries.find_best_match(bufnr, query_string, 'textobjects', filter_function, scoring_function)
+  local previous_node = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
 
   return previous_node and previous_node.node
 end

@@ -1,12 +1,14 @@
-local ts_utils = require'nvim-treesitter.ts_utils'
-local shared = require'nvim-treesitter.textobjects.shared'
-local attach = require'nvim-treesitter.textobjects.attach'
+local ts_utils = require "nvim-treesitter.ts_utils"
+local shared = require "nvim-treesitter.textobjects.shared"
+local attach = require "nvim-treesitter.textobjects.attach"
 
 local M = {}
 
 local function swap_textobject(query_string, direction)
   local bufnr, textobject_range, node = shared.textobject_at_point(query_string)
-  if not node then return end
+  if not node then
+    return
+  end
 
   local step = direction > 0 and 1 or -1
   local overlapping_range_ok = false
@@ -26,8 +28,7 @@ function M.swap_previous(query_string)
   swap_textobject(query_string, -1)
 end
 
-local normal_mode_functions = {"swap_next",
-                               "swap_previous"}
+local normal_mode_functions = { "swap_next", "swap_previous" }
 
 M.attach = attach.make_attach(normal_mode_functions, "swap")
 M.detach = attach.make_detach(normal_mode_functions, "swap")
@@ -48,6 +49,5 @@ M.commands = {
     },
   },
 }
-
 
 return M

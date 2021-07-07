@@ -1,7 +1,7 @@
 -- Execute as `nvim --headless -c "luafile ./scripts/check-queries.lua"`
 
 local function extract_captures()
-  local lines = vim.fn.readfile("CONTRIBUTING.md")
+  local lines = vim.fn.readfile "CONTRIBUTING.md"
   local captures = {}
   local current_query
 
@@ -21,23 +21,25 @@ local function extract_captures()
 end
 
 local function do_check()
-  local parsers = require 'nvim-treesitter.parsers'.available_parsers()
-  local queries = require 'nvim-treesitter.query'
+  local parsers = require("nvim-treesitter.parsers").available_parsers()
+  local queries = require "nvim-treesitter.query"
   local query_types = { "textobjects" }
 
   local captures = extract_captures()
 
   for _, lang in pairs(parsers) do
     for _, query_type in pairs(query_types) do
-      print('Checking '..lang..' '..query_type)
+      print("Checking " .. lang .. " " .. query_type)
       local query = queries.get_query(lang, query_type)
 
       if query then
         for _, capture in ipairs(query.captures) do
-          if not vim.startswith(capture, "_") -- We ignore things like _helper
+          if
+            not vim.startswith(capture, "_") -- We ignore things like _helper
             and captures[query_type]
-            and not capture:find("^[A-Z]") -- Highlight groups
-            and not vim.tbl_contains(captures[query_type], capture) then
+            and not capture:find "^[A-Z]"
+            and not vim.tbl_contains(captures[query_type], capture)
+          then
             error(string.format("Invalid capture @%s in %s for %s.", capture, query_type, lang))
           end
         end
@@ -46,14 +48,13 @@ local function do_check()
   end
 end
 
-
 local ok, err = pcall(do_check)
 if ok then
-  print('Check successful!\n')
-  vim.cmd('q')
+  print "Check successful!\n"
+  vim.cmd "q"
 else
-  print('Check failed:')
+  print "Check failed:"
   print(err)
-  print('\n')
-  vim.cmd('cq')
+  print "\n"
+  vim.cmd "cq"
 end

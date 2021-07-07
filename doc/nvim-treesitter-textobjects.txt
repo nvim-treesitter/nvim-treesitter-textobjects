@@ -133,7 +133,7 @@ LSP interop~
   or its successor is merged)
 Supported options:
 - enable: `true` or `false`.
-- border: 'none', 'single', 'double', 'rounded', 'solid', 'shadow'
+- border: 'none' (default), 'single', 'double', 'rounded', 'solid', 'shadow'.
 >
   lua <<EOF
   require'nvim-treesitter.configs'.setup {

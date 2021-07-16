@@ -34,27 +34,81 @@
 (call (_) @call.inner)
 
 ;; Parameters
-((parameters
-  ([(identifier)
-   (tuple)
-   (typed_parameter)
-   (default_parameter)
-   (typed_default_parameter)
-   (list_splat)
-   (dictionary_splat)] @parameter.inner)
-   . ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+(
+  (
+  parameters
+    [
+      (identifier)
+      (tuple)
+      (typed_parameter)
+      (default_parameter)
+      (typed_default_parameter)
+      (list_splat)
+      (dictionary_splat)
+      ; (dictionary_splat_pattern)
+      ; (list_splat_pattern)
+    ] @parameter.inner
+    . "," @_end
+  )
+  (#make-range! "parameter.outer" @parameter.inner @_end)
+)
 
-((lambda_parameters
-  [(identifier)
-   (tuple)
-   (typed_parameter)
-   (default_parameter)
-   (typed_default_parameter)
-   (list_splat)
-   (dictionary_splat)] @parameter.inner
-   . ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+(
+  (
+  lambda_parameters
+    [
+      (identifier)
+      (tuple)
+      (typed_parameter)
+      (default_parameter)
+      (typed_default_parameter)
+      (list_splat)
+      (dictionary_splat)
+      ; (dictionary_splat_pattern)
+      ; (list_splat_pattern)
+    ] @parameter.inner
+    . "," @_end
+  )
+  (#make-range! "parameter.outer" @parameter.inner @_end)
+)
+
+(
+  (
+  parameters
+    "," @_start .
+    [
+      (identifier)
+      (tuple)
+      (typed_parameter)
+      (default_parameter)
+      (typed_default_parameter)
+      (list_splat)
+      (dictionary_splat)
+      ; (dictionary_splat_pattern)
+      ; (list_splat_pattern)
+    ] @parameter.inner
+  )
+  (#make-range! "parameter.outer" @_start @parameter.inner)
+)
+
+(
+  (
+  lambda_parameters
+    "," @_start .
+    [
+      (identifier)
+      (tuple)
+      (typed_parameter)
+      (default_parameter)
+      (typed_default_parameter)
+      (list_splat)
+      (dictionary_splat)
+      ; (dictionary_splat_pattern)
+      ; (list_splat_pattern)
+    ] @parameter.inner
+  )
+  (#make-range! "parameter.outer" @_start @parameter.inner)
+)
 
 ; TODO: exclude comments using the future negate syntax from tree-sitter
 ((argument_list (_) @parameter.inner . ","? @_end)

@@ -87,7 +87,6 @@
       ; (dictionary_splat_pattern)
       ; (list_splat_pattern)
     ] @parameter.inner
-    . ")"
   )
   (#make-range! "parameter.outer" @_start @parameter.inner)
 )
@@ -107,7 +106,6 @@
       ; (dictionary_splat_pattern)
       ; (list_splat_pattern)
     ] @parameter.inner
-    . ")"
   )
   (#make-range! "parameter.outer" @_start @parameter.inner)
 )

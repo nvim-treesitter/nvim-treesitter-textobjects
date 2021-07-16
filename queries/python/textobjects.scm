@@ -45,8 +45,6 @@
       (typed_parameter)
       (default_parameter)
       (typed_default_parameter)
-      (list_splat)
-      (dictionary_splat)
       (dictionary_splat_pattern)
       (list_splat_pattern)
     ] @parameter.inner
@@ -57,14 +55,13 @@
 (
   (
   parameters
+    "(" @justforfun .
     [
       (identifier)
       (tuple)
       (typed_parameter)
       (default_parameter)
       (typed_default_parameter)
-      (list_splat)
-      (dictionary_splat)
       (dictionary_splat_pattern)
       (list_splat_pattern)
     ] @parameter.inner
@@ -83,8 +80,6 @@
       (typed_parameter)
       (default_parameter)
       (typed_default_parameter)
-      (list_splat)
-      (dictionary_splat)
       (dictionary_splat_pattern)
       (list_splat_pattern)
     ] @parameter.inner
@@ -101,8 +96,6 @@
       (typed_parameter)
       (default_parameter)
       (typed_default_parameter)
-      (list_splat)
-      (dictionary_splat)
       (dictionary_splat_pattern)
       (list_splat_pattern)
     ] @parameter.inner
@@ -121,8 +114,6 @@
       (typed_parameter)
       (default_parameter)
       (typed_default_parameter)
-      (list_splat)
-      (dictionary_splat)
       (dictionary_splat_pattern)
       (list_splat_pattern)
     ] @parameter.inner
@@ -133,14 +124,13 @@
 (
   (
   tuple
+    "(" .
     [
       (identifier)
       (tuple)
       (typed_parameter)
       (default_parameter)
       (typed_default_parameter)
-      (list_splat)
-      (dictionary_splat)
       (dictionary_splat_pattern)
       (list_splat_pattern)
     ] @parameter.inner
@@ -159,8 +149,6 @@
       (typed_parameter)
       (default_parameter)
       (typed_default_parameter)
-      (list_splat)
-      (dictionary_splat)
       (dictionary_splat_pattern)
       (list_splat_pattern)
     ] @parameter.inner
@@ -171,14 +159,13 @@
 (
   (
   list
+    "[" .
     [
       (identifier)
       (tuple)
       (typed_parameter)
       (default_parameter)
       (typed_default_parameter)
-      (list_splat)
-      (dictionary_splat)
       (dictionary_splat_pattern)
       (list_splat_pattern)
     ] @parameter.inner
@@ -188,5 +175,3 @@
 )
 
 ; TODO: exclude comments using the future negate syntax from tree-sitter
-((argument_list (_) @parameter.inner . ","? @_end)
- (#make-range! "parameter.outer" @parameter.inner @_end))

@@ -61,9 +61,15 @@
   (_) @statement.outer)
 
 ((parameter_list
-  (parameter_declaration) @parameter.inner . ","? @_end)
+  "," @_start . (parameter_declaration) @parameter.inner)
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+((parameter_list
+  (parameter_declaration) @parameter.inner . "," @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((argument_list
-  (_) @parameter.inner . ","? @_end)
+  "," @_start . (_) @parameter.inner)
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+((argument_list
+  (_) @parameter.inner . "," @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end))

@@ -22,35 +22,35 @@
   "," @_start . (_) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner))
 ((lambda_capture_specifier
-  (_) @parameter.inner . "," @_end)
+  "[" . (_) @parameter.inner . "," @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((template_argument_list
   "," @_start . (_) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner))
 ((template_argument_list
-  (_) @parameter.inner . "," @_end)
+  "<" . (_) @parameter.inner . "," @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((template_parameter_list
   "," @_start . (_) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner))
 ((template_parameter_list
-  (_) @parameter.inner . "," @_end)
+  "<" . (_) @parameter.inner . "," @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((parameter_list
   "," @_start . (optional_parameter_declaration) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner))
 ((parameter_list
-  (optional_parameter_declaration) @parameter.inner . "," @_end)
+  "(" . (optional_parameter_declaration) @parameter.inner . "," @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((initializer_list
   "," @_start . (_) @parameter.inner  @_end)
  (#make-range! "parameter.outer" @_start @parameter.inner))
 ((initializer_list
-  (_) @parameter.inner . "," @_end)
+  "{" . (_) @parameter.inner . "," @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 (new_expression

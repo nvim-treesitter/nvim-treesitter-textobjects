@@ -75,9 +75,18 @@
 
 ;; parameter
 
-(("," @_start . (parameter) @parameter.inner)
+((parameters 
+  "," @_start . (parameter) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner)) 
-((parameters . (parameter) @parameter.inner . ","? @_end)
+((parameters
+  . (parameter) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 
+
+((type_parameters
+  "," @_start . (_) @parameter.inner)
+ (#make-range! "parameter.outer" @_start @parameter.inner)) 
+((type_parameters 
+  . (_) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
 ((tuple_pattern
@@ -105,6 +114,13 @@
   "," @_start . (_) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner)) 
 ((arguments 
+  . (_) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 
+
+((type_arguments
+  "," @_start . (_) @parameter.inner)
+ (#make-range! "parameter.outer" @_start @parameter.inner)) 
+((type_arguments 
   . (_) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end)) 
 

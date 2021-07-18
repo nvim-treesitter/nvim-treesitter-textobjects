@@ -35,9 +35,7 @@
 
 ;; Parameters
 
-(
-  (
-  parameters
+((parameters
     "," @_start .
     [
       (identifier)
@@ -49,12 +47,9 @@
       (list_splat_pattern)
     ] @parameter.inner
   )
-  (#make-range! "parameter.outer" @_start @parameter.inner)
-)
+  (#make-range! "parameter.outer" @_start @parameter.inner))
 
-(
-  (
-  parameters
+((parameters
     . [
       (identifier)
       (tuple)
@@ -69,9 +64,7 @@
   (#make-range! "parameter.outer" @parameter.inner @_end)
 )
 
-(
-  (
-  lambda_parameters
+((lambda_parameters
     "," @_start .
     [
       (identifier)
@@ -83,12 +76,9 @@
       (list_splat_pattern)
     ] @parameter.inner
   )
-  (#make-range! "parameter.outer" @_start @parameter.inner)
-)
+  (#make-range! "parameter.outer" @_start @parameter.inner))
 
-(
-  (
-  lambda_parameters
+((lambda_parameters
     . [
       (identifier)
       (tuple)
@@ -100,12 +90,9 @@
     ] @parameter.inner
     . ","? @_end
   )
-  (#make-range! "parameter.outer" @parameter.inner @_end)
-)
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
-(
-  (
-  tuple
+((tuple
     "," @_start .
     [
       (identifier)
@@ -120,9 +107,7 @@
   (#make-range! "parameter.outer" @_start @parameter.inner)
 )
 
-(
-  (
-  tuple
+((tuple
     "(" .
     [
       (identifier)
@@ -138,9 +123,7 @@
   (#make-range! "parameter.outer" @parameter.inner @_end)
 )
 
-(
-  (
-  list
+((list
     "," @_start .
     [
       (identifier)
@@ -155,9 +138,7 @@
   (#make-range! "parameter.outer" @_start @parameter.inner)
 )
 
-(
-  (
-  list
+((list
     . [
       (identifier)
       (tuple)
@@ -169,43 +150,30 @@
     ] @parameter.inner
     . ","? @_end
   )
-  (#make-range! "parameter.outer" @parameter.inner @_end)
-)
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
-(
-  (
-  dictionary
+((dictionary
     . (pair) @parameter.inner
     . ","? @_end
   )
-  (#make-range! "parameter.outer" @parameter.inner @_end)
-)
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
-(
-  (
-  dictionary
+((dictionary
     "," @_start . 
     (pair) @parameter.inner
   )
-  (#make-range! "parameter.outer" @_start @parameter.inner)
-)
+  (#make-range! "parameter.outer" @_start @parameter.inner))
 
-(
-  (
-  argument_list
+((argument_list
     . (_) @parameter.inner
     . ","? @_end
   )
-  (#make-range! "parameter.outer" @parameter.inner @_end)
-)
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
-(
-  (
-  argument_list
+((argument_list
     "," @_start .
     (_) @parameter.inner
   )
-  (#make-range! "parameter.outer" @_start @parameter.inner)
-)
+  (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ; TODO: exclude comments using the future negate syntax from tree-sitter

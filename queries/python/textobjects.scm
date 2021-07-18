@@ -55,8 +55,7 @@
 (
   (
   parameters
-    "(" @justforfun .
-    [
+    . [
       (identifier)
       (tuple)
       (typed_parameter)
@@ -90,7 +89,7 @@
 (
   (
   lambda_parameters
-    [
+    . [
       (identifier)
       (tuple)
       (typed_parameter)
@@ -159,8 +158,7 @@
 (
   (
   list
-    "[" .
-    [
+    . [
       (identifier)
       (tuple)
       (typed_parameter)
@@ -177,8 +175,7 @@
 (
   (
   dictionary
-    "{" .
-    (pair) @parameter.inner
+    . (pair) @parameter.inner
     . ","? @_end
   )
   (#make-range! "parameter.outer" @parameter.inner @_end)
@@ -196,8 +193,7 @@
 (
   (
   argument_list
-    "(" .
-    (_) @parameter.inner
+    . (_) @parameter.inner
     . ","? @_end
   )
   (#make-range! "parameter.outer" @parameter.inner @_end)

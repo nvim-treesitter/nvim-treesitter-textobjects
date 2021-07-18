@@ -1,3 +1,9 @@
+```
+parameter.outer
+
+queries/*/textobjects.scm
+```
+
 # nvim-treesitter-textobjects
 
 Create your own textobjects using tree-sitter queries!

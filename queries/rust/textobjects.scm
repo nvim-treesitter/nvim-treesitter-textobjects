@@ -77,40 +77,41 @@
 
 (("," @_start . (parameter) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner)) 
-(((parameter) @parameter.inner . ","? @_end)
+((parameters . (parameter) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
 ((tuple_pattern
   "," @_start . (identifier) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner)) 
 ((tuple_pattern 
-  (identifier) @parameter.inner . ","? @_end)
+  . (identifier) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
 ((tuple_struct_pattern
   "," @_start . (identifier) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner)) 
 ((tuple_struct_pattern 
-  (identifier) @parameter.inner . ","? @_end)
+  . (identifier) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
 ((closure_parameters
   "," @_start . (_) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner)) 
 ((closure_parameters 
-  (_) @parameter.inner . ","? @_end)
+  . (_) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
 ((arguments
   "," @_start . (_) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner)) 
 ((arguments 
-  (_) @parameter.inner . ","? @_end)
+  . (_) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end)) 
 
 ((meta_arguments
   "," @_start . (_) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner)) 
 ((meta_arguments
-  (_) @parameter.inner . ","? @_end)
+  . (_) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end)) 
+

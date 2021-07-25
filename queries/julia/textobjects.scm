@@ -83,6 +83,16 @@
   "end") @loop.outer
 
 ; Parameters
+((subscript_expression
+    "," @_start . 
+    (_) @parameter.inner)
+ (#make-range! "parameter.outer" @_start @parameter.inner)) 
+
+((subscript_expression
+    . (_) @parameter.inner 
+    . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 
+
 ((argument_list
     "," @_start .
     (_) @parameter.inner)

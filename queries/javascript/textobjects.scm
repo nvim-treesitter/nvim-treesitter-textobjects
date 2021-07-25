@@ -40,21 +40,39 @@
 (_ (statement_block) @block.inner) @block.outer
 
 ;; parameters
-(formal_parameters
-  (identifier) @parameter.inner)
-
+; function ({ x }) ...
+; function ([ x ]) ...
 ; function (v = default_value)
 (formal_parameters
-  (assignment_pattern) @parameter.inner)
-
-; function ({ x }) ...
+  "," @_start .
+  (_) @parameter.inner
+ (#make-range! "parameter.outer" @_start @parameter.inner))
 (formal_parameters
-  (object_pattern) @paremeter.inner)
+  . (_) @parameter.inner
+  . ","? @_end
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
-; function ([ x ]) ...
-(formal_parameters
-  (array_pattern) @paremeter.inner)
+; If the array/object pattern is the first parameter, treat its elements as the argument list
+(formal_parameters 
+  . (_ 
+    [(object_pattern "," @_start .  (_) @parameter.inner)
+    (array_pattern "," @_start .  (_) @parameter.inner)]
+    ) 
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+(formal_parameters 
+  . (_ 
+    [(object_pattern . (_) @parameter.inner . ","? @_end)
+    (array_pattern . (_) @parameter.inner . ","? @_end)]
+    )
+ (#make-range! "parameter.outer" @parameter.inner @_end))
+
 
 ;; arguments
 (arguments
-  (_) @parameter.inner)
+  "," @_start .
+  (_) @parameter.inner
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+(arguments
+  . (_) @parameter.inner
+  . ","? @_end
+ (#make-range! "parameter.outer" @parameter.inner @_end))

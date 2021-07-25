@@ -14,10 +14,35 @@
 (function_call) @call.outer
 
 (arguments
- (_) @parameter.inner)
+  "," @_start .
+  (_) @parameter.inner
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+(arguments
+  . (_) @parameter.inner
+  . ","? @_end
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 (parameters
- (_) @parameter.inner)
+  "," @_start .
+  (_) @parameter.inner
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+(parameters
+  . (_) @parameter.inner
+  . ","? @_end
+ (#make-range! "parameter.outer" @parameter.inner @_end))
+
+(arguments 
+  . (table
+    "," @_start .
+    (_) @parameter.inner
+   (#make-range! "parameter.outer" @_start @parameter.inner))
+  . ) 
+(arguments 
+  . (table
+    . (_) @parameter.inner
+    . ","? @_end
+   (#make-range! "parameter.outer" @parameter.inner @_end))
+  . ) 
 
 (comment) @comment.outer
 

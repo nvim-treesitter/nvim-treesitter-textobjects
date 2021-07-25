@@ -51,7 +51,13 @@
 
 ;; parameters
 (parameter_list
-  (parameter_declaration) @parameter.inner)
+  "," @_start .
+  (parameter_declaration) @parameter.inner
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+(parameter_list
+  . (parameter_declaration) @parameter.inner
+  . ","? @_end
+ (#make-range! "parameter.outer" @_start @parameter.inner))
 
 (parameter_declaration
   (identifier)
@@ -62,8 +68,16 @@
   (identifier))
 
 (parameter_list
-  (variadic_parameter_declaration) @parameter.inner)
+  "," @_start .
+  (variadic_parameter_declaration) @parameter.inner
+ (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ;; arguments
 (argument_list
-  (_) @parameter.inner)
+  "," @_start .
+  (_) @parameter.inner
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+(argument_list
+  . (_) @parameter.inner
+  . ","? @_end
+ (#make-range! "parameter.outer" @_start @parameter.inner))

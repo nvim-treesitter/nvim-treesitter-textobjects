@@ -176,4 +176,16 @@
   )
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
+((subscript
+    "[" . (_) @parameter.inner
+    . ","? @_end
+  )
+  (#make-range! "parameter.outer" @parameter.inner @_end))
+
+((subscript
+    "," @_start .
+    (_) @parameter.inner
+  )
+  (#make-range! "parameter.outer" @_start @parameter.inner))
+
 ; TODO: exclude comments using the future negate syntax from tree-sitter

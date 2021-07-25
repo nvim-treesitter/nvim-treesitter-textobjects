@@ -17,13 +17,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo add-apt-repository universe
-          wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
+          wget https://github.com/neovim/neovim/releases/download/v0.5.0/nvim.appimage
           chmod u+x nvim.appimage
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
           ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/start
           cd ~/.local/share/nvim/site/pack/nvim-treesitter/start
           git clone https://github.com/nvim-treesitter/nvim-treesitter.git
+          cd nvim-treesitter
+          git checkout 0.5-compat
 
       - name: Compile parsers
         run: ./nvim.appimage --headless -c "TSInstallSync all" -c "q"

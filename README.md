@@ -15,6 +15,15 @@ Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 ```
 
+*If you want to use this plugin with Neovim 0.5, please use the
+0.5-compat branches of this plugin and nvim-treesitter. Be aware though that most improvements will require
+neovim nightly.*
+
+```vim
+Plug 'nvim-treesitter/nvim-treesitter', {'branch' : '0.5-compat'}
+Plug 'nvim-treesitter/nvim-treesitter-textobjects', {'branch' : '0.5-compat'}
+```
+
 ## Text objects: select
 
 Define your own text objects mappings

@@ -88,4 +88,21 @@ M.commands = {
   },
 }
 
+-- Inject hooks to every function
+local hook = configs.get_module("textobjects.select").hook
+if hook then
+  for k, v in pairs(hook) do
+    local unhooked = M[k]
+    M[k] = function(...)
+      if v.before then
+        v.before(...)
+      end
+      unhooked(...)
+      if v.after then
+        v.after(...)
+      end
+    end
+  end
+end
+
 return M

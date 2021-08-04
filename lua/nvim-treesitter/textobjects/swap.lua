@@ -1,6 +1,7 @@
 local ts_utils = require "nvim-treesitter.ts_utils"
 local shared = require "nvim-treesitter.textobjects.shared"
 local attach = require "nvim-treesitter.textobjects.attach"
+local configs = require "nvim-treesitter.configs"
 
 local M = {}
 
@@ -49,5 +50,22 @@ M.commands = {
     },
   },
 }
+
+-- Inject hooks to every function
+local hook = configs.get_module("textobjects.swap").hook
+if hook then
+  for k, v in pairs(hook) do
+    local unhooked = M[k]
+    M[k] = function(...)
+      if v.before then
+        v.before(...)
+      end
+      unhooked(...)
+      if v.after then
+        v.after(...)
+      end
+    end
+  end
+end
 
 return M

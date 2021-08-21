@@ -32,18 +32,28 @@
   body: (switch_body) @conditional.inner) @conditional.outer
 
 ;; calls
-(invocation_expression) @call.outer
-
 (invocation_expression 
-  (argument_list) @call.inner)
+  (argument_list) @call.inner) @call.outer
 
 ;; blocks
 (_ (block) @block.inner) @block.outer
 
-;; arguments
-(argument_list 
-  (_) @call.inner)
-
 ;; parameters
-(parameter_list
-  (_) @parameter.inner) @parameter.outer
+((parameter_list
+  "," @_start . (parameter) @parameter.inner)
+ (#make-range! "parameter.outer" @_start @parameter.inner)) 
+
+((parameter_list
+  . (parameter) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 
+
+((argument_list
+  "," @_start . (argument) @parameter.inner)
+ (#make-range! "parameter.outer" @_start @parameter.inner)) 
+
+((argument_list
+  . (argument) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end)) 
+
+;; comments
+(comment) @comment.outer

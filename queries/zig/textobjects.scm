@@ -1,6 +1,6 @@
 ;; "Classes"
 (VarDecl 
-  (_ (ContainerDecl (ContainerMembers) @class.inner))) @class.outer
+  (_ (_ (ContainerDecl (ContainerMembers)? @class.inner)))) @class.outer
 
 ;; functions
 (_ 
@@ -8,15 +8,13 @@
   (Block) @function.inner) @function.outer
 
 ;; loops
-(ForTypeExpr
-  (SuffixExpr 
-    (SwitchExpr) @loop.inner)) @loop.outer
+(_
+  (ForPrefix)
+  (_) @loop.inner) @loop.outer
 
-(ForStatement 
-  (BlockExpr) @loop.inner) @loop.outer
-
-(WhileStatement
-  (BlockExpr) @loop.inner) @loop.outer
+(_
+  (WhilePrefix)
+  (_) @loop.inner) @loop.outer
 
 ;; blocks
 (_ (Block) @block.inner) @block.outer
@@ -42,8 +40,9 @@
 (line_comment) @comment.outer
 
 ;; conditionals
-(IfStatement
-  (_ (Block) @conditional.inner)) @conditional.outer
+(_
+  (IfPrefix)
+  (_) @conditional.inner) @conditional.outer
 
 ((SwitchExpr
   "{" @_start "}" @_end)

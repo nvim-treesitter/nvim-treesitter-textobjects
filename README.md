@@ -205,7 +205,7 @@ EOF
 <tr>
 <td>fennel</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr>
-<td>fish</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
+<td>fish</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td>👍</td> <td>👍</td> <td>👍</td> <td> </td> <td> </td> <td> </td> <td>👍</td> <td>👍</td> <td>👍</td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr>
 <td>fortran</td><td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> <td> </td> </tr>
 <tr>

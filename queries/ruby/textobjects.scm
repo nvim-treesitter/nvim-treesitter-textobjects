@@ -8,9 +8,15 @@
 
 ;; classes
 [
+  ;; match against classes with and without parrents
   (class
     name: (constant)
     superclass: (_)
+    (_) @class.inner)
+
+  (class
+    name: (constant)
+    !superclass
     (_) @class.inner)
 
   (module

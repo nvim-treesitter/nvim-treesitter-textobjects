@@ -10,9 +10,7 @@
 [
   (call function: (function_identifier) (module) (do_block (_) @class.inner))
 ] @class.outer
-[
-  ((unary_op (call function: (function_identifier) @_annotator (heredoc (heredoc_start)
-  (heredoc_content) @comment.inner (heredoc_end))))
-  (#match? @_annotator "doc$"))
-] @comment.outer
+((unary_op (call function: (function_identifier) @_annotator (heredoc (heredoc_start)
+ (heredoc_content) @comment.inner (heredoc_end)))) @comment.outer
+ (#match? @_annotator "doc$"))
 (call (do_block (_) @block.inner)) @block.outer

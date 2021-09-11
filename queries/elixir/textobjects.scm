@@ -1,5 +1,3 @@
-;; Write your query here like `(node) @capture`,
-;; put the cursor under the capture to highlight the matches.
 [
   (call function: (function_identifier) (call) (do_block (_) @function.inner))
   (call function: (function_identifier) (call) (keyword_list (keyword) (_)
@@ -9,7 +7,6 @@
   @function.inner))
   (anonymous_function (_) @function.inner)
 ] @function.outer
-
 
 (call function: (function_identifier) (module) (do_block (_) @class.inner)) @class.outer
 
@@ -33,4 +30,5 @@
   . (_) @parameter.inner
   . ","? @_end
  (#make-range! "parameter.outer" @parameter.inner @_end))
+
 

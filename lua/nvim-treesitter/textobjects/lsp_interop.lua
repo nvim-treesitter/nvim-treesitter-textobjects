@@ -10,6 +10,14 @@ local normal_mode_functions = {
   "peek_definition_code",
 }
 
+local function is_new_signature_handler()
+  if debug.getinfo(vim.lsp.handlers.signature_help).nparams == 4 then
+    return true
+  else
+    return false
+  end
+end
+
 function M.preview_location(location, context)
   -- location may be LocationLink or Location (more useful for the former)
   local uri = location.targetUri or location.uri
@@ -45,7 +53,7 @@ end
 
 function M.make_preview_location_callback(textobject, context)
   local context = context or 0
-  return vim.schedule_wrap(function(err, method, result)
+  local callback = function(err, method, result)
     if err then
       error(tostring(err))
     end
@@ -77,7 +85,17 @@ function M.make_preview_location_callback(textobject, context)
     end
 
     _, floating_win = M.preview_location(result, context)
-  end)
+  end
+
+  local signature_handler = callback
+
+  if is_new_signature_handler() then
+    signature_handler = function(err, result, handler_context)
+      callback(err, handler_context.method, result)
+    end
+  end
+
+  return vim.schedule_wrap(signature_handler)
 end
 
 function M.peek_definition_code(textobject, lsp_request, context)

@@ -1,6 +1,6 @@
 ;; "Classes"
 (VarDecl 
-  (_ (_ (ContainerDecl (ContainerMembers)? @class.inner)))) @class.outer
+  (_ (_ (ContainerDecl) @class.inner))) @class.outer
 
 ;; functions
 (_ 
@@ -18,6 +18,9 @@
 
 ;; blocks
 (_ (Block) @block.inner) @block.outer
+
+;; statements
+(Statement) @statement.outer
 
 ;; parameters
 ((ParamDeclList 

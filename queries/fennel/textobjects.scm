@@ -16,18 +16,7 @@
 
 ; parameters
 (parameters (symbol) @parameter.inner)
-
-; only parameter
-((parameters . (symbol) @parameter.outer .))
-
-; start or middle parameter
-((parameters (symbol) @parameter.outer . (symbol)+)
- (#offset! @parameter.outer 0 0 0 1))
-
-; last parameter
-((parameters (symbol)+ . (symbol) @parameter.outer .)
- (#offset! @parameter.outer 0 -1 0 0))
-
+(parameters (symbol) @parameter.outer)
 
 ; call
 ((list . [(multi_symbol) (symbol)] @call.inner) @call.outer

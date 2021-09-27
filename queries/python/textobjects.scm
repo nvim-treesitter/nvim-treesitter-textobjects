@@ -94,30 +94,14 @@
 
 ((tuple
     "," @_start .
-    [
-      (identifier)
-      (tuple)
-      (typed_parameter)
-      (default_parameter)
-      (typed_default_parameter)
-      (dictionary_splat_pattern)
-      (list_splat_pattern)
-    ] @parameter.inner
+    (_) @parameter.inner
   )
   (#make-range! "parameter.outer" @_start @parameter.inner)
 )
 
 ((tuple
     "(" .
-    [
-      (identifier)
-      (tuple)
-      (typed_parameter)
-      (default_parameter)
-      (typed_default_parameter)
-      (dictionary_splat_pattern)
-      (list_splat_pattern)
-    ] @parameter.inner
+    (_) @parameter.inner
     . ","? @_end
   )
   (#make-range! "parameter.outer" @parameter.inner @_end)
@@ -125,29 +109,13 @@
 
 ((list
     "," @_start .
-    [
-      (identifier)
-      (tuple)
-      (typed_parameter)
-      (default_parameter)
-      (typed_default_parameter)
-      (dictionary_splat_pattern)
-      (list_splat_pattern)
-    ] @parameter.inner
+    (_) @parameter.inner
   )
   (#make-range! "parameter.outer" @_start @parameter.inner)
 )
 
 ((list
-    . [
-      (identifier)
-      (tuple)
-      (typed_parameter)
-      (default_parameter)
-      (typed_default_parameter)
-      (dictionary_splat_pattern)
-      (list_splat_pattern)
-    ] @parameter.inner
+    . (_) @parameter.inner
     . ","? @_end
   )
   (#make-range! "parameter.outer" @parameter.inner @_end))

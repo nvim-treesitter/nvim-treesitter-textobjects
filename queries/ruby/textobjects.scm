@@ -50,22 +50,32 @@
 ] @function.outer
 
 ;; @blocks
+(
+  [
+    (call
+      block: (_
+        !parameters
+        . (_) @_start (_) @_end .)
+      )
+
+    (call
+      block: (_
+        . parameters: (block_parameters)
+        . (_) @_start (_) @_end .)
+      )
+  ]
+   (#make-range! "block.inner" @_start @_end))
+
 [
-  (do_block
+  (call
+    block: (_
       !parameters
-      . (_) @block.inner .)
+      . (_) @block.inner .))
 
-  (do_block
-      parameters: (block_parameters)
-      . (_) @block.inner .)
-
-  (block
-      !parameters
-      . (_) @block.inner .)
-
-  (block
-      parameters: (block_parameters)
-      . (_) @block.inner .)
+  (call
+    block: (_
+      . parameters: (block_parameters)
+      . (_) @block.inner .))
 ]
 
 [

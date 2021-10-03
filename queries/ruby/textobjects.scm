@@ -2,80 +2,75 @@
 (
   [
     (method
-      . name: (identifier) 
-      !parameters 
+      . name: (identifier)
+      !parameters
       . (_) @_start (_) @_end .)
 
     (method
-      . name: (identifier) 
-      . parameters: (method_parameters) 
+      . name: (identifier)
+      . parameters: (method_parameters)
       . (_) @_start (_) @_end .)
 
     (singleton_method
       . object: (_)
-      . name: (identifier) 
-      !parameters 
+      . name: (identifier)
+      !parameters
       . (_) @_start (_) @_end .)
 
     (singleton_method
       . object: (_)
-      . name: (identifier) 
-      . parameters: (method_parameters) 
+      . name: (identifier)
+      . parameters: (method_parameters)
       . (_) @_start (_) @_end .)
   ] @function.outer
    (#make-range! "function.inner" @_start @_end))
 
 [
   (method
-    . name: (identifier) 
-    !parameters 
+    . name: (identifier)
+    !parameters
     . (_) @function.inner .)
 
   (method
-    . name: (identifier) 
-    . parameters: (method_parameters) 
+    . name: (identifier)
+    . parameters: (method_parameters)
     . (_) @function.inner .)
 
   (singleton_method
     . object: (_)
-    . name: (identifier) 
-    !parameters 
+    . name: (identifier)
+    !parameters
     . (_) @function.inner .)
 
   (singleton_method
     . object: (_)
-    . name: (identifier) 
-    . parameters: (method_parameters) 
+    . name: (identifier)
+    . parameters: (method_parameters)
     . (_) @function.inner .)
 ] @function.outer
 
 ;; @blocks
-(
-  [
-    (call
-      block: (_
-        !parameters
-        . (_) @_start (_) @_end .)
-      )
+[
+  (do_block
+      !parameters
+      . (_) @block.inner .)
 
-    (call
-      block: (_
-        . parameters: (block_parameters)
-        . (_) @_start (_) @_end .)
-      )
-  ] @block.outer
-   (#make-range! "block.inner" @_start @_end))
+  (do_block
+      parameters: (block_parameters)
+      . (_) @block.inner .)
+
+  (block
+      !parameters
+      . (_) @block.inner .)
+
+  (block
+      parameters: (block_parameters)
+      . (_) @block.inner .)
+]
 
 [
-  (call
-    block: (_
-      !parameters
-      . (_) @block.inner .))
-
-  (call
-    block: (_
-      . parameters: (block_parameters)
-      . (_) @block.inner .))
+  (do_block)
+  (block)
 ] @block.outer
 
 ((lambda
@@ -96,21 +91,21 @@
 (
   [
     (class
-      . name: (_) 
+      . name: (_)
       . superclass: (_)
       . (_) @_start (_) @_end .)
 
     (class
-      . name: (_) 
-      !superclass 
+      . name: (_)
+      !superclass
       . (_) @_start (_) @_end .)
 
     (module
-      . name: (_) 
+      . name: (_)
       . (_) @_start (_) @_end .)
 
     (singleton_class
-      . value: (_) 
+      . value: (_)
       . (_) @_start (_) @_end .)
   ] @class.outer
  (#make-range! "class.inner" @_start @_end))

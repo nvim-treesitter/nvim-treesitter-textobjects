@@ -15,8 +15,8 @@
 (hashfn ["#" "hashfn"] @function.outer.start (_) @function.inner) @function.outer
 
 ; parameters
-(parameters (symbol) @parameter.inner)
-(parameters (symbol) @parameter.outer)
+(parameters (binding) @parameter.inner)
+(parameters (binding) @parameter.outer)
 
 ; call
 ((list . [(multi_symbol) (symbol)] @call.inner) @call.outer

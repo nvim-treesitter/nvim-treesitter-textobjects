@@ -1,34 +1,55 @@
-[
-  (call function: (function_identifier) (call) (do_block (_) @function.inner))
-  (call function: (function_identifier) (call) (keyword_list (keyword) (_)
-  @function.inner))
-  (call function: (function_identifier) (binary_op) (do_block (_) @function.inner))
-  (call function: (function_identifier) (binary_op) (keyword_list (keyword) (_)
-  @function.inner))
-  (anonymous_function (_) @function.inner)
-] @function.outer
+; Block Objects
+([
+  (do_block "do" . (_) @_do (_) @_end . "end")
+  (do_block "do" . ((_) @_do) @_end . "end")
+] (#make-range! "block.inner" @_do @_end)) @block.outer
 
-(call function: (function_identifier) (module) (do_block (_) @class.inner)) @class.outer
+; Class Objects (Modules, Protocols)
+(call
+  target: ((identifier) @_identifier (#any-of? @_identifier 
+    "defmodule" 
+    "defprotocol" 
+    "defimpl"
+  ))
+  (arguments (alias))
+  [
+    (do_block "do" . (_) @_do (_) @_end . "end")
+    (do_block "do" . ((_) @_do) @_end . "end")
+  ]
+  (#make-range! "class.inner" @_do @_end)
+) @class.outer
 
-((unary_op (call function: (function_identifier) @_annotator (heredoc (heredoc_start)
- (heredoc_content) @comment.inner (heredoc_end)))) @comment.outer
- (#match? @_annotator "doc$"))
+; Function, Parameter, and Call Objects
+(call 
+  target: ((identifier) @_identifier (#any-of? @_identifier 
+    "def" 
+    "defmacro" 
+    "defmacrop" 
+    "defn" 
+    "defnp" 
+    "defp"
+  ))
+  (arguments (call [
+    (arguments (_) @parameter.inner . "," @_delimiter)
+    (arguments ((_) @parameter.inner) @_delimiter .) 
+  ] (#make-range! "parameter.outer" @parameter.inner @_delimiter)))
+  [
+    (do_block "do" . (_) @_do (_) @_end . "end")
+    (do_block "do" . ((_) @_do) @_end . "end")
+  ]
+  (#make-range! "function.inner" @_do @_end)
+) @function.outer
 
+; Comment Objects
 (comment) @comment.outer
 
-(call 
-  function: (function_identifier) @_call 
-  (do_block) @conditional.inner
-  (#any-of? @_call "if" "case" "cond")
-) @conditional.outer
-
-(arguments
-  "," @_start .
-  (_) @parameter.inner
- (#make-range! "parameter.outer" @_start @parameter.inner))
-(arguments
-  . (_) @parameter.inner
-  . ","? @_end
- (#make-range! "parameter.outer" @parameter.inner @_end))
-
-
+; Documentation Objects
+(unary_operator 
+  operator: "@"
+  operand: (call target: ((identifier) @_identifier (#any-of? @_identifier
+    "moduledoc" 
+    "typedoc" 
+    "shortdoc" 
+    "doc"
+  )))
+) @comment.outer

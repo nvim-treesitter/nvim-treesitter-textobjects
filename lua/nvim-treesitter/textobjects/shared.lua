@@ -52,6 +52,9 @@ function M.textobject_at_point(query_string, pos, bufnr, opts)
   local lookahead_match_length
   local lookahead_largest_range
   local lookahead_earliest_start
+  local lookbehind_match_length
+  local lookbehind_largest_range
+  local lookbehind_earliest_start
 
   for _, m in pairs(matches) do
     if m.node and ts_utils.is_in_node_range(m.node, row, col) then
@@ -86,6 +89,20 @@ function M.textobject_at_point(query_string, pos, bufnr, opts)
           lookahead_earliest_start = start_byte
         end
       end
+    elseif opts.lookbehind then
+      local start_line, start_col, start_byte = m.node:start()
+      if start_line < row or start_line == row and start_col < col then
+        local length = ts_utils.node_length(m.node)
+        if
+          not lookbehind_earliest_start
+          or lookbehind_earliest_start < start_byte
+          or (lookbehind_earliest_start == start_byte and lookbehind_match_length > length)
+        then
+          lookbehind_match_length = length
+          lookbehind_largest_range = m
+          lookbehind_earliest_start = start_byte
+        end
+      end
     end
   end
 
@@ -99,6 +116,8 @@ function M.textobject_at_point(query_string, pos, bufnr, opts)
     end
   elseif lookahead_largest_range then
     return bufnr, { lookahead_largest_range.node:range() }, lookahead_largest_range.node
+  elseif lookbehind_largest_range then
+    return bufnr, { lookbehind_largest_range.node:range() }, lookbehind_largest_range.node
   end
 end
 

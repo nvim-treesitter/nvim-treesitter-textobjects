@@ -1,193 +1,40 @@
-;; @functions
+; @functions
+ ((method . name: (identifier) (method_parameters)? . (_) @function.inner (_)? @function.end .)
+   (#make-range! "function.inner" @function.inner @function.end)) @function.outer
+ ((singleton_method . name: (identifier) (method_parameters)? . (_) @function.inner (_)? @function.end .)
+   (#make-range! "function.inner" @function.inner @function.end)) @function.outer
+
+; @blocks
+((block (block_parameters)? . (_) @block.inner (_)? @block.inner.end .)
+  (#make-range! "block.inner" @block.inner @block.inner.end)) @block.outer
+((do_block (block_parameters)? . (_) @block.inner (_)? @block.inner.end .)
+  (#make-range! "block.inner" @block.inner @block.inner.end)) @block.outer
+
+; @classes
 (
-  [
-    (method
-      . name: (identifier)
-      !parameters
-      . (_) @_start (_) @_end .)
-
-    (method
-      . name: (identifier)
-      . parameters: (method_parameters)
-      . (_) @_start (_) @_end .)
-
-    (singleton_method
-      . object: (_)
-      . name: (identifier)
-      !parameters
-      . (_) @_start (_) @_end .)
-
-    (singleton_method
-      . object: (_)
-      . name: (identifier)
-      . parameters: (method_parameters)
-      . (_) @_start (_) @_end .)
-  ] @function.outer
-   (#make-range! "function.inner" @_start @_end))
-
-[
-  (method
-    . name: (identifier)
-    !parameters
-    . (_) @function.inner .)
-
-  (method
-    . name: (identifier)
-    . parameters: (method_parameters)
-    . (_) @function.inner .)
-
-  (singleton_method
-    . object: (_)
-    . name: (identifier)
-    !parameters
-    . (_) @function.inner .)
-
-  (singleton_method
-    . object: (_)
-    . name: (identifier)
-    . parameters: (method_parameters)
-    . (_) @function.inner .)
-] @function.outer
-
-;; @blocks
+  (class . name: (constant) (superclass) . (_) @class.inner (_)? @class.end .)
+  (#make-range! "class.inner" @class.inner @class.end)
+ ) @class.outer
 (
-  [
-    (call
-      block: (_
-        !parameters
-        . (_) @_start (_) @_end .)
-      )
+  (class . name: (constant) !superclass . (_) @class.inner (_)? @class.end .)
+  (#make-range! "class.inner" @class.inner @class.end)
+ ) @class.outer
 
-    (call
-      block: (_
-        . parameters: (block_parameters)
-        . (_) @_start (_) @_end .)
-      )
-  ]
-   (#make-range! "block.inner" @_start @_end))
+((module name: (constant) . (_) @class.inner (_)? @class.inner.end .)
+ (#make-range! "class.inner" @class.inner @class.inner.end)) @class.outer
 
-[
-  (call
-    block: (_
-      !parameters
-      . (_) @block.inner .))
+((singleton_class value: (self) . (_) @class.inner (_)? @class.inner.end .)
+ (#make-range! "class.inner" @class.inner @class.inner.end)) @class.outer
 
-  (call
-    block: (_
-      . parameters: (block_parameters)
-      . (_) @block.inner .))
-]
+; @parameters
+(block_parameters (_) @parameter.inner)
+(method_parameters (_) @parameter.inner)
+(lambda_parameters (_) @parameter.inner)
+(argument_list (_) @parameter.inner)
 
 [
-  (do_block)
-  (block)
-] @block.outer
-
-((lambda
-  body: (_
-    . (_) @_start (_) @_end .)
-  ) @block.outer
- (#make-range! "block.inner" @_start @_end))
-
-(lambda
-  body: (_
-    . (_) @block.inner .) @block.outer)
-
-;; calls
-(call
-  method: (_) @call.inner ) @call.outer
-
-;; classes
-(
-  [
-    (class
-      . name: (_)
-      . superclass: (_)
-      . (_) @_start (_) @_end .)
-
-    (class
-      . name: (_)
-      !superclass
-      . (_) @_start (_) @_end .)
-
-    (module
-      . name: (_)
-      . (_) @_start (_) @_end .)
-
-    (singleton_class
-      . value: (_)
-      . (_) @_start (_) @_end .)
-  ] @class.outer
- (#make-range! "class.inner" @_start @_end))
-
-[
-  ;; match against classes with and without parrents
-  (class
-    . name: (_)
-    . superclass: (_)
-    . (_) @class.inner .)
-
-  (class
-    . name: (_)
-    !superclass
-    . (_) @class.inner .)
-
-  (module
-    . name: (_)
-    . (_) @class.inner .)
-
-  (singleton_class
-    . value: (_)
-    . (_) @class.inner .)
-] @class.outer
-
-;; comments
-(comment) @comment.outer
-
-;; conditionals
-[
-  (if
-   consequence: (_) @conditional.inner
-   alternative: (_) @conditional.inner)
-
-  (if_modifier
-    condition: (_) @conditional.inner)
-
-  (until_modifier
-     condition: (_) @conditional.inner)
-
-  (unless
-   consequence: (_) @conditional.inner
-   alternative: (_) @conditional.inner)
-
-  (case
-    value: (_)
-    (_) @conditional.inner)
-]  @conditional.outer
-
-;; loops
-[
-  (while
-    body: (_) @loop.inner)
-
-  (while_modifier
-    condition: (_) @loop.inner)
-
-  (until
-    body: (_) @loop.inner)
-
-  (until_modifier
-    condition: (_) @loop.inner)
-
-  (for
-    body: (_) @loop.inner)
-] @loop.outer
-
-;; parameters
-[
- (block_parameters (_) @parameter.inner)
-
- (method_parameters (_) @parameter.inner)
-
- (lambda_parameters (_) @parameter.inner)
+  (block_parameters)
+  (method_parameters)
+  (lambda_parameters)
+  (argument_list)
 ] @parameter.outer

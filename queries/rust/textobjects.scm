@@ -73,61 +73,65 @@
 ;; statements
 (block (_) @statement.outer)
 
+;; comments
+(line_comment) @comment.outer
+(block_comment) @comment.outer
+
 ;; parameter
 
-((parameters 
+((parameters
   "," @_start . (parameter) @parameter.inner)
- (#make-range! "parameter.outer" @_start @parameter.inner)) 
+ (#make-range! "parameter.outer" @_start @parameter.inner))
 ((parameters
   . (parameter) @parameter.inner . ","? @_end)
- (#make-range! "parameter.outer" @parameter.inner @_end)) 
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((type_parameters
   "," @_start . (_) @parameter.inner)
- (#make-range! "parameter.outer" @_start @parameter.inner)) 
-((type_parameters 
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+((type_parameters
   . (_) @parameter.inner . ","? @_end)
- (#make-range! "parameter.outer" @parameter.inner @_end)) 
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((tuple_pattern
   "," @_start . (identifier) @parameter.inner)
- (#make-range! "parameter.outer" @_start @parameter.inner)) 
-((tuple_pattern 
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+((tuple_pattern
   . (identifier) @parameter.inner . ","? @_end)
- (#make-range! "parameter.outer" @parameter.inner @_end)) 
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((tuple_struct_pattern
   "," @_start . (identifier) @parameter.inner)
- (#make-range! "parameter.outer" @_start @parameter.inner)) 
-((tuple_struct_pattern 
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+((tuple_struct_pattern
   . (identifier) @parameter.inner . ","? @_end)
- (#make-range! "parameter.outer" @parameter.inner @_end)) 
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((closure_parameters
   "," @_start . (_) @parameter.inner)
- (#make-range! "parameter.outer" @_start @parameter.inner)) 
-((closure_parameters 
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+((closure_parameters
   . (_) @parameter.inner . ","? @_end)
- (#make-range! "parameter.outer" @parameter.inner @_end)) 
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((arguments
   "," @_start . (_) @parameter.inner)
- (#make-range! "parameter.outer" @_start @parameter.inner)) 
-((arguments 
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+((arguments
   . (_) @parameter.inner . ","? @_end)
- (#make-range! "parameter.outer" @parameter.inner @_end)) 
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((type_arguments
   "," @_start . (_) @parameter.inner)
- (#make-range! "parameter.outer" @_start @parameter.inner)) 
-((type_arguments 
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+((type_arguments
   . (_) @parameter.inner . ","? @_end)
- (#make-range! "parameter.outer" @parameter.inner @_end)) 
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((meta_arguments
   "," @_start . (_) @parameter.inner)
- (#make-range! "parameter.outer" @_start @parameter.inner)) 
+ (#make-range! "parameter.outer" @_start @parameter.inner))
 ((meta_arguments
   . (_) @parameter.inner . ","? @_end)
- (#make-range! "parameter.outer" @parameter.inner @_end)) 
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 

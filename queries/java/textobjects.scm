@@ -38,12 +38,13 @@
 (method_invocation (argument_list) @call.inner)
 
 ;; parameters
-(formal_parameters    
+(formal_parameters
   "," @_start .
   (formal_parameter) @parameter.inner
  (#make-range! "parameter.outer" @_start @parameter.inner))
-(formal_parameters    
+(formal_parameters
   . (formal_parameter) @parameter.inner
   . ","? @_end
  (#make-range! "parameter.outer" @_start @parameter.inner))
 
+(comment) @comment.outer

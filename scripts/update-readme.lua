@@ -39,8 +39,8 @@ for _, v in ipairs(sorted_parsers) do
 
   for _, o in ipairs(textobjects) do
     local found = vim.tbl_contains(found_textobjects, o:sub(2))
-    local status = found and "✅" or "⬜"
-    generated_text = generated_text .. "<td>" .. '<span title="' .. o .. '">' .. status .. "</td> "
+    local status = found and "🟩" or "⬜"
+    generated_text = generated_text .. "<td>" .. '<span title="' .. o .. '">' .. status .. "</span>" .. "</td> "
   end
   generated_text = generated_text .. "</tr>\n"
 end

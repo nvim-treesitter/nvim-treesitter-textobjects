@@ -1,9 +1,14 @@
+*nvim-treesitter-textobjects*  Syntax aware |text-objects|, select, move, swap, and peek support.
+
+                                       Type |gO| to see the table of contents.
+
 ==============================================================================
-TEXT OBJECTS                                 *nvim-treesitter-textobjects-mod*
+MODULES					 *nvim-treesitter-textobjects-modules*
 
-Syntax aware |text-objects|.
+Available modules for |nvim-treesitter|.
 
-                                  *nvim-treesitter-text-objects-select-submod*
+------------------------------------------------------------------------------
+				  *nvim-treesitter-text-objects-select-submod*
 Text object selection~
 
 Define your own text objects mappings
@@ -44,7 +49,8 @@ Supported options:
   EOF
 <
 
-                                    *nvim-treesitter-text-objects-swap-submod*
+------------------------------------------------------------------------------
+				    *nvim-treesitter-text-objects-swap-submod*
 Swap text objects~
 
 Define your own mappings to swap the node under the cursor with the next or previous one,
@@ -75,7 +81,8 @@ Supported options:
   EOF
 <
 
-                                    *nvim-treesitter-text-objects-move-submod*
+------------------------------------------------------------------------------
+				    *nvim-treesitter-text-objects-move-submod*
 Go to next/previous text object~
 
 Define your own mappings to jump to the next or previous text object.
@@ -124,7 +131,8 @@ Supported options:
   EOF
 <
 
-                                   *nvim-treesitter-textobjects-lsp_interop-submod*
+------------------------------------------------------------------------------
+			      *nvim-treesitter-textobjects-lsp_interop-submod*
 LSP interop~
 
 - peek_definition_code: show textobject surrounding definition as determined

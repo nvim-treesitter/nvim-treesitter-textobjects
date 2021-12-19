@@ -1,6 +1,10 @@
 # nvim-treesitter-textobjects
 
-Create your own textobjects using tree-sitter queries!
+Syntax aware text-objects, select, move, swap, and peek support.
+
+**Warning: tree-sitter and nvim-treesitter are an experimental feature of nightly versions of Neovim.
+Please consider the experience with this plug-in as experimental until tree-sitter support in Neovim is stable!
+We recommend using the nightly builds of Neovim or the latest stable version.**
 
 ## Installation
 
@@ -11,17 +15,8 @@ You can install nvim-treesitter-textobjects with your favorite package manager, 
 If you are using vim-plug, put this in your init.vim file:
 
 ```vim
-Plug 'nvim-treesitter/nvim-treesitter'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'nvim-treesitter/nvim-treesitter-textobjects'
-```
-
-*If you want to use this plugin with Neovim 0.5, please use the
-0.5-compat branches of this plugin and nvim-treesitter. Be aware though that most improvements will require
-neovim nightly.*
-
-```vim
-Plug 'nvim-treesitter/nvim-treesitter', {'branch' : '0.5-compat'}
-Plug 'nvim-treesitter/nvim-treesitter-textobjects', {'branch' : '0.5-compat'}
 ```
 
 ## Text objects: select
@@ -36,7 +31,7 @@ require'nvim-treesitter.configs'.setup {
     select = {
       enable = true,
 
-      -- Automatically jump forward to textobj, similar to targets.vim 
+      -- Automatically jump forward to textobj, similar to targets.vim
       lookahead = true,
 
       keymaps = {

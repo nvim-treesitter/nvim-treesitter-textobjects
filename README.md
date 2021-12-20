@@ -31,8 +31,13 @@ require'nvim-treesitter.configs'.setup {
     select = {
       enable = true,
 
-      -- Automatically jump forward to textobj, similar to targets.vim
+      -- Automatically jump forwards or backwards to textobj, similar to targets.vim
       lookahead = true,
+      lookbehind = false,
+
+      -- Automatically decide if the selection should start from
+      -- the start of the line instead of the start of the node.
+      auto_expand = false,
 
       keymaps = {
         -- You can use the capture groups defined in textobjects.scm

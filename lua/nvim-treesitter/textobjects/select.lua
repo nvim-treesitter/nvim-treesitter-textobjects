@@ -9,16 +9,15 @@ local ts_utils = require "nvim-treesitter.ts_utils"
 local M = {}
 
 function M.select_textobject(query_string, keymap_mode)
-  local lookahead = configs.get_module("textobjects.select").lookahead
-  local lookbehind = configs.get_module("textobjects.select").lookbehind
+  local config = configs.get_module "textobjects.select"
   local bufnr, textobject = shared.textobject_at_point(
     query_string,
     nil,
     nil,
-    { lookahead = lookahead, lookbehind = lookbehind }
+    { lookahead = config.lookahead, lookbehind = config.lookbehind }
   )
   if textobject then
-    ts_utils.update_selection(bufnr, textobject, M.detect_selection_mode(keymap_mode))
+    ts_utils.update_selection(bufnr, textobject, M.detect_selection_mode(keymap_mode), config.auto_expand)
   end
 end
 

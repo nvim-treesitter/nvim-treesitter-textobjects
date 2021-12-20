@@ -18,7 +18,13 @@ Query files: `textobjects.scm`.
 Supported options:
 - enable: `true` or `false`.
 - disable: list of languages.
-- lookahead: `true` or `false`, whether or not to look ahead for the textobject
+- lookahead: `true` or `false`, whether or not to look ahead for the textobject.
+  Defaults to `false`.
+- lookbehind: `true` or `false`, whether or not to look behind for the textobject.
+  Defaults to `false`.
+- auto_expand: Automatically decide if the selection should start from
+  the start of the line instead of the start of the node.
+  Defaults to `false`.
 - keymaps: map of keymaps to a tree-sitter query
   (`(function_definition) @function`) or capture group (`@function.inner`).
 

@@ -31,6 +31,7 @@ function M.init()
         end,
         lookahead = false,
         lookbehind = false,
+        auto_expand = false,
         keymaps = {},
       },
       move = {

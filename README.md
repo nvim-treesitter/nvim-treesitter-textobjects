@@ -40,14 +40,6 @@ require'nvim-treesitter.configs'.setup {
         ["if"] = "@function.inner",
         ["ac"] = "@class.outer",
         ["ic"] = "@class.inner",
-
-        -- Or you can define your own textobjects like this
-        ["iF"] = {
-          python = "(function_definition) @function",
-          cpp = "(function_definition) @function",
-          c = "(function_definition) @function",
-          java = "(method_declaration) @function",
-        },
       },
     },
   },
@@ -136,6 +128,41 @@ require'nvim-treesitter.configs'.setup {
 }
 EOF
 ```
+
+# Overriding or extending textobjects
+
+Textobjects are defined in the `textobjects.scm` files.
+You can extend or override those files by following the instructions at
+<https://github.com/nvim-treesitter/nvim-treesitter#adding-queries>.
+You can also use a custom capture for your own textobjects,
+and use it in any of the textobject modules, for example:
+
+```scm
+-- after/queries/python/textobjects.scm
+
+(function_definition) @custom-capture
+```
+
+```
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+  textobjects = {
+    select = {
+      enable = true,
+      keymaps = {
+        -- Your custom capture.
+        ["aF"] = "@custom-capture",
+
+        -- Built-in captures.
+        ["af"] = "@function.outer",
+        ["if"] = "@function.inner",
+      },
+    },
+  },
+}
+EOF
+```
+
 ## Built-in Textobjects
 
 <!--textobjectinfo-->

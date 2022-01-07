@@ -15,7 +15,7 @@
     (type_spec (type_identifier) (struct_type (field_declaration_list (_)?) @class.inner))) @class.outer
 
 (type_declaration
-  (type_spec (type_identifier) (interface_type (method_spec_list (_)?) @class.inner))) @class.outer
+  (type_spec (type_identifier) (interface_type) @class.inner)) @class.outer
 
 ;; struct literals as class textobject
 (composite_literal
@@ -57,7 +57,7 @@
 (parameter_list
   . (parameter_declaration) @parameter.inner
   . ","? @_end
- (#make-range! "parameter.outer" @_start @parameter.inner))
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 (parameter_declaration
   (identifier)
@@ -80,4 +80,4 @@
 (argument_list
   . (_) @parameter.inner
   . ","? @_end
- (#make-range! "parameter.outer" @_start @parameter.inner))
+ (#make-range! "parameter.outer" @parameter.inner @_end))

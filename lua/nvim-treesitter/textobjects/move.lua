@@ -5,7 +5,7 @@ local configs = require "nvim-treesitter.configs"
 
 local M = {}
 
-local function move(query_string, forward, start, bufnr)
+local function move(query_strings, forward, start, bufnr)
   local bufnr = bufnr or vim.api.nvim_get_current_buf()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row = row - 1
@@ -42,22 +42,38 @@ local function move(query_string, forward, start, bufnr)
     end
   end
 
-  local match = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
+  local first_match
+  local best_score
+  for _, query_string in pairs(query_strings) do
+    local match = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
+    if match then
+      local range = { match.node:range() }
+      local score = { row = math.abs(range[1] - row), col = math.abs(range[3] - col) }
+      if not first_match then
+        first_match = match
+        best_score = score
+      end
+      if score.row < best_score.row or (score.row == best_score.row and score.col < best_score.col) then
+        first_match = match
+        best_score = score
+      end
+    end
+  end
   local config = configs.get_module "textobjects.move"
-  ts_utils.goto_node(match and match.node, not start, not config.set_jumps)
+  ts_utils.goto_node(first_match and first_match.node, not start, not config.set_jumps)
 end
 
-M.goto_next_start = function(query_string)
-  move(query_string, "forward", "start")
+M.goto_next_start = function(query_strings)
+  move(query_strings, "forward", "start")
 end
-M.goto_next_end = function(query_string)
-  move(query_string, "forward", not "start")
+M.goto_next_end = function(query_strings)
+  move(query_strings, "forward", not "start")
 end
-M.goto_previous_start = function(query_string)
-  move(query_string, not "forward", "start")
+M.goto_previous_start = function(query_strings)
+  move(query_strings, not "forward", "start")
 end
-M.goto_previous_end = function(query_string)
-  move(query_string, not "forward", not "start")
+M.goto_previous_end = function(query_strings)
+  move(query_strings, not "forward", not "start")
 end
 
 local normal_mode_functions = { "goto_next_start", "goto_next_end", "goto_previous_start", "goto_previous_end" }

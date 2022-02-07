@@ -4,8 +4,15 @@ local attach = require "nvim-treesitter.textobjects.attach"
 
 local M = {}
 
-local function swap_textobject(query_string, direction)
-  local bufnr, textobject_range, node = shared.textobject_at_point(query_string)
+local function swap_textobject(query_strings, direction)
+  local bufnr, textobject_range, node, query_string
+  for _, query_string_iter in pairs(query_strings) do
+    bufnr, textobject_range, node = shared.textobject_at_point(query_string_iter)
+    if node then
+      query_string = query_string_iter
+      break
+    end
+  end
   if not node then
     return
   end

@@ -10,18 +10,25 @@ function M.make_attach(normal_mode_functions, submodule)
     lang = lang or parsers.get_buf_lang(bufnr)
 
     for _, function_call in pairs(normal_mode_functions) do
-      for mapping, query in pairs(config[function_call] or {}) do
+      for mapping, config_queries in pairs(config[function_call] or {}) do
         if not queries.get_query(lang, "textobjects") then
-          query = nil
+          config_queries = nil
         end
-        if query then
+        if config_queries then
+          local config_query_str
+          if type(config_queries) == "string" then
+            config_query_str = "'" .. config_queries .. "'"
+          else
+            config_query_str = "{'" .. table.concat(config_queries, "','") .. "'}"
+          end
+
           local cmd = ":lua require'nvim-treesitter.textobjects."
             .. submodule
             .. "'."
             .. function_call
-            .. "('"
-            .. query
-            .. "')<CR>"
+            .. "("
+            .. config_query_str
+            .. ")<CR>"
           api.nvim_buf_set_keymap(bufnr, "n", mapping, cmd, { silent = true, noremap = true })
         end
       end

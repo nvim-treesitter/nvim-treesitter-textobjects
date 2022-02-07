@@ -55,3 +55,7 @@
 
 (formal_parameters
   (identifier) @parameter.inner) @parameter.outer
+
+((arguments
+  (identifier) @parameter.inner . ","? @_end)
+  (#make-range! "parameter.outer" @parameter.inner @_end))

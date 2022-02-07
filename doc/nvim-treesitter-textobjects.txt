@@ -52,8 +52,9 @@ Query files: `textobjects.scm`.
 Supported options:
 - enable: `true` or `false`.
 - disable: list of languages.
-- swap_next: map of keymaps to a tree-sitter capture group (`@parameter.inner`).
-- swap_previous: same as swap_next.
+- swap_next: map of keymaps to a list of tree-sitter capture groups (`{@parameter.inner}`). Capture groups that come earlier in the list are preferred.
+- swap_previous: same as swap_next, but it will swap with the previous text
+  object.
 
 >
   lua <<EOF
@@ -62,10 +63,10 @@ Supported options:
       swap = {
         enable = true,
         swap_next = {
-          ["<leader>a"] = "@parameter.inner",
+          ["<leader>a"] = {"@parameter.inner"},
         },
         swap_previous = {
-          ["<leader>A"] = "@parameter.inner",
+          ["<leader>A"] = {"@parameter.inner"},
         },
       },
     },
@@ -86,7 +87,7 @@ Supported options:
 - enable: `true` or `false`.
 - disable: list of languages.
 - set_jumps: whether to set jumps in the jumplist
-- goto_next_start: map of keymaps to a tree-sitter capture group (`@function.outer`).
+- goto_next_start: map of keymaps to a list of tree-sitter capture groups (`{@function.outer, @class.outer}`). The one that starts closest to the cursor will be chosen, preferring row-proximity to column-proximity.
 - goto_next_end: same as goto_next_start, but it jumps to the start of
   the text object.
 - goto_previous_start: same as goto_next_start, but it jumps to the previous
@@ -102,20 +103,16 @@ Supported options:
         enable = true,
         set_jumps = true, -- whether to set jumps in the jumplist
         goto_next_start = {
-          ["]m"] = "@function.outer",
-          ["]]"] = "@class.outer",
+          ["]m"] = {"@function.outer", "@class.outer"},
         },
         goto_next_end = {
-          ["]M"] = "@function.outer",
-          ["]["] = "@class.outer",
+          ["]M"] = {"@function.outer", "@class.outer"},
         },
         goto_previous_start = {
-          ["[m"] = "@function.outer",
-          ["[["] = "@class.outer",
+          ["[m"] = {"@function.outer", "@class.outer"},
         },
         goto_previous_end = {
-          ["[M"] = "@function.outer",
-          ["[]"] = "@class.outer",
+          ["[M"] = {"@function.outer", "@class.outer"},
         },
       },
     },

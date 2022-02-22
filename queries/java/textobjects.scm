@@ -45,7 +45,7 @@
 (formal_parameters
   . (formal_parameter) @parameter.inner
   . ","? @_end
- (#make-range! "parameter.outer" @_end @parameter.inner))
+ (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((argument_list
   "," @_start .

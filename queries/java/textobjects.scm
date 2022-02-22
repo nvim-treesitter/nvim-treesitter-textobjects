@@ -47,13 +47,13 @@
   . ","? @_end
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
-((argument_list
+(argument_list
   "," @_start .
-  (_) @parameter.inner)
+  (_) @parameter.inner
  (#make-range! "parameter.outer" @_start @parameter.inner))
-((argument_list
+(argument_list
   . (_) @parameter.inner
-  . ","? @_end)
+  . ","? @_end
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 [

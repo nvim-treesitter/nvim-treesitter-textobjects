@@ -38,7 +38,7 @@
   (_)? @_end .)
  (#make-range! "loop.inner" @_start @_end)) @loop.outer
 
-((each . (each_clause) .
+((each . (_) .
   (_) @_start .
   (_)* .
   (_)? @_end .)

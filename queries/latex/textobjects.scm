@@ -15,7 +15,7 @@
  (#make-range! "frame.inner" @_start @_end)) 
 
 [
-  (command)
+  (generic_command)
 ] @statement.outer
 
 [

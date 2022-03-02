@@ -6,9 +6,12 @@ local configs = require "nvim-treesitter.configs"
 local M = {}
 
 local function move(query_strings, forward, start, bufnr)
-  local bufnr = bufnr or vim.api.nvim_get_current_buf()
+  -- Support single query string in query_strings,
+  --    for compatability with old configs and the Vim commands
+  query_strings = type(query_strings) == "string" and { query_strings } or query_strings
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  row = row - 1
+  row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
 
   local function filter_function(match)
     local range = { match.node:range() }
@@ -42,25 +45,24 @@ local function move(query_strings, forward, start, bufnr)
     end
   end
 
-  local first_match
+  local best_match
   local best_score
-  for _, query_string in pairs(query_strings) do
-    local match = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
-    if match then
-      local range = { match.node:range() }
-      local score = { row = math.abs(range[1] - row), col = math.abs(range[3] - col) }
-      if not first_match then
-        first_match = match
+  for _, query_string in ipairs(query_strings) do
+    local current_match = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
+    if current_match then
+      local score = scoring_function(current_match)
+      if not best_match then
+        best_match = current_match
         best_score = score
       end
-      if score.row < best_score.row or (score.row == best_score.row and score.col < best_score.col) then
-        first_match = match
+      if score > best_score then
+        best_match = current_match
         best_score = score
       end
     end
   end
   local config = configs.get_module "textobjects.move"
-  ts_utils.goto_node(first_match and first_match.node, not start, not config.set_jumps)
+  ts_utils.goto_node(best_match and best_match.node, not start, not config.set_jumps)
 end
 
 M.goto_next_start = function(query_strings)

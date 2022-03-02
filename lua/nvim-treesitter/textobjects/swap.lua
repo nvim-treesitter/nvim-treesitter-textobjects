@@ -5,8 +5,11 @@ local attach = require "nvim-treesitter.textobjects.attach"
 local M = {}
 
 local function swap_textobject(query_strings, direction)
+  -- Support single query string in query_strings,
+  --    for compatability with old configs and the Vim commands
+  query_strings = type(query_strings) == "string" and { query_strings } or query_strings
   local bufnr, textobject_range, node, query_string
-  for _, query_string_iter in pairs(query_strings) do
+  for _, query_string_iter in ipairs(query_strings) do
     bufnr, textobject_range, node = shared.textobject_at_point(query_string_iter)
     if node then
       query_string = query_string_iter

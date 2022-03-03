@@ -1,14 +1,13 @@
 local ts_utils = require "nvim-treesitter.ts_utils"
 local attach = require "nvim-treesitter.textobjects.attach"
+local shared = require "nvim-treesitter.textobjects.shared"
 local queries = require "nvim-treesitter.query"
 local configs = require "nvim-treesitter.configs"
 
 local M = {}
 
 local function move(query_strings, forward, start, bufnr)
-  -- Support single query string in query_strings,
-  --    for compatability with old configs and the Vim commands
-  query_strings = type(query_strings) == "string" and { query_strings } or query_strings
+  query_strings = shared.make_query_strings_table(query_strings)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed

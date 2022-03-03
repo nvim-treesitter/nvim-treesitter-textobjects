@@ -6,6 +6,11 @@ local ts_utils = require "nvim-treesitter.ts_utils"
 
 local M = {}
 
+-- Convert single query string to list for backwards compatibility and the Vim commands
+function M.make_query_strings_table(query_strings)
+  return type(query_strings) == "string" and { query_strings } or query_strings
+end
+
 function M.available_textobjects(lang)
   lang = lang or parsers.get_buf_lang()
   local parsed_queries = queries.get_query(lang, "textobjects")

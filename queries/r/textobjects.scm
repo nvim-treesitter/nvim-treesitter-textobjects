@@ -54,63 +54,14 @@
 ; parameter
 
 ((formal_parameters
-  . [
-      (identifier)
-      (float)
-      (integer)
-      (complex)
-      (true)
-      (false)
-      (string)
-      (call)
-      (namespace_get)
-      (namespace_get_internal)
-      (default_parameter)
-      (dots)
-      (na)
-      (nan)
-      (null)
-      (inf)
-      (binary)
-      (unary)
-      (pipe)
-      (subset)
-      (subset2)
-      (dollar)
-      (slot)
-    ] @parameter.inner
-    . ","? @_end
+  . (_) @parameter.inner
+  . ","? @_end
   )
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 
 ((arguments
-  . [
-      (identifier)
-      (float)
-      (integer)
-      (complex)
-      (true)
-      (false)
-      (string)
-      (call)
-      (namespace_get)
-      (namespace_get_internal)
-      (default_argument)
-      (dots)
-      (na)
-      (nan)
-      (null)
-      (inf)
-      (binary)
-      (unary)
-      (pipe)
-      (function_definition)
-      (subset)
-      (subset2)
-      (dollar)
-      (slot)
-    ] @parameter.inner
-    . ","? @_end
+  . (_) @parameter.inner
+  . ","? @_end
   )
   (#make-range! "parameter.outer" @parameter.inner @_end))

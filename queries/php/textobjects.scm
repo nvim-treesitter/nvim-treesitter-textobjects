@@ -1,8 +1,16 @@
 (function_definition 
- body: (compound_statement) @function.inner) @function.outer
+  body: (compound_statement)) @function.outer
+
+(function_definition
+  body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
 
 (method_declaration
-  body: (compound_statement) @function.inner) @function.outer
+  body: (compound_statement)) @function.outer
+
+(method_declaration
+  body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
 
 (class_declaration
   body: (declaration_list) @class.inner) @class.outer

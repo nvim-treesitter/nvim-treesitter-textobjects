@@ -1,14 +1,27 @@
-;; function textobject
+;; inner function textobject
 (function_declaration
-  body: (block)? @function.inner) @function.outer
+  body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
 
-;; function literals
+;; inner function literals
 (func_literal
-	(_)? @function.inner) @function.outer
+  body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
 
-;; method as function textobject
+;; method as inner function textobject
 (method_declaration
-  body: (block)? @function.inner) @function.outer
+  body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
+
+;; outer function textobject
+(function_declaration) @function.outer
+
+;; outer function literals
+(func_literal (_)?) @function.outer
+
+;; method as outer function textobject
+(method_declaration body: (block)?) @function.outer
+
 
 ;; struct and interface declaration as class textobject?
 (type_declaration

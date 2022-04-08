@@ -1,9 +1,17 @@
 ; inherits: (jsx)
 (function_declaration
-  body: (statement_block) @function.inner) @function.outer
+  body: (statement_block)) @function.outer
 
 (function
-  body: (statement_block) @function.inner) @function.outer
+  body: (statement_block)) @function.outer
+
+(function_declaration
+  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
+
+(function
+  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
 
 (export_statement
   (function_declaration) @function.outer) @function.outer.start
@@ -12,7 +20,11 @@
   body: (_) @function.inner) @function.outer
 
 (method_definition
-  body: (statement_block) @function.inner) @function.outer
+  body: (statement_block)) @function.outer
+
+(method_definition
+  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
 
 (class_declaration
   body: (class_body) @class.inner) @class.outer

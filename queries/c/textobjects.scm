@@ -3,12 +3,15 @@
 ;(function_definition
   ;body:  (compound_statement
                           ;("{" (_)* @function.inner "}"))?) @function.outer
-
 (declaration
   declarator: (function_declarator)) @function.outer
 
 (function_definition
-  body:  (compound_statement) @function.inner) @function.outer
+  body:  (compound_statement)) @function.outer
+
+(function_definition
+  body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
 
 (struct_specifier
   body: (_) @class.inner) @class.outer

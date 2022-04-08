@@ -1,11 +1,17 @@
 (class_declaration
   body: (class_body) @class.inner) @class.outer
 
+(method_declaration) @function.outer
+
 (method_declaration
-  body: (_) @function.inner) @function.outer
+  body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
 
 (constructor_declaration) @function.outer
-(constructor_body) @function.inner
+
+(constructor_declaration
+  body: (constructor_body . "{" . (_) @_start @_end (_)? @_end . "}"
+ (#make-range! "function.inner" @_start @_end)))
 
 (for_statement
   body: (_)? @loop.inner) @loop.outer

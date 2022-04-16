@@ -20,6 +20,11 @@
 ) @class.outer
 
 ; Function, Parameter, and Call Objects
+(anonymous_function
+  (stab_clause 
+    right: (body) @function.inner)
+) @function.outer
+
 (call 
   target: ((identifier) @_identifier (#any-of? @_identifier 
     "def" 

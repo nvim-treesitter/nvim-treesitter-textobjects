@@ -101,7 +101,7 @@
   (switch_statement)
   (while_statement)
   (assert_statement)
-  (labeled_statement)
+  ;(labeled_statement)
   (yield_statement)
   (yield_each_statement)
   (continue_statement)

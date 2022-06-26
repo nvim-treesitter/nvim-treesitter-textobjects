@@ -5,6 +5,8 @@ You can define text objects based on nodes of the grammar by adding queries in `
 Each capture group can be declared as `inner` or `outer`.
 
 ```
+@attribute.inner
+@attribute.outer
 @function.inner
 @function.outer
 @class.inner

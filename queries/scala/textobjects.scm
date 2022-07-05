@@ -5,7 +5,7 @@
   body: (template_body)? @class.inner) @class.outer
 
 (function_definition
-  body: (block) @function.inner) @function.outer
+  body: (expression) @function.inner) @function.outer
 
 (parameter
   name: (identifier) @parameter.inner) @parameter.outer

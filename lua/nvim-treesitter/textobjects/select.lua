@@ -140,14 +140,21 @@ function M.attach(bufnr, lang)
   lang = lang or parsers.get_buf_lang(buf)
 
   for mapping, query in pairs(config.keymaps) do
+    local desc
+    if type(query) == "table" then
+      desc = query.desc
+      query = query.query
+    end
+    if not desc then
+      desc = "Select textobject " .. query
+    end
     if not queries.get_query(lang, "textobjects") then
       query = nil
     end
     if query then
-      local cmd_o = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'o')<CR>"
-      api.nvim_buf_set_keymap(buf, "o", mapping, cmd_o, { silent = true, noremap = true })
-      local cmd_x = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'x')<CR>"
-      api.nvim_buf_set_keymap(buf, "x", mapping, cmd_x, { silent = true, noremap = true })
+      vim.keymap.set({ "o", "x" }, mapping, function()
+        require("nvim-treesitter.textobjects.select").select_textobject(query)
+      end, { buffer = buf, silent = true, remap = false, desc = desc })
     end
   end
 end
@@ -161,9 +168,11 @@ function M.detach(bufnr)
     if not queries.get_query(lang, "textobjects") then
       query = nil
     end
+    if type(query) == "table" then
+      query = query.query
+    end
     if query then
-      api.nvim_buf_del_keymap(buf, "o", mapping)
-      api.nvim_buf_del_keymap(buf, "x", mapping)
+      vim.keymap.del({ "o", "x" }, mapping, { buffer = buf })
     end
   end
 end

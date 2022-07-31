@@ -35,6 +35,7 @@ function M.detect_selection_mode(query_string, keymap_mode)
   elseif method == "operator-pending" then
     local ctrl_v = vim.api.nvim_replace_termcodes("<c-v>", true, true, true)
     local t = {
+      nov = "v",
       noV = "V",
       ["no" .. ctrl_v] = "<c-v>",
     }

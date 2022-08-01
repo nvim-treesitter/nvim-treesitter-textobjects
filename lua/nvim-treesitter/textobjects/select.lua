@@ -25,24 +25,31 @@ end
 function M.include_surrounding_whitespace(bufnr, textobject)
   local start_row, start_col, end_row, end_col = unpack(textobject)
   local extended = false
-  local next_row, next_col = M.next_position(bufnr, start_row, start_col, false)
-  while M.is_whitespace_after(bufnr, next_row, next_col) do
+  while M.is_whitespace_after(bufnr, end_row, end_col) do
     extended = true
-    start_row = next_row
-    start_col = next_col
-    next_row, next_col = M.next_position(bufnr, start_row, start_col, false)
+    end_row, end_col = M.next_position(bufnr, end_row, end_col, true)
   end
   if extended then
     -- don't extend in both directions
     return { start_row, start_col, end_row, end_col }
   end
-  while M.is_whitespace_after(bufnr, end_row, end_col) do
-    end_row, end_col = M.next_position(bufnr, end_row, end_col, true)
+  local next_row, next_col = M.next_position(bufnr, start_row, start_col, false)
+  while M.is_whitespace_after(bufnr, next_row, next_col) do
+    start_row = next_row
+    start_col = next_col
+    next_row, next_col = M.next_position(bufnr, start_row, start_col, false)
   end
   return { start_row, start_col, end_row, end_col }
 end
 
 function M.is_whitespace_after(bufnr, row, col)
+  if col == #M.get_line(bufnr, row) then
+    if row == vim.api.nvim_buf_line_count(bufnr) then
+      return false
+    end
+    row = row + 1
+    col = 0
+  end
   local char = M.get_char_after_position(bufnr, row, col)
   if char == nil then
     return false

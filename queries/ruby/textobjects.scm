@@ -1,30 +1,29 @@
 ; @functions
- ((method . name: (identifier) (method_parameters)? . (_) @function.inner (_)? @function.end .)
-   (#make-range! "function.inner" @function.inner @function.end)) @function.outer
- ((singleton_method . name: (identifier) (method_parameters)? . (_) @function.inner (_)? @function.end .)
-   (#make-range! "function.inner" @function.inner @function.end)) @function.outer
+(method
+  body: (body_statement) @function.inner)
+(method) @function.outer
+(singleton_method
+  body: (body_statement) @function.inner)
+(singleton_method) @function.outer
 
 ; @blocks
-((block (block_parameters)? . (_) @block.inner (_)? @block.inner.end .)
-  (#make-range! "block.inner" @block.inner @block.inner.end)) @block.outer
-((do_block (block_parameters)? . (_) @block.inner (_)? @block.inner.end .)
-  (#make-range! "block.inner" @block.inner @block.inner.end)) @block.outer
+(block
+  body: (block_body) @block.inner)
+(block) @block.outer
+(do_block
+  body: (body_statement) @block.inner)
+(do_block) @block.outer
 
 ; @classes
-(
-  (class . name: (constant) (superclass) . (_) @class.inner (_)? @class.end .)
-  (#make-range! "class.inner" @class.inner @class.end)
- ) @class.outer
-(
-  (class . name: (constant) !superclass . (_) @class.inner (_)? @class.end .)
-  (#make-range! "class.inner" @class.inner @class.end)
- ) @class.outer
-
-((module name: (constant) . (_) @class.inner (_)? @class.inner.end .)
- (#make-range! "class.inner" @class.inner @class.inner.end)) @class.outer
-
-((singleton_class value: (self) . (_) @class.inner (_)? @class.inner.end .)
- (#make-range! "class.inner" @class.inner @class.inner.end)) @class.outer
+(class
+  body: (body_statement) @class.inner)
+(class) @class.outer
+(module
+  body: (body_statement) @class.inner)
+(module) @class.outer
+(singleton_class
+  body: (body_statement) @class.inner)
+(singleton_class) @class.outer
 
 ; @parameters
 (block_parameters (_) @parameter.inner)

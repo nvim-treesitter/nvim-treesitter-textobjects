@@ -9,11 +9,13 @@ local M = {}
 local function move(query_strings, forward, start, bufnr)
   query_strings = shared.make_query_strings_table(query_strings)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
 
+  local config = configs.get_module "textobjects.move"
   local function filter_function(match)
     local range = { match.node:range() }
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
+
     if not start then
       if range[4] == 0 then
         range[1] = range[3] - 1
@@ -44,24 +46,25 @@ local function move(query_strings, forward, start, bufnr)
     end
   end
 
-  local best_match
-  local best_score
-  for _, query_string in ipairs(query_strings) do
-    local current_match = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
-    if current_match then
-      local score = scoring_function(current_match)
-      if not best_match then
-        best_match = current_match
-        best_score = score
-      end
-      if score > best_score then
-        best_match = current_match
-        best_score = score
+  for i = 1, vim.v.count1 do
+    local best_match
+    local best_score
+    for _, query_string in ipairs(query_strings) do
+      local current_match = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
+      if current_match then
+        local score = scoring_function(current_match)
+        if not best_match then
+          best_match = current_match
+          best_score = score
+        end
+        if score > best_score then
+          best_match = current_match
+          best_score = score
+        end
       end
     end
+    ts_utils.goto_node(best_match and best_match.node, not start, not config.set_jumps)
   end
-  local config = configs.get_module "textobjects.move"
-  ts_utils.goto_node(best_match and best_match.node, not start, not config.set_jumps)
 end
 
 M.goto_next_start = function(query_strings)

@@ -6,14 +6,15 @@ local configs = require "nvim-treesitter.configs"
 
 local M = {}
 
-local function move(query_strings, forward, start, bufnr)
+local function move(query_strings, forward, start, winid)
   query_strings = shared.make_query_strings_table(query_strings)
-  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  winid = winid or vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(winid)
 
   local config = configs.get_module "textobjects.move"
   local function filter_function(match)
     local range = { match.node:range() }
-    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    local row, col = unpack(vim.api.nvim_win_get_cursor(winid))
     row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
 
     if not start then
@@ -46,11 +47,12 @@ local function move(query_strings, forward, start, bufnr)
     end
   end
 
-  for i = 1, vim.v.count1 do
+  for _ = 1, vim.v.count1 do
     local best_match
     local best_score
     for _, query_string in ipairs(query_strings) do
-      local current_match = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
+      local current_match =
+        queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
       if current_match then
         local score = scoring_function(current_match)
         if not best_match then

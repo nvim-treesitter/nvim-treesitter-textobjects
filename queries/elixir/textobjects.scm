@@ -45,6 +45,25 @@
   (#make-range! "function.inner" @_do @_end)
 ) @function.outer
 
+(call 
+  target: ((identifier) @_identifier (#any-of? @_identifier 
+    "def" 
+    "defmacro" 
+    "defmacrop" 
+    "defn" 
+    "defnp" 
+    "defp"
+  ))
+  (arguments (call [
+    (arguments (_) @parameter.inner . "," @_delimiter)
+    (arguments ((_) @parameter.inner) @_delimiter .) 
+  ] (#make-range! "parameter.outer" @parameter.inner @_delimiter))
+    (keywords
+      (pair
+        value: (_) @function.inner))
+  )
+) @function.outer
+
 ; Comment Objects
 (comment) @comment.outer
 

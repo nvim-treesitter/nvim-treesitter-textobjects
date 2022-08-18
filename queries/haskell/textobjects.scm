@@ -1,5 +1,7 @@
-(exp_apply) @call.outer
-(exp_apply (_) @call.inner)
+(
+ (exp_apply . (exp_name) . (_) @_start . (_)* . (_)? @_end .)
+ (#make-range! "call.inner" @_start @_end)
+) @call.outer
 
 (function rhs: (_) @function.inner) @function.outer
 ;; also treat function signature as @function.outer

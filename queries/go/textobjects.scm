@@ -60,7 +60,10 @@
 (comment) @comment.outer
 
 ;; calls
-(call_expression (_)? @call.inner) @call.outer
+(call_expression) @call.outer
+(call_expression
+  arguments: (argument_list . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))
 
 ;; parameters
 (parameter_list

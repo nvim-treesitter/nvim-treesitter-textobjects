@@ -4,7 +4,11 @@
 
 ; call
 
-(function_call) @call.outer (arguments) @call.inner
+(function_call) @call.outer ((arguments) @call.inner (#match? @call.inner "^[^\\(]"))
+
+(function_call
+  arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end))) @call.outer
 
 ; class
 

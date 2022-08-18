@@ -41,7 +41,9 @@
 
 
 (method_invocation) @call.outer
-(method_invocation (argument_list) @call.inner)
+(method_invocation
+  arguments: (argument_list . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))
 
 ;; parameters
 (formal_parameters

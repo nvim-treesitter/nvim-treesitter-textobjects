@@ -55,8 +55,18 @@
  (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ; call
-(expression_statement
-  (selector) @call.inner) @call.outer
+(
+ (identifier) @_start . (selector (argument_part) @_end)
+ (#make-range! "call.outer" @_start @_end)
+)
+
+(
+ (identifier) .
+ (selector
+   (argument_part
+     (arguments . "(" . (_) @_start (_)? @_end . ")"
+     (#make-range! "call.inner" @_start @_end))))
+)
 
 ; block
 (block) @block.outer

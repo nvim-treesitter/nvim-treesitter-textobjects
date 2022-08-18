@@ -68,7 +68,10 @@
 (unsafe_block (_)? @block.inner) @block.outer
 
 ;; calls
-(call_expression (_)? @call.inner) @call.outer
+(call_expression) @call.outer
+(call_expression
+  arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))
 
 ;; statements
 (block (_) @statement.outer)

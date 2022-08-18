@@ -52,7 +52,9 @@
   body: (_)? @conditional.inner) @conditional.outer
 
 (call_expression) @call.outer
-(call_expression (arguments) @call.inner)
+(call_expression
+  arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))
 
 ;; blocks
 (_ (statement_block) @block.inner) @block.outer

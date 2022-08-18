@@ -52,4 +52,7 @@
   (#make-range! "conditional.inner" @_start @_end))  @conditional.outer
 
 ;; calls
-(_ (FnCallArguments) @call.inner) @call.outer
+(_ (FnCallArguments)) @call.outer
+(_
+  (FnCallArguments . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))

@@ -9,8 +9,10 @@
 (#make-range! "block.inner" @_start @_end)) @block.outer
 
 ; Calls
+(call_expression) @call.outer
 (call_expression
-  (argument_list) @call.inner) @call.outer
+  (argument_list . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))
 
 ; Objects (class)
 ((struct_definition

@@ -53,7 +53,6 @@ require'nvim-treesitter.configs'.setup {
       -- `ap`.
       include_surrounding_whitespace = true,
     },
-    },
   },
 }
 EOF

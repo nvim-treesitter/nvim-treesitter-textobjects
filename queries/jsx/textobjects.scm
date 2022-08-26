@@ -1,5 +1,3 @@
-(
- (jsx_attribute (property_identifier)@arg.name
-                (_)@parameter.inner
-  )@parameter.outer
-)
+; inherits: ecma
+((jsx_attribute
+   (property_identifier) (_) @parameter.inner) @parameter.outer)

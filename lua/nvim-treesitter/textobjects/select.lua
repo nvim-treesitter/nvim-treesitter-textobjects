@@ -21,7 +21,11 @@ local function is_whitespace_after(bufnr, row, col)
     return false
   end
   if char == "" then
-    return true
+    if row == vim.api.nvim_buf_line_count(bufnr) - 1 then
+      return false
+    else
+      return true
+    end
   end
   return string.match(char, "%s")
 end
@@ -57,7 +61,7 @@ local function next_position(bufnr, row, col, forward)
   return row, col
 end
 
-local function include_surrounding_whitespace(bufnr, textobject)
+local function include_surrounding_whitespace(bufnr, textobject, selection_mode)
   local start_row, start_col, end_row, end_col = unpack(textobject)
   local extended = false
   while is_whitespace_after(bufnr, end_row, end_col) do
@@ -74,6 +78,9 @@ local function include_surrounding_whitespace(bufnr, textobject)
     start_col = next_col
     next_row, next_col = next_position(bufnr, start_row, start_col, false)
   end
+  if selection_mode == "linewise" then
+    start_row, start_col = next_position(bufnr, start_row, start_col, true)
+  end
   return { start_row, start_col, end_row, end_col }
 end
 
@@ -84,10 +91,11 @@ function M.select_textobject(query_string, keymap_mode)
   local bufnr, textobject =
     shared.textobject_at_point(query_string, nil, nil, { lookahead = lookahead, lookbehind = lookbehind })
   if textobject then
+    local selection_mode = M.detect_selection_mode(query_string, keymap_mode)
     if surrounding_whitespace then
-      textobject = include_surrounding_whitespace(bufnr, textobject)
+      textobject = include_surrounding_whitespace(bufnr, textobject, selection_mode)
     end
-    ts_utils.update_selection(bufnr, textobject, M.detect_selection_mode(query_string, keymap_mode))
+    ts_utils.update_selection(bufnr, textobject, selection_mode)
   end
 end
 

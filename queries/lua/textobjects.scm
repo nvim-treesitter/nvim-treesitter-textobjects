@@ -4,13 +4,15 @@
 
 ; call
 
+(function_call) @call.outer
+
 (function_call
   (arguments) @call.inner
-  (#match? @call.inner "^[^\\(]")) @call.outer
+  (#match? @call.inner "^[^\\(]"))
 
 (function_call
   arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
-  (#make-range! "call.inner" @_start @_end))) @call.outer
+  (#make-range! "call.inner" @_start @_end)))
 
 ; class
 

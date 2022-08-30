@@ -12,7 +12,10 @@ local function get_char_after_position(bufnr, row, col)
   if row == nil then
     return nil
   end
-  return vim.api.nvim_buf_get_text(bufnr, row, col, row, col + 1, {})[1]
+  local ok, char = pcall(vim.api.nvim_buf_get_text, bufnr, row, col, row, col + 1, {})
+  if ok then
+    return char[1]
+  end
 end
 
 local function is_whitespace_after(bufnr, row, col)

@@ -14,8 +14,27 @@ end
 function M.available_textobjects(lang)
   lang = lang or parsers.get_buf_lang()
   local parsed_queries = queries.get_query(lang, "textobjects")
-  local found_textobjects = parsed_queries and parsed_queries.captures or {}
+  if not parsed_queries then
+    return {}
+  end
+  local found_textobjects = parsed_queries.captures or {}
+  for _, p in pairs(parsed_queries.info.patterns) do
+    for _, q in ipairs(p) do
+      local query, arg1 = table.unpack(q)
+      if query == "make-range!" and not vim.tbl_contains(found_textobjects, arg1) then
+        table.insert(found_textobjects, arg1)
+      end
+    end
+  end
   return found_textobjects
+  --patterns = {
+  --[2] = { { "make-range!", "function.inner", 2, 3 } },
+  --[4] = { { "make-range!", "function.inner", 2, 3 } },
+  --[11] = { { "make-range!", "parameter.outer", 2, 12 } },
+  --[12] = { { "make-range!", "parameter.outer", 12, 3 } },
+  --[13] = { { "make-range!", "parameter.outer", 2, 12 } },
+  --[14] = { { "make-range!", "parameter.outer", 12, 3 } }
+  --}
 end
 
 function M.textobject_at_point(query_string, pos, bufnr, opts)

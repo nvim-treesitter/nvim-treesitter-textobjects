@@ -152,9 +152,11 @@ function M.attach(bufnr, lang)
       query = nil
     end
     if query then
-      vim.keymap.set({ "o", "x" }, mapping, function()
-        require("nvim-treesitter.textobjects.select").select_textobject(query)
-      end, { buffer = buf, silent = true, remap = false, desc = desc })
+      for _, mode in ipairs { "o", "x" } do
+        vim.keymap.set(mode, mapping, function()
+          require("nvim-treesitter.textobjects.select").select_textobject(query, mode)
+        end, { buffer = buf, silent = true, remap = false, desc = desc })
+      end
     end
   end
 end

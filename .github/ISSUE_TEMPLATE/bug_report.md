@@ -20,7 +20,7 @@ Steps to reproduce the behavior:
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Output of `:checkhealth nvim_treesitter`**
+**Output of `:checkhealth nvim-treesitter`**
 
 <details>
 <code>

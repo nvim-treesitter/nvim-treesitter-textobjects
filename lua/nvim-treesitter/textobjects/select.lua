@@ -152,11 +152,14 @@ function M.attach(bufnr, lang)
       query = nil
     end
     if query then
-      for _, mode in ipairs { "o", "x" } do
-        vim.keymap.set(mode, mapping, function()
-          require("nvim-treesitter.textobjects.select").select_textobject(query, mode)
-        end, { buffer = buf, silent = true, remap = false, desc = desc })
-      end
+      --- Does not currently work in visual mode
+      --vim.keymap.set({ "o", "x" }, mapping, function()
+      --require("nvim-treesitter.textobjects.select").select_textobject(query)
+      --end, { buffer = buf, silent = true, remap = false, desc = desc })
+      local cmd_o = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'o')<CR>"
+      api.nvim_buf_set_keymap(buf, "o", mapping, cmd_o, { silent = true, noremap = true, desc = desc })
+      local cmd_x = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'x')<CR>"
+      api.nvim_buf_set_keymap(buf, "x", mapping, cmd_x, { silent = true, noremap = true, desc = desc })
     end
   end
 end

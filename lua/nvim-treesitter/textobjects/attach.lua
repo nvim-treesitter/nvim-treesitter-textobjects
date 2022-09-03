@@ -11,24 +11,21 @@ function M.make_attach(normal_mode_functions, submodule)
     for _, function_call in pairs(normal_mode_functions) do
       local description = function_call:gsub("_", " ")
       for mapping, config_queries in pairs(config[function_call] or {}) do
-        if not queries.get_query(lang, "textobjects") then
-          -- not enabled
-          config_queries = nil
-        end
-        local desc
-        if type(config_queries) == "table" then
-          desc = config_queries.desc
-          config_queries = config_queries.query
-        end
-        if config_queries then
-          if not desc then
-            desc = description:gsub("^%l", string.upper) .. " " .. config_queries
+        if queries.get_query(lang, "textobjects") then
+          local desc
+          if type(config_queries) == "table" then
+            desc = config_queries.desc
+            config_queries = config_queries.query
           end
-          vim.keymap.set("n", mapping, function()
-            require("nvim-treesitter.textobjects." .. submodule)[function_call](config_queries)
-          end, { buffer = bufnr, silent = true, remap = false, desc = desc })
+          if config_queries then
+            if not desc then
+              desc = description:gsub("^%l", string.upper) .. " " .. config_queries
+            end
+            vim.keymap.set("n", mapping, function()
+              require("nvim-treesitter.textobjects." .. submodule)[function_call](config_queries)
+            end, { buffer = bufnr, silent = true, remap = false, desc = desc })
+          end
         end
-        config_queries = nil
       end
     end
   end

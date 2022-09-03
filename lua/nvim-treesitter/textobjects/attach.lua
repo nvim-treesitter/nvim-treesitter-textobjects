@@ -5,30 +5,29 @@ local M = {}
 
 function M.make_attach(normal_mode_functions, submodule)
   return function(bufnr, lang)
-    local config = configs.get_module("textobjects." .. submodule)
     lang = lang or parsers.get_buf_lang(bufnr)
+    if not queries.get_query(lang, "textobjects") then
+      return
+    end
+
+    local config = configs.get_module("textobjects." .. submodule)
 
     for _, function_call in pairs(normal_mode_functions) do
-      local description = function_call:gsub("_", " ")
-      for mapping, config_queries in pairs(config[function_call] or {}) do
-        if not queries.get_query(lang, "textobjects") then
-          -- not enabled
-          config_queries = nil
+      local function_description = function_call:gsub("_", " "):gsub("^%l", string.upper)
+      for mapping, query_metadata in pairs(config[function_call] or {}) do
+        local mapping_description, query
+
+        if type(query_metadata) == "table" then
+          query = query_metadata.query
+          mapping_description = query_metadata.desc
+        else
+          query = query_metadata
+          mapping_description = function_description .. " " .. query_metadata
         end
-        local desc
-        if type(config_queries) == "table" then
-          desc = config_queries.desc
-          config_queries = config_queries.query
-        end
-        if config_queries then
-          if not desc then
-            desc = description:gsub("^%l", string.upper) .. " " .. config_queries
-          end
-          vim.keymap.set("n", mapping, function()
-            require("nvim-treesitter.textobjects." .. submodule)[function_call](config_queries)
-          end, { buffer = bufnr, silent = true, remap = false, desc = desc })
-        end
-        config_queries = nil
+
+        vim.keymap.set("n", mapping, function()
+          require("nvim-treesitter.textobjects." .. submodule)[function_call](query)
+        end, { buffer = bufnr, silent = true, remap = false, desc = mapping_description })
       end
     end
   end

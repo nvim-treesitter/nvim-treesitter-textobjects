@@ -6,6 +6,12 @@ local ts_utils = require "nvim-treesitter.ts_utils"
 
 local M = {}
 
+if not unpack then
+  -- luacheck: push ignore 121
+  unpack = table.unpack
+  -- luacheck: pop
+end
+
 -- Convert single query string to list for backwards compatibility and the Vim commands
 function M.make_query_strings_table(query_strings)
   return type(query_strings) == "string" and { query_strings } or query_strings
@@ -20,7 +26,7 @@ function M.available_textobjects(lang)
   local found_textobjects = parsed_queries.captures or {}
   for _, p in pairs(parsed_queries.info.patterns) do
     for _, q in ipairs(p) do
-      local query, arg1 = table.unpack(q)
+      local query, arg1 = unpack(q)
       if query == "make-range!" and not vim.tbl_contains(found_textobjects, arg1) then
         table.insert(found_textobjects, arg1)
       end

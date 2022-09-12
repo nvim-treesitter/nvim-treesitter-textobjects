@@ -51,6 +51,11 @@
 
 (for body: (_) @loop.inner)
 
+; statement
+(brace_list (_) @statement.outer)
+(program (_) @statement.outer)
+
+
 ; parameter
 
 ((formal_parameters

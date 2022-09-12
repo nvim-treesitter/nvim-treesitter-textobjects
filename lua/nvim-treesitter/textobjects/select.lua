@@ -87,6 +87,14 @@ local function include_surrounding_whitespace(bufnr, textobject, selection_mode)
   return { start_row, start_col, end_row, end_col }
 end
 
+local val_or_return = function(val, opts)
+  if type(val) == "function" then
+    return val(opts)
+  else
+    return val
+  end
+end
+
 function M.select_textobject(query_string, keymap_mode)
   local lookahead = configs.get_module("textobjects.select").lookahead
   local lookbehind = configs.get_module("textobjects.select").lookbehind
@@ -95,7 +103,12 @@ function M.select_textobject(query_string, keymap_mode)
     shared.textobject_at_point(query_string, nil, nil, { lookahead = lookahead, lookbehind = lookbehind })
   if textobject then
     local selection_mode = M.detect_selection_mode(query_string, keymap_mode)
-    if surrounding_whitespace then
+    if
+      val_or_return(surrounding_whitespace, {
+        query_string = query_string,
+        selection_mode = selection_mode,
+      })
+    then
       textobject = include_surrounding_whitespace(bufnr, textobject, selection_mode)
     end
     ts_utils.update_selection(bufnr, textobject, selection_mode)
@@ -113,7 +126,14 @@ function M.detect_selection_mode(query_string, keymap_mode)
   local method = keymap_to_method[keymap_mode]
 
   local config = configs.get_module "textobjects.select"
-  local selection_mode = config.selection_modes[query_string] or "v"
+  local selection_modes = val_or_return(config.selection_modes, { query_string = query_string, method = method })
+  local selection_mode
+  if type(selection_modes) == "table" then
+    selection_mode = selection_modes[query_string] or "v"
+  else
+    selection_mode = selection_modes or "v"
+  end
+
   if method == "visual" then
     selection_mode = vim.fn.visualmode()
   elseif method == "operator-pending" then

@@ -29,6 +29,7 @@
 (comment) @comment.outer
 
 (block (_) @statement.outer)
+(module (_) @statement.outer)
 
 (call) @call.outer
 (call

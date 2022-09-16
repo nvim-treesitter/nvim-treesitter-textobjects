@@ -39,7 +39,8 @@ require'nvim-treesitter.configs'.setup {
         ["af"] = "@function.outer",
         ["if"] = "@function.inner",
         ["ac"] = "@class.outer",
-        -- you can optionally set descriptions to the mappings (used in the desc parameter of nvim_buf_set_keymap
+        -- You can optionally set descriptions to the mappings (used in the desc parameter of
+        -- nvim_buf_set_keymap) which plugins like which-key display
         ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
       },
       -- You can choose the select mode (default is charwise 'v')
@@ -108,7 +109,7 @@ require'nvim-treesitter.configs'.setup {
       set_jumps = true, -- whether to set jumps in the jumplist
       goto_next_start = {
         ["]m"] = "@function.outer",
-        ["]]"] = "@class.outer",
+        ["]]"] = { query = "@class.outer", desc = "Next class start" },
       },
       goto_next_end = {
         ["]M"] = "@function.outer",
@@ -132,8 +133,7 @@ EOF
 
 - peek_definition_code: show textobject surrounding definition as determined
   using Neovim's built-in LSP in a floating window. Press the shortcut twice
-  to enter the floating window (when https://github.com/neovim/neovim/pull/12720
-  or its successor is merged)
+  to enter the floating window.
 
 ```lua
 lua <<EOF

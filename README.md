@@ -55,7 +55,7 @@ require'nvim-treesitter.configs'.setup {
         ['@class.outer'] = '<c-v>', -- blockwise
       },
       -- If you set this to `true` (default is `false`) then any textobject is
-      -- extended to include preceding xor succeeding whitespace. Succeeding
+      -- extended to include preceding or succeeding whitespace. Succeeding
       -- whitespace has priority in order to act similarly to eg the built-in
       -- `ap`.
       --

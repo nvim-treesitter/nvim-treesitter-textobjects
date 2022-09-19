@@ -33,6 +33,17 @@ function M.make_attach(normal_mode_functions, submodule)
   end
 end
 
+local function ignore_e31(callback)
+  local ok, err = xpcall(callback, debug.traceback)
+  if ok then
+    return
+  end
+  if string.find(err, "E31: No such mapping", 1, true) then
+    return
+  end
+  error(err)
+end
+
 function M.make_detach(normal_mode_functions, submodule)
   return function(bufnr)
     local config = configs.get_module("textobjects." .. submodule)
@@ -43,7 +54,9 @@ function M.make_detach(normal_mode_functions, submodule)
         query = nil
       end
       if query then
-        vim.keymap.del({ "o", "x" }, mapping, { buffer = bufnr })
+        ignore_e31(function()
+          vim.keymap.del({ "o", "x" }, mapping, { buffer = bufnr })
+        end)
       end
     end
     for _, function_call in pairs(normal_mode_functions) do
@@ -54,7 +67,9 @@ function M.make_detach(normal_mode_functions, submodule)
           query = nil
         end
         if query then
-          vim.keymap.del("n", mapping, { buffer = bufnr })
+          ignore_e31(function()
+            vim.keymap.del("n", mapping, { buffer = bufnr })
+          end)
         end
       end
     end

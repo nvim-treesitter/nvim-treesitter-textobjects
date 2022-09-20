@@ -1,54 +1,52 @@
 ;; functions
 (function_definition
   body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "function.inner" @_start @_end))) @function.outer
+  (#make-range! "function.inner" @_start @_end)))
+(function_definition) @function.outer
 
 ;; methods
 (method_declaration
   body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "function.inner" @_start @_end))) @function.outer
+  (#make-range! "function.inner" @_start @_end)))
+(method_declaration) @function.outer
 
 ;; classes
 (class_declaration
-  body: (declaration_list) @class.inner)
-
-(
-  (comment) @_class_comment
-  (class_declaration) @_class_body
-  (#make-range! "class.outer" @_class_comment @_class_body)
-)
+  body: (declaration_list . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "class.inner" @_start @_end)))
+(class_declaration) @class.outer
 
 ;; loops
 (for_statement
   (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "loop.inner" @_start @_end))
-) @loop.outer
+  (#make-range! "loop.inner" @_start @_end)))
+(for_statement) @loop.outer
 
 (foreach_statement
   body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "loop.inner" @_start @_end))
-) @loop.outer
+  (#make-range! "loop.inner" @_start @_end)))
+(foreach_statement) @loop.outer
 
 (while_statement
   body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "loop.inner" @_start @_end))
-) @loop.outer
+  (#make-range! "loop.inner" @_start @_end)))
+(while_statement) @loop.outer
 
 (do_statement
   body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "loop.inner" @_start @_end))
-) @loop.outer
+  (#make-range! "loop.inner" @_start @_end)))
+(do_statement) @loop.outer
 
 ;; conditionals
 (switch_statement
   body: (switch_block . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "conditional.inner" @_start @_end))
-) @conditional.outer
+  (#make-range! "conditional.inner" @_start @_end)))
+(switch_statement) @conditional.outer
 
 (if_statement
   body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "conditional.inner" @_start @_end))
-) @conditional.outer
+  (#make-range! "conditional.inner" @_start @_end)))
+(if_statement) @conditional.outer
 
 (else_clause
   body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"

@@ -21,20 +21,41 @@ Supported options:
 - lookahead: `true` or `false`, whether or not to look ahead for the textobject
 - keymaps: map of keymaps to a tree-sitter query
   (`(function_definition) @function`) or capture group (`@function.inner`).
+- selection_modes: map of capture group to `v`(charwise), `V`(linewise), or `<c-v>`(blockwise),
+  choose a selection mode per capture, default is `v`(charwise).
+- include_surrounding_whitespace: `true` or `false`, when `true` textobjects
+  are extended to include preceding or succeeding whitespace, defaults is
+  `false`.
 
 >
   lua <<EOF
   require'nvim-treesitter.configs'.setup {
     textobjects = {
       select = {
-        enable = true,
-        keymaps = {
-          -- You can use the capture groups defined in textobjects.scm
-          ["af"] = "@function.outer",
-          ["if"] = "@function.inner",
-          ["ac"] = "@class.outer",
-          ["ic"] = "@class.inner",
-        },
+	enable = true,
+
+	-- Automatically jump forward to textobj, similar to targets.vim
+	lookahead = true,
+
+	keymaps = {
+	  -- You can use the capture groups defined in textobjects.scm
+	  ["af"] = "@function.outer",
+	  ["if"] = "@function.inner",
+	  ["ac"] = "@class.outer",
+	  -- you can optionally set descriptions to the mappings (used in the desc parameter of nvim_buf_set_keymap
+	  ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
+	},
+	-- You can choose the select mode (default is charwise 'v')
+	selection_modes = {
+	  ['@parameter.outer'] = 'v', -- charwise
+	  ['@function.outer'] = 'V', -- linewise
+	  ['@class.outer'] = '<c-v>', -- blockwise
+	},
+	-- If you set this to `true` (default is `false`) then any textobject is
+	-- extended to include preceding or succeeding whitespace. Succeeding
+	-- whitespace has priority in order to act similarly to eg the built-in
+	-- `ap`.
+	include_surrounding_whitespace = true,
       },
     },
   }
@@ -63,10 +84,10 @@ Supported options:
       swap = {
         enable = true,
         swap_next = {
-          ["<leader>a"] = {"@parameter.inner"},
+          ["<leader>a"] = "@parameter.inner",
         },
         swap_previous = {
-          ["<leader>A"] = {"@parameter.inner"},
+          ["<leader>A"] = "@parameter.inner",
         },
       },
     },
@@ -87,7 +108,8 @@ Supported options:
 - enable: `true` or `false`.
 - disable: list of languages.
 - set_jumps: whether to set jumps in the jumplist
-- goto_next_start: map of keymaps to a list of tree-sitter capture groups (`{@function.outer, @class.outer}`). The one that starts closest to the cursor will be chosen, preferring row-proximity to column-proximity.
+- goto_next_start: map of keymaps to a list of tree-sitter capture groups (`{@function.outer, @class.outer}`).
+  The one that starts closest to the cursor will be chosen, preferring row-proximity to column-proximity.
 - goto_next_end: same as goto_next_start, but it jumps to the start of
   the text object.
 - goto_previous_start: same as goto_next_start, but it jumps to the previous
@@ -100,20 +122,24 @@ Supported options:
   require'nvim-treesitter.configs'.setup {
     textobjects = {
       move = {
-        enable = true,
-        set_jumps = true, -- whether to set jumps in the jumplist
-        goto_next_start = {
-          ["]m"] = {"@function.outer", "@class.outer"},
-        },
-        goto_next_end = {
-          ["]M"] = {"@function.outer", "@class.outer"},
-        },
-        goto_previous_start = {
-          ["[m"] = {"@function.outer", "@class.outer"},
-        },
-        goto_previous_end = {
-          ["[M"] = {"@function.outer", "@class.outer"},
-        },
+	enable = true,
+	set_jumps = true, -- whether to set jumps in the jumplist
+	goto_next_start = {
+	  ["]m"] = "@function.outer",
+	  ["]]"] = "@class.outer",
+	},
+	goto_next_end = {
+	  ["]M"] = "@function.outer",
+	  ["]["] = "@class.outer",
+	},
+	goto_previous_start = {
+	  ["[m"] = "@function.outer",
+	  ["[["] = "@class.outer",
+	},
+	goto_previous_end = {
+	  ["[M"] = "@function.outer",
+	  ["[]"] = "@class.outer",
+	},
       },
     },
   }

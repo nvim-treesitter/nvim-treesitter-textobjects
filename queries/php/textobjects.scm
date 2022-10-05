@@ -82,3 +82,17 @@
 
 ;; comments
 (comment) @comment.outer
+
+;; call
+(function_call_expression) @call.outer
+
+(member_call_expression) @call.outer
+
+(function_call_expression
+  arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))
+
+(member_call_expression
+  arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))
+

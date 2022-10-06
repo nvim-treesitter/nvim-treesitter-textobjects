@@ -96,3 +96,32 @@
   arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
   (#make-range! "call.inner" @_start @_end)))
 
+;; statement
+[
+  (expression_statement)
+  (declare_statement)
+  (return_statement)
+  (namespace_use_declaration)
+  (namespace_definition)
+  (if_statement)
+  (empty_statement)
+  (switch_statement)
+  (while_statement)
+  (do_statement)
+  (for_statement)
+  (foreach_statement)
+  (goto_statement)
+  (continue_statement)
+  (break_statement)
+  (try_statement)
+  (echo_statement)
+  (unset_statement)
+  (const_declaration)
+  (function_definition)
+  (class_declaration)
+  (interface_declaration)
+  (trait_declaration)
+  (enum_declaration)
+  (global_declaration)
+  (function_static_declaration)
+] @statement.outer

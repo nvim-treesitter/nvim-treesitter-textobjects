@@ -120,18 +120,26 @@ function M.textobject_at_point(query_string, pos, bufnr, opts)
     end
   end
 
+  local get_range = function(match)
+    if match.metadata ~= nil then
+      return match.metadata.range
+    end
+
+    return { match.node:range() }
+  end
+
   if smallest_range then
     if smallest_range.start then
-      local start_range = { smallest_range.start.node:range() }
-      local node_range = { smallest_range.node:range() }
+      local start_range = get_range(smallest_range.start)
+      local node_range = get_range(smallest_range)
       return bufnr, { start_range[1], start_range[2], node_range[3], node_range[4] }, smallest_range.node
     else
-      return bufnr, { smallest_range.node:range() }, smallest_range.node
+      return bufnr, get_range(smallest_range), smallest_range.node
     end
   elseif lookahead_largest_range then
-    return bufnr, { lookahead_largest_range.node:range() }, lookahead_largest_range.node
+    return bufnr, get_range(lookahead_largest_range), lookahead_largest_range.node
   elseif lookbehind_largest_range then
-    return bufnr, { lookbehind_largest_range.node:range() }, lookbehind_largest_range.node
+    return bufnr, get_range(lookbehind_largest_range), lookbehind_largest_range.node
   end
 end
 

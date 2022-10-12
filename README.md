@@ -151,7 +151,7 @@ and use it in any of the textobject modules, for example:
 
 ```scm
 -- after/queries/python/textobjects.scm
-
+; extends
 (function_definition) @custom-capture
 ```
 

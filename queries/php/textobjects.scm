@@ -4,6 +4,11 @@
   (#make-range! "function.inner" @_start @_end)))
 (function_definition) @function.outer
 
+(anonymous_function_creation_expression
+  body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "function.inner" @_start @_end)))
+(anonymous_function_creation_expression) @function.outer
+
 ;; methods
 (method_declaration
   body: (compound_statement . "{" . (_) @_start @_end (_)? @_end . "}"

@@ -48,7 +48,9 @@ function M.preview_location(location, context)
   end
   local contents = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 1, false)
   local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
-  return vim.lsp.util.open_floating_preview(contents, filetype, opts)
+  local preview_buf, preview_win = vim.lsp.util.open_floating_preview(contents, filetype, opts)
+  vim.api.nvim_buf_set_option(preview_buf, "filetype", filetype)
+  return preview_buf, preview_win
 end
 
 function M.make_preview_location_callback(textobject, context)

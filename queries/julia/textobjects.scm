@@ -1,38 +1,20 @@
-; Blocks
-((compound_expression
+;; Blocks
+((compound_statement
   . (_)? @_start
   (_) @_end .)
 (#make-range! "block.inner" @_start @_end)) @block.outer
+
+((quote_statement
+  . (_)? @_start
+  (_) @_end .)
+(#make-range! "block.inner" @_start @_end)) @block.outer
+
 ((let_statement
   . (_)? @_start
   (_) @_end .)
 (#make-range! "block.inner" @_start @_end)) @block.outer
 
-; Calls
-(call_expression) @call.outer
-(call_expression
-  (argument_list . "(" . (_) @_start (_)? @_end . ")"
-  (#make-range! "call.inner" @_start @_end)))
-
-; Objects (class)
-((struct_definition
-  name: (_)
-  . (_)? @_start
-  (_) @_end .
-  "end"
-)(#make-range! "class.inner" @_start @_end)) @class.outer
-
-((struct_definition
-  name: (_) type_parameters: (_)
-  . (_)? @_start
-  (_) @_end .
-  "end"
-)(#make-range! "class.inner" @_start @_end)) @class.outer
-
-; Comments
-[(line_comment) (block_comment)] @comment.outer
-
-; Conditionals
+;; Conditionals
 ((if_statement condition: (_)
     . (_)? @_start
     .
@@ -48,31 +30,7 @@
   (_) @_end .)
 (#make-range! "conditional.inner" @_start @_end))
 
-; Functions
-(assignment_expression 
-  (call_expression (_)) 
-  (_) @function.inner) @function.outer
-
-(function_expression 
-  [ (identifier) (parameter_list) ] 
-  "->" 
-  (_) @function.inner) @function.outer
-
-((macro_definition
-  name: (_) parameters: (_)
-  . (_)? @_start
-  (_) @_end .
-  "end"
-)(#make-range! "function.inner" @_start @_end)) @function.outer
-
-((function_definition
-  name: (_) parameters: (_)
-  . (_)? @_start
-  (_) @_end .
-  "end"
-)(#make-range! "function.inner" @_start @_end)) @function.outer
-
-; Loops
+;; Loops
 (for_statement
  . (_)? @_start
  (_) @_end .
@@ -84,13 +42,59 @@
  (#make-range! "loop.inner" @_start @_end)
   "end") @loop.outer
 
-; Parameters
-((subscript_expression
+;; Type definitions
+((struct_definition
+  name: (_)
+  . (_)? @_start
+  (_) @_end .
+  "end"
+)(#make-range! "class.inner" @_start @_end)) @class.outer
+
+((struct_definition
+  name: (_) type_parameters: (_)
+  . (_)? @_start
+  (_) @_end .
+  "end"
+)(#make-range! "class.inner" @_start @_end)) @class.outer
+
+
+;; Function definitions
+((function_definition
+  name: (_) parameters: (_)
+  . (_)? @_start
+  (_) @_end .
+  "end"
+)(#make-range! "function.inner" @_start @_end)) @function.outer
+
+(short_function_definition
+  name: (_) parameters: (_)
+  (_) @function.inner) @function.outer
+
+(function_expression 
+  [ (identifier) (parameter_list) ] 
+  "->"
+  (_) @function.inner) @function.outer
+
+((macro_definition
+  name: (_) parameters: (_)
+  . (_)? @_start
+  (_) @_end .
+  "end"
+)(#make-range! "function.inner" @_start @_end)) @function.outer
+
+;; Calls
+(call_expression) @call.outer
+(call_expression
+  (argument_list . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))
+
+;; Parameters
+((index_expression
     "," @_start . 
     (_) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner)) 
 
-((subscript_expression
+((index_expression
     . (_) @parameter.inner 
     . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end)) 
@@ -114,3 +118,6 @@
     (_) @parameter.inner
     . [","] @_end)
 (#make-range! "parameter.outer" @parameter.inner @_end))
+
+; Comments
+[(line_comment) (block_comment)] @comment.outer

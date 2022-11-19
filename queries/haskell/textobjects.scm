@@ -12,3 +12,10 @@
 (instance (where)? . _ @class.inner) @class.outer
 
 (comment) @comment.outer
+
+(exp_cond) @conditional.outer
+
+(exp_cond
+  (_) @conditional.inner
+  ) 
+

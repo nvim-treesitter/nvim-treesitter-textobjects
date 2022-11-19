@@ -39,3 +39,30 @@
   (_)
   (_) @loop.inner
 ) @loop.outer
+
+;; e.g. func x
+(function
+  (patterns
+    (_) @parameter.outer
+  )
+)
+;; e.g. func mb@(Just x)
+(function
+  (patterns
+    (pat_parens
+      (pat_apply
+      (_) @parameter.inner
+      )
+    )
+  )
+)
+(signature
+  (fun
+    (type_apply) @parameter.inner
+  )
+)
+(signature
+  (fun
+    (type_name) @parameter.inner
+  )
+)

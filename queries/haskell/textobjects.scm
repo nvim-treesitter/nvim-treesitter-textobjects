@@ -2,6 +2,11 @@
  (exp_apply . (exp_name) . (_) @_start . (_)* . (_)? @_end .)
  (#make-range! "call.inner" @_start @_end)
 ) @call.outer
+(exp_infix 
+(_)
+(variable)
+(_)
+) @call.outer
 
 (function rhs: (_) @function.inner) @function.outer
 ;; also treat function signature as @function.outer
@@ -50,8 +55,15 @@
 (function
   (patterns
     (pat_parens
-      (pat_apply
       (_) @parameter.inner
+    )
+  )
+)
+(function
+  (patterns
+    (pat_as
+      (pat_parens
+        (_) @parameter.inner
       )
     )
   )
@@ -65,4 +77,7 @@
   (fun
     (type_name) @parameter.inner
   )
+)
+(signature
+  (type_name) @parameter.inner
 )

@@ -28,7 +28,7 @@
 (exp_infix
   (exp_apply
     (exp_name)@_name
-    (#any-of? @_name "for" "forM" "forM")
+    (#any-of? @_name "for" "for_" "forM" "forM_")
   ) 
   (operator) @_op
   (#eq? @_op "$")
@@ -40,7 +40,7 @@
 ;; e.g. forM [1..10] print
 (exp_apply
   (exp_name)@_name
-  (#any-of? @_name "for" "forM" "forM")
+  (#any-of? @_name "for" "for_" "forM" "forM_")
   (_)
   (_) @loop.inner
 ) @loop.outer

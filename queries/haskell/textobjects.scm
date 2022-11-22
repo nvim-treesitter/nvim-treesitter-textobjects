@@ -69,6 +69,20 @@
   )
 )
 (signature
+  (context
+    (fun
+      (type_apply) @parameter.inner
+    ) 
+  )
+)
+(signature
+  (context
+    (fun
+      (type_name) @parameter.inner
+    ) 
+  )
+)
+(signature
   (fun
     (type_apply) @parameter.inner
   )
@@ -77,6 +91,9 @@
   (fun
     (type_name) @parameter.inner
   )
+)
+(signature
+  (type_apply) @parameter.inner
 )
 (signature
   (type_name) @parameter.inner

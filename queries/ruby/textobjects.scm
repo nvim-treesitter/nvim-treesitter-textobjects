@@ -37,3 +37,6 @@
   (lambda_parameters)
   (argument_list)
 ] @parameter.outer
+
+; @comment
+(comment) @comment.outer

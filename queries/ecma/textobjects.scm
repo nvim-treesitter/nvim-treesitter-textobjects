@@ -99,3 +99,6 @@
 
 ;; comment
 (comment) @comment.outer
+
+;; regex
+(regex (regex_pattern) @regex.inner) @regex.outer

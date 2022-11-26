@@ -18,3 +18,7 @@
 
 (_ (body) @block.inner) @block.outer
 (body (_) @statement.outer)
+
+((syntax_statement
+   (pattern) @regex.inner @regex.outer)
+ (#offset! @regex.outer 0 -1 0 1))

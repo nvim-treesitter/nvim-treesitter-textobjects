@@ -21,6 +21,8 @@ Each capture group can be declared as `inner` or `outer`.
 @block.outer
 @parameter.inner
 @parameter.outer
+@regex.inner
+@regex.outer
 
 # For LaTeX frames
 @frame.inner

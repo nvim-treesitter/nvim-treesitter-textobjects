@@ -121,3 +121,9 @@
 
 ; Comments
 [(line_comment) (block_comment)] @comment.outer
+
+; Regex
+((prefixed_string_literal
+   prefix: (identifier) @_prefix) @regex.inner @regex.outer
+ (#eq? @_prefix "r")
+ (#offset! @regex.inner 0 2 0 -1))

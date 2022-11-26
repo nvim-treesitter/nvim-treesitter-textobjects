@@ -40,3 +40,6 @@
 
 ; @comment
 (comment) @comment.outer
+
+; @regex
+(regex (string_content) @regex.inner) @regex.outer

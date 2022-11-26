@@ -15,3 +15,5 @@
   (_) @loop.inner ) @loop.outer
 
 (comment) @comment.outer
+
+(regex) @regex.inner

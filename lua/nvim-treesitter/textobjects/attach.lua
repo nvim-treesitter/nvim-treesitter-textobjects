@@ -25,7 +25,7 @@ function M.make_attach(normal_mode_functions, submodule)
           mapping_description = function_description .. " " .. query_metadata
         end
 
-        vim.keymap.set("n", mapping, function()
+        vim.keymap.set({ "n", "o", "x" }, mapping, function()
           require("nvim-treesitter.textobjects." .. submodule)[function_call](query)
         end, { buffer = bufnr, silent = true, remap = false, desc = mapping_description })
       end
@@ -54,7 +54,7 @@ function M.make_detach(normal_mode_functions, submodule)
           query = nil
         end
         if query then
-          vim.keymap.del("n", mapping, { buffer = bufnr })
+          vim.keymap.del({ "n", "o", "x" }, mapping, { buffer = bufnr })
         end
       end
     end

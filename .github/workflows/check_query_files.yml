@@ -21,7 +21,7 @@ jobs:
         env:
           NVIM_TAG: stable
         run: |
-          sudo apt-get update
+          sudo apt-get update && sudo apt-get install libfuse2
           sudo add-apt-repository universe
           wget https://github.com/neovim/neovim/releases/download/${NVIM_TAG}/nvim.appimage
           chmod u+x nvim.appimage

@@ -6,7 +6,10 @@ local M = {}
 
 local floating_win
 
-local normal_mode_functions = {
+-- peeking is not interruptive so it is okay to use in visual mode.
+-- in fact, visual mode peeking is very helpful because you may not want
+-- to jump to the definition.
+local nx_mode_functions = {
   "peek_definition_code",
 }
 
@@ -107,8 +110,8 @@ function M.peek_definition_code(textobject, lsp_request, context)
   end
 end
 
-M.attach = attach.make_attach(normal_mode_functions, "lsp_interop")
-M.detach = attach.make_detach(normal_mode_functions, "lsp_interop")
+M.attach = attach.make_attach(nx_mode_functions, "lsp_interop", { "n", "x" })
+M.detach = attach.make_detach(nx_mode_functions, "lsp_interop", { "n", "x" })
 M.commands = {
   TSTextobjectPeekDefinitionCode = {
     run = M.peek_definition_code,

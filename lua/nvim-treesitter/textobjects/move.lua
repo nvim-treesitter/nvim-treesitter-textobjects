@@ -82,10 +82,10 @@ M.goto_previous_end = function(query_strings)
   move(query_strings, not "forward", not "start")
 end
 
-local normal_mode_functions = { "goto_next_start", "goto_next_end", "goto_previous_start", "goto_previous_end" }
+local nxo_mode_functions = { "goto_next_start", "goto_next_end", "goto_previous_start", "goto_previous_end" }
 
-M.attach = attach.make_attach(normal_mode_functions, "move")
-M.detach = attach.make_detach(normal_mode_functions, "move")
+M.attach = attach.make_attach(nxo_mode_functions, "move", { "n", "x", "o" })
+M.detach = attach.make_detach(nxo_mode_functions, "move", { "n", "x", "o" })
 
 M.commands = {
   TSTextobjectGotoNextStart = {

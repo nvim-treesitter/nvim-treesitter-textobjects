@@ -3,7 +3,8 @@ local parsers = require "nvim-treesitter.parsers"
 local queries = require "nvim-treesitter.query"
 local M = {}
 
-function M.make_attach(normal_mode_functions, submodule)
+function M.make_attach(normal_mode_functions, submodule, keymap_modes)
+  keymap_modes = keymap_modes or "n"
   return function(bufnr, lang)
     lang = lang or parsers.get_buf_lang(bufnr)
     if not queries.get_query(lang, "textobjects") then
@@ -25,7 +26,7 @@ function M.make_attach(normal_mode_functions, submodule)
           mapping_description = function_description .. " " .. query_metadata
         end
 
-        vim.keymap.set({ "n", "o", "x" }, mapping, function()
+        vim.keymap.set(keymap_modes, mapping, function()
           require("nvim-treesitter.textobjects." .. submodule)[function_call](query)
         end, { buffer = bufnr, silent = true, remap = false, desc = mapping_description })
       end
@@ -33,7 +34,8 @@ function M.make_attach(normal_mode_functions, submodule)
   end
 end
 
-function M.make_detach(normal_mode_functions, submodule)
+function M.make_detach(normal_mode_functions, submodule, keymap_modes)
+  keymap_modes = keymap_modes or "n"
   return function(bufnr)
     local config = configs.get_module("textobjects." .. submodule)
     local lang = parsers.get_buf_lang(bufnr)
@@ -54,7 +56,7 @@ function M.make_detach(normal_mode_functions, submodule)
           query = nil
         end
         if query then
-          vim.keymap.del({ "n", "o", "x" }, mapping, { buffer = bufnr })
+          vim.keymap.del(keymap_modes, mapping, { buffer = bufnr })
         end
       end
     end

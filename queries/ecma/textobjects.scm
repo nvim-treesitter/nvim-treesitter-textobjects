@@ -38,6 +38,9 @@
 (for_in_statement
   body: (_)? @loop.inner) @loop.outer
 
+(for_statement
+  body: (_)? @loop.inner) @loop.outer
+
 (while_statement
   body: (_)? @loop.inner) @loop.outer
 

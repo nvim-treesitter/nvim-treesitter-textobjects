@@ -51,7 +51,8 @@
 )(#make-range! "class.inner" @_start @_end)) @class.outer
 
 ((struct_definition
-  name: (_) type_parameters: (_)
+  name: (_)
+  (type_parameter_list)*
   . (_)? @_start
   (_) @_end .
   "end"

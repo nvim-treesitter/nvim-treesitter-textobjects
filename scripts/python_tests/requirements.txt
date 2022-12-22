@@ -1,0 +1,2 @@
+pynvim==0.4.3
+coloredlogs==15.0.1

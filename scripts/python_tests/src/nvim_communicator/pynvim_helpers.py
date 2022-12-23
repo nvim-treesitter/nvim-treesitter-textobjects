@@ -49,6 +49,7 @@ def init_nvim_communicator(nvim, lua_file_paths):
         logger.info(f"Communicating with {nvim.channel_id = }")
         nvim.vars['nvim_communicator_channel_id'] = nvim.channel_id
         nvim.vars['nvim_communicator_buffer_id'] = buffer_id
+        nvim.vars['nvim_communicator_num_pending_msgs'] = 0
         # Define helper functions
         # Must come at the beginning
         for lua_file_path in lua_file_paths:
@@ -62,6 +63,7 @@ def init_nvim_communicator(nvim, lua_file_paths):
         # Already initialised, but exited once
         nvim.vars['nvim_communicator_channel_id'] = nvim.channel_id
         nvim.vars['nvim_communicator_buffer_id'] = buffer_id
+        nvim.vars['nvim_communicator_num_pending_msgs'] = 0
     else:
         logger.error("Communicator already running on another side.")
         raise NvimInitError("Communicator already running on another side.")

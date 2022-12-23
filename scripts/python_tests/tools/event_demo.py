@@ -5,22 +5,29 @@ import logging
 import os
 from pathlib import Path
 import sys
+import time
 
 import coloredlogs
+import requests
 
 from nvim_communicator import pynvim_helpers
-
+from nvim_communicator import set_cursor, receive_all_pending_messages
 logger = logging.getLogger(__name__)
 SOURCE_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
 LUA_DIR = SOURCE_DIR / '..' / 'lua'
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description="Get events as you use nvim. Try typing in insert mode, moving around, visual mode enter and leave etc.",
+    parser = argparse.ArgumentParser(description="Demo of using a sample code on the internet, performing some actions and printing events."
+                                         "Run nvim with `--clean --listen localhost:28905` to use this script.",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--nvim_addr", default = '127.0.0.1', help="")
     parser.add_argument("--nvim_port", default = 28905, help="")
     parser.add_argument("--socket_path", help="Specify this if you want to communicate with Neovim over a socket (file) instead of TCP.")
+    parser.add_argument("--packpath", default = "~/.local/share/nvim/site", help="Path to search packages. "
+                            "The packages should be located at `pack/*/opt/nvim-treesitter` and "
+                            "`pack/*/opt/nvim-treesitter-textobjects`. "
+                            "The latter should be a symlink of this repo.")
     return parser
 
 
@@ -34,7 +41,6 @@ def main():
     logger.info("nvim port: %s", args.nvim_port)
     logger.info("socket path: %s", args.socket_path)
 
-
     try:
         if args.socket_path is not None:
             nvim = pynvim_helpers.wait_until_attached_socket(args.socket_path, timeout = 100)
@@ -46,6 +52,26 @@ def main():
 
 
     try:
+        # This is the path to the plugins that will be loaded into nvim.
+        nvim.command(f"set packpath+={args.packpath}")
+        nvim.command("packadd nvim-treesitter")
+        nvim.command("packadd nvim-treesitter-textobjects")
+
+        nvim.command("TSUpdate")
+
+        # Read file from URL
+        response = requests.get('https://raw.githubusercontent.com/pytorch/pytorch/fc4acd4425ca0896ca1c4f0a8bd7e22a51e94731/torch/nn/modules/loss.py')
+        content = response.text
+        content = content.split('\n')
+
+        # This will modify the entire buffer
+        nvim.current.buffer[:] = content
+        nvim.command('set filetype=python')
+
+        # Better cursor visualisation
+        nvim.command('set cursorline')
+        nvim.command('set cursorcolumn')
+
         pynvim_helpers.init_nvim_communicator(nvim, [
                                                   LUA_DIR / 'treesitter_init.lua',
                                                   LUA_DIR / 'helpers.lua',
@@ -57,42 +83,38 @@ def main():
                                                   LUA_DIR / 'autocmd_vimleave.lua',
                                               ])
 
-        # Start event loop
-        while True:
-            event = nvim.next_message()
+        logger.info('Select the first function')
+        nvim.feedkeys(nvim.replace_termcodes('<esc>', True, True, True))
+        #nvim.feedkeys('viw')
+        nvim.command('normal vam')
+
+        # Print all messages so far.
+        # WARNING: do not use nvim.next_message() as it will lose track of how many messages have been received.
+        # We need that info in order to receive all messages without having to wait and add timeout.
+        events = receive_all_pending_messages(nvim)
+        for event in events:
             logger.info(f'Event from nvim: {event}')
 
-            if event is None:
-                logger.error("Received event=None")
-                break
+        # To visually show what's going on, we sleep for 2 seconds.
+        time.sleep(2)
+        logger.info('Print selection area with visual_leave event')
+        nvim.feedkeys(nvim.replace_termcodes('<esc>', True, True, True))
+        events = receive_all_pending_messages(nvim)
+        for event in events:
+            logger.info(f'Event from nvim: {event}')
 
-            if event[0] != 'notification':
-                logger.error("Received event[0] != 'notification'")
-                logger.error(event[0])
-                break
-            else:
-                if event[1] == 'on_byte_remove':
-                    (start_row, start_col, byte_offset,
-                     old_end_row, old_end_col, old_end_byte_length,
-                    ) = event[2]
-                elif event[1] == 'on_byte':
-                    (changed_bytes, start_row, start_col, byte_offset,
-                     new_end_row, new_end_col, new_end_byte_length) = event[2]
-                elif event[1] == 'CursorMoved':
-                    cursor_pos_row, cursor_pos_col = event[2]
-                    # Grab visual range
-                elif event[1] == 'CursorMovedI':
-                    cursor_pos_row, cursor_pos_col = event[2]
-                elif event[1] == 'visual_enter':
-                    old_mode, new_mode = event[2]
-                elif event[1] == 'visual_leave':
-                    old_mode, new_mode, start_row, start_col, end_row, end_col = event[2]
-                elif event[1] == 'grab_entire_buf':
-                    buf = event[2][0]
-                    print(buf)
-                elif event[1] == 'VimLeave':
-                    logger.info("Nvim closed. Exiting")
-                    break
+        time.sleep(2)
+        logger.info('Move to the first function argument and remove to the end of the class')
+        set_cursor(nvim, 3, 2)
+        time.sleep(2)
+        nvim.feedkeys(']m')
+        time.sleep(2)
+        nvim.feedkeys(']a')
+        time.sleep(2)
+        nvim.feedkeys('dv][')
+        events = receive_all_pending_messages(nvim)
+        for event in events:
+            logger.info(f'Event from nvim: {event}')
 
     except Exception as e:
         logger.exception("Exception occurred")

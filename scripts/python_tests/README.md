@@ -25,3 +25,7 @@ also add `nvim-treesitter` to `~/.local/share/nvim/site/pack/tests/opt/nvim-tree
 4. Launch `tools/event_playground.py` and move around the vim file to see what events you can receive.
 5. Once you saw it working, run `pytest`. It will essentially do the same thing. It is just a template for now, but we need to make more tests.
   - The coverage report is reporting test coverage of this python test program, not the treesitter-textobjects. You can ignore this report.
+
+
+## Note
+Test templated follows [this mCoding YouTube](https://youtu.be/DhUpxWjOhME).

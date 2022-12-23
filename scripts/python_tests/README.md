@@ -7,12 +7,16 @@ It uses pynvim to communicate with neovim, executing lua scripts or input keys a
 
 ## Installation
 
+If using conda,  
 ```bash
 pip install -e .						# requirements for running tools
 pip install -r requirements_dev.txt		# requirements for running tests
 ```
 
-You can bypass installing and just run `tox` (`pip install tox` still required) if all you want is to run tests. 
+If running on the system python, add `--user`.
+
+You can bypass installing and just run `tox` if all you want is to run tests.  
+You still need to `pip install tox` and follow "Using the demo - 1." Add symlink of the plugins.
 
 ## Using the demo
 

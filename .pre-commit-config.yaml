@@ -3,3 +3,9 @@ repos:
   rev: v0.15.3
   hooks:
     - id: stylua-github
+
+- repo: https://github.com/psf/black
+  rev: 22.12.0
+  hooks:
+    - id: black
+      args: [--safe]

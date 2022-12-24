@@ -162,9 +162,10 @@ function M.attach(bufnr, lang)
       query = nil
     end
     if query then
-      vim.keymap.set({ "o", "x" }, mapping, function()
-        require("nvim-treesitter.textobjects.select").select_textobject(query)
-      end, { buffer = buf, silent = true, remap = false, desc = desc })
+      local cmd_o = "<cmd>lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'o')<CR>"
+      local cmd_x = "<cmd>lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'x')<CR>"
+      vim.keymap.set({ "o" }, mapping, cmd_o, { buffer = buf, silent = true, remap = false, desc = desc })
+      vim.keymap.set({ "x" }, mapping, cmd_x, { buffer = buf, silent = true, remap = false, desc = desc })
     end
   end
 end

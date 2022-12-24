@@ -1,7 +1,6 @@
-
 def get_visual_range(nvim, input_keys):
     """
-    Go to normal mode, 
+    Go to normal mode,
     Select the text object using the key bindings,
     Return the range of the text object,
 
@@ -9,4 +8,3 @@ def get_visual_range(nvim, input_keys):
     Do this by letting pynvim instance listens to `on_byte` event. It should not be triggered.
     """
     pass
-

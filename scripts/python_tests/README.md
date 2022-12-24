@@ -1,5 +1,7 @@
 # Nvim_communicator Python Package
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 This project is made for testing neovim plugins, specifically focussing on Nvim-treesitter-textobjects for now.
 
 It uses pynvim to communicate with neovim, executing lua scripts or input keys and then return the results.

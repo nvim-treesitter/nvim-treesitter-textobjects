@@ -134,24 +134,14 @@ function M.detect_selection_mode(query_string, keymap_mode)
     selection_mode = selection_modes or "v"
   end
 
-  if method == "visual" then
-    selection_mode = vim.fn.visualmode()
-  elseif method == "operator-pending" then
-    local ctrl_v = vim.api.nvim_replace_termcodes("<c-v>", true, true, true)
-    local t = {
-      nov = "v",
-      noV = "V",
-      ["no" .. ctrl_v] = "<c-v>",
-    }
-    selection_mode = t[vim.fn.mode(1)] or selection_mode
-  end
+  -- According to "mode()" mapping, if we are in operator pending mode or visual mode,
+  -- then last char is {v,V,<C-v>}, exept for "no", which is "o", in which case we honor
+  -- last set `selection_mode`
+  local visual_mode = vim.fn.mode(1)
+  visual_mode = visual_mode:sub(#visual_mode)
+  selection_mode = visual_mode == "o" and selection_mode or visual_mode
 
-  local t = {
-    v = "charwise",
-    V = "linewise",
-    ["<c-v>"] = "blockwise",
-  }
-  return t[selection_mode]
+  return selection_mode
 end
 
 function M.attach(bufnr, lang)
@@ -172,14 +162,10 @@ function M.attach(bufnr, lang)
       query = nil
     end
     if query then
-      --- Does not currently work in visual mode
-      --vim.keymap.set({ "o", "x" }, mapping, function()
-      --require("nvim-treesitter.textobjects.select").select_textobject(query)
-      --end, { buffer = buf, silent = true, remap = false, desc = desc })
-      local cmd_o = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'o')<CR>"
-      api.nvim_buf_set_keymap(buf, "o", mapping, cmd_o, { silent = true, noremap = true, desc = desc })
-      local cmd_x = ":lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'x')<CR>"
-      api.nvim_buf_set_keymap(buf, "x", mapping, cmd_x, { silent = true, noremap = true, desc = desc })
+      local cmd_o = "<cmd>lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'o')<CR>"
+      local cmd_x = "<cmd>lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'x')<CR>"
+      vim.keymap.set({ "o" }, mapping, cmd_o, { buffer = buf, silent = true, remap = false, desc = desc })
+      vim.keymap.set({ "x" }, mapping, cmd_x, { buffer = buf, silent = true, remap = false, desc = desc })
     end
   end
 end

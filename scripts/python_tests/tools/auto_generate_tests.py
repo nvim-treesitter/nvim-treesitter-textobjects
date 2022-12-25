@@ -12,11 +12,43 @@ import coloredlogs
 import requests
 
 from nvim_communicator import pynvim_helpers
-from nvim_communicator import receive_all_pending_messages, set_cursor
+from nvim_communicator import (
+    receive_all_pending_messages,
+    set_cursor,
+    event_to_dict,
+    events_to_listdict,
+)
 
 logger = logging.getLogger(__name__)
 SOURCE_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
 LUA_DIR = SOURCE_DIR / ".." / "lua"
+
+VISUAL_MODES = ["v", "V", "<C-v>"]
+ACTIONS = [
+    "am",
+    "im",
+    "aC",
+    "iC",
+    "ab",
+    "ib",
+    "ad",
+    "id",
+    "ao",
+    "io",
+    "aa",
+    "ia",
+    "af",
+    "if",
+    "ac",
+    "ar",
+    "ir",
+    "at",
+    "it",
+    "ae",
+    "ie",
+    "as",
+    "is",
+]
 
 
 def get_parser():
@@ -25,6 +57,16 @@ def get_parser():
         "Run nvim with `--clean --listen localhost:28905` to use this script.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    parser.add_argument(
+        "--URL",
+        default="https://raw.githubusercontent.com/pytorch/pytorch/fc4acd4425ca0896ca1c4f0a8bd7e22a51e94731/torch/nn/modules/loss.py",
+        help="",
+    )
+    parser.add_argument(
+        "--num_tests", default=300, type=int, help="Number of selections to perform."
+    )
+    parser.add_argument("--seed", default=0, type=int, help="Random seed")
+
     parser.add_argument("--nvim_addr", default="127.0.0.1", help="")
     parser.add_argument("--nvim_port", default=28905, help="")
     parser.add_argument(
@@ -49,6 +91,8 @@ def main():
 
     parser = get_parser()
     args = parser.parse_args()
+
+    random.seed(args.seed)
 
     logger.info("nvim addr: %s", args.nvim_addr)
     logger.info("nvim port: %s", args.nvim_port)
@@ -105,33 +149,55 @@ def main():
         )
 
         # TODO: Generalise this programme. For now, it assumes python file and only perform select visual mode.
+        # TODO: Lookahead, lookbehind, include_whitespaces options
         nvim.feedkeys(nvim.replace_termcodes("<esc>", True, True, True))
 
-        for i in range(3):
-            row_len = len(nvim.current.buffer)
-            row = random.randint(0, row_len)
-            col = random.randint(0, len(nvim.current.buffer[row]))
-            logger.info(f"Setting cursor to row {row} and col {col}")
-            set_cursor(nvim, row, col)
+        row_len = len(nvim.current.buffer)
+        for row in range(row_len):
+            for col in range(len(nvim.current.buffer[row])):
+                for visual_mode in VISUAL_MODES:
+                    for action in ACTIONS:
+                        logger.info(f"Setting cursor to row {row} and col {col}")
+                        set_cursor(nvim, row, col)
 
-            # nvim.feedkeys('viw')
-            nvim.command("normal vam")
+                        logger.info(
+                            f"Performing action {action} in visual mode {visual_mode}"
+                        )
+                        nvim.feedkeys(
+                            nvim.replace_termcodes(visual_mode, True, True, True)
+                        )
+                        nvim.feedkeys(action)
 
-            events = receive_all_pending_messages(nvim)
-            for event in events:
-                logger.info(f"Event from nvim: {event}")
+                        events = receive_all_pending_messages(nvim)
+                        for event in events:
+                            assert not event[0].startswith(
+                                "on_bytes"
+                            ), f"on_bytes event should not be triggered but got {event[0]}"
+                            logger.info(f"Event from nvim: {event}")
 
-            # To visually show what's going on, we sleep for 2 seconds.
-            time.sleep(2)
-            nvim.feedkeys(nvim.replace_termcodes("<esc>", True, True, True))
+                        # To visually show what's going on, we sleep for 2 seconds.
+                        time.sleep(2)
+                        nvim.feedkeys(nvim.replace_termcodes("<esc>", True, True, True))
 
-            # Print all messages so far.
-            # WARNING: do not use nvim.next_message() as it will lose track of how many messages have been received.
-            # We need that info in order to receive all messages without having to wait and add timeout.
-            events = receive_all_pending_messages(nvim)
-            for event in events:
-                logger.info(f"Event from nvim: {event}")
-            time.sleep(2)
+                        # Print all messages so far.
+                        # WARNING: do not use nvim.next_message() as it will lose track of how many messages have been received.
+                        # We need that info in order to receive all messages without having to wait and add timeout.
+                        events = receive_all_pending_messages(nvim)
+                        assert (
+                            len(events) == 2
+                        ), f"Expected 2 events, got {len(events)}, events: {events}"
+
+                        events_d = events_to_listdict(events)
+                        assert (
+                            events_d[0]["name"] == "visual_leave"
+                        ), f"Expected visual_leave event, got {events_d[0]['name']}"
+                        assert (
+                            events_d[1]["name"] == "CursorMoved"
+                        ), f"Expected CursorMoved event, got {events_d[1]['name']}"
+                        for event in events_d:
+                            logger.info(f"Event from nvim: {event}")
+                        time.sleep(2)
+                        # TODO: save events as YAML
 
     except Exception:
         logger.exception("Exception occurred")

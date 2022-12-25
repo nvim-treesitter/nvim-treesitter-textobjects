@@ -8,7 +8,7 @@ import sys
 
 import coloredlogs
 
-from nvim_communicator import pynvim_helpers, receive_message
+from nvim_communicator import pynvim_helpers, receive_message, event_to_dict
 
 logger = logging.getLogger(__name__)
 SOURCE_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
@@ -88,54 +88,36 @@ def main():
         # Start event loop
         while True:
             event = receive_message(nvim)
-            logger.info(f"Event from nvim: {event}")
+            event_dict = event_to_dict(event)
+            logger.info(f"Event from nvim: {event_dict}")
 
             if event is None:
                 logger.error("Received event=None")
                 break
 
-            if event[0] not in ["notification", "request"]:
-                logger.error("Received event[0] not in ['notification', 'request']")
-                logger.error(event[0])
+            if event_dict["type"] not in ["notification", "request"]:
+                logger.error("Received event type not in ['notification', 'request']")
+                logger.error(event_dict["type"])
                 break
             else:
-                if event[0] == "request":
+                if event_dict["type"] == "request":
                     event[3].send(None)
 
-                if event[1] == "on_bytes_remove":
-                    (
-                        start_row,
-                        start_col,
-                        byte_offset,
-                        old_end_row,
-                        old_end_col,
-                        old_end_byte_length,
-                    ) = event[2]
-                elif event[1] == "on_bytes":
-                    (
-                        changed_bytes,
-                        start_row,
-                        start_col,
-                        byte_offset,
-                        new_end_row,
-                        new_end_col,
-                        new_end_byte_length,
-                    ) = event[2]
-                elif event[1] == "CursorMoved":
-                    cursor_pos_row, cursor_pos_col = event[2]
-                    # Grab visual range
-                elif event[1] == "CursorMovedI":
-                    cursor_pos_row, cursor_pos_col = event[2]
-                elif event[1] == "visual_enter":
-                    old_mode, new_mode = event[2]
-                elif event[1] == "visual_leave":
-                    old_mode, new_mode, start_row, start_col, end_row, end_col = event[
-                        2
-                    ]
-                elif event[1] == "grab_entire_buf":
-                    buf = event[2][0]
-                    print(buf)
-                elif event[1] == "VimLeave":
+                if event_dict["name"] == "on_bytes_remove":
+                    pass
+                elif event_dict["name"] == "on_bytes":
+                    pass
+                elif event_dict["name"] == "CursorMoved":
+                    pass
+                elif event_dict["name"] == "CursorMovedI":
+                    pass
+                elif event_dict["name"] == "visual_enter":
+                    pass
+                elif event_dict["name"] == "visual_leave":
+                    pass
+                elif event_dict["name"] == "grab_entire_buf":
+                    print(event_dict["args"]["buf"])
+                elif event_dict["name"] == "VimLeave":
                     logger.info("Nvim closed. Exiting")
                     break
 

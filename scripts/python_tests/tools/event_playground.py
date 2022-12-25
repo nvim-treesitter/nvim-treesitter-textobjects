@@ -102,7 +102,7 @@ def main():
                 if event[0] == "request":
                     event[3].send(None)
 
-                if event[1] == "on_byte_remove":
+                if event[1] == "on_bytes_remove":
                     (
                         start_row,
                         start_col,
@@ -111,7 +111,7 @@ def main():
                         old_end_col,
                         old_end_byte_length,
                     ) = event[2]
-                elif event[1] == "on_byte":
+                elif event[1] == "on_bytes":
                     (
                         changed_bytes,
                         start_row,

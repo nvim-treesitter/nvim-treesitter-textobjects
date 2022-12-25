@@ -22,7 +22,7 @@ vim.api.nvim_buf_attach(vim.g.nvim_communicator_buffer_id, false, {
       --
       -- NOTE: deleting lines at the end of file will result in out of bound index (will try to delete one more line than the buffer row length), so the client should handle this. I see this for Nvim 0.8.1.
       Nvim_communicator_rpcnotify(
-        "on_byte_remove",
+        "on_bytes_remove",
         start_row,
         start_col,
         byte_offset,
@@ -71,7 +71,7 @@ vim.api.nvim_buf_attach(vim.g.nvim_communicator_buffer_id, false, {
       end
 
       Nvim_communicator_rpcnotify(
-        "on_byte",
+        "on_bytes",
         changed,
         start_row,
         start_col,

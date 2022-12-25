@@ -11,6 +11,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.10']
+        nvim-tag: [stable]
 
     steps:
       - uses: actions/checkout@v3
@@ -20,7 +21,7 @@ jobs:
 
       - name: Prepare Nvim
         env:
-          NVIM_TAG: stable
+          NVIM_TAG: ${{ matrix.nvim-tag }}
         run: |
           sudo apt-get update && sudo apt-get install libfuse2
           sudo add-apt-repository universe
@@ -32,7 +33,7 @@ jobs:
           cd ~/.local/share/nvim/site/pack/nvim-treesitter/opt
           git clone https://github.com/nvim-treesitter/nvim-treesitter.git
       - name: Compile parsers
-        run: ./nvim.appimage --headless -c "TSInstallSync all" -c "q"
+        run: ./nvim.appimage --headless -c "packadd nvim-treesitter" -c "TSInstallSync all" -c "q"
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -43,4 +44,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox tox-gh-actions
       - name: Test with tox
-        run: tox
+        run: cd scripts/python_tests && tox

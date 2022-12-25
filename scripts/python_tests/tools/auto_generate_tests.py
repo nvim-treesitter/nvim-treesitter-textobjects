@@ -4,7 +4,6 @@ import argparse
 import logging
 import os
 from pathlib import Path
-import random
 import sys
 import time
 
@@ -15,7 +14,6 @@ from nvim_communicator import pynvim_helpers
 from nvim_communicator import (
     receive_all_pending_messages,
     set_cursor,
-    event_to_dict,
     events_to_listdict,
 )
 
@@ -23,7 +21,9 @@ logger = logging.getLogger(__name__)
 SOURCE_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
 LUA_DIR = SOURCE_DIR / ".." / "lua"
 
-VISUAL_MODES = ["v", "V", "<C-v>"]
+# VISUAL_MODES = ["v", "V", "<C-v>"]
+# TODO: Dense generate 'v' mode but sparse generate 'V' and '<C-v>' mode
+VISUAL_MODES = ["v"]
 ACTIONS = [
     "am",
     "im",
@@ -53,8 +53,9 @@ ACTIONS = [
 
 def get_parser():
     parser = argparse.ArgumentParser(
-        description="Demo of using a sample code on the internet, performing some actions and printing events."
-        "Run nvim with `--clean --listen localhost:28905` to use this script.",
+        description="Generate tests for the nvim-communicator plugin."
+        "Run nvim with `--clean --listen localhost:28905` to use this script."
+        "DO NOT interact with nvim during the execution. It will generate wrong events (wrong test samples)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
@@ -63,9 +64,8 @@ def get_parser():
         help="",
     )
     parser.add_argument(
-        "--num_tests", default=300, type=int, help="Number of selections to perform."
+        "--demo", action="store_true", help="Add sleep(2) between actions to visualise."
     )
-    parser.add_argument("--seed", default=0, type=int, help="Random seed")
 
     parser.add_argument("--nvim_addr", default="127.0.0.1", help="")
     parser.add_argument("--nvim_port", default=28905, help="")
@@ -91,8 +91,6 @@ def main():
 
     parser = get_parser()
     args = parser.parse_args()
-
-    random.seed(args.seed)
 
     logger.info("nvim addr: %s", args.nvim_addr)
     logger.info("nvim port: %s", args.nvim_port)
@@ -175,28 +173,38 @@ def main():
                             ), f"on_bytes event should not be triggered but got {event[0]}"
                             logger.info(f"Event from nvim: {event}")
 
-                        # To visually show what's going on, we sleep for 2 seconds.
-                        time.sleep(2)
+                        if args.demo:
+                            # To visually show what's going on, we sleep for 2 seconds.
+                            time.sleep(2)
+
                         nvim.feedkeys(nvim.replace_termcodes("<esc>", True, True, True))
 
                         # Print all messages so far.
                         # WARNING: do not use nvim.next_message() as it will lose track of how many messages have been received.
                         # We need that info in order to receive all messages without having to wait and add timeout.
+
+                        # len(events) is 1 if the selection is not made. (visual_leave)
+                        # len(events) is 2 if the selection is made. (visual_leave, CursorMoved)
                         events = receive_all_pending_messages(nvim)
-                        assert (
-                            len(events) == 2
-                        ), f"Expected 2 events, got {len(events)}, events: {events}"
+                        assert len(events) in [
+                            1,
+                            2,
+                        ], f"Expected 1 or 2 events, got {len(events)}, events: {events}"
 
                         events_d = events_to_listdict(events)
                         assert (
                             events_d[0]["name"] == "visual_leave"
                         ), f"Expected visual_leave event, got {events_d[0]['name']}"
-                        assert (
-                            events_d[1]["name"] == "CursorMoved"
-                        ), f"Expected CursorMoved event, got {events_d[1]['name']}"
+
+                        if len(events_d) == 2:
+                            assert (
+                                events_d[1]["name"] == "CursorMoved"
+                            ), f"Expected CursorMoved event, got {events_d[1]['name']}"
                         for event in events_d:
                             logger.info(f"Event from nvim: {event}")
-                        time.sleep(2)
+
+                        if args.demo:
+                            time.sleep(2)
                         # TODO: save events as YAML
 
     except Exception:

@@ -29,9 +29,8 @@ def event_to_dict(event):
         return event_dict
 
     event_dict["type"] = event[0]  # request / notification
-    event_dict["name"] = event[
-        1
-    ]  # on_bytes / on_bytes_remove, CursorMoved, CursorMovedI, visual_enter, visual_leave, grab_entire_buf, VimLeave
+    # on_bytes / on_bytes_remove, CursorMoved, CursorMovedI, visual_enter, visual_leave, grab_entire_buf, VimLeave
+    event_dict["name"] = event[1]
     event_args = {}
 
     if event[1] == "on_bytes_remove":

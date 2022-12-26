@@ -99,10 +99,12 @@ def generate_test_select(row, col, visual_mode, action):
     if nvim is None:
         return None
 
-    events_ret = []
+    actions_yaml = []
+    events_yaml = []
 
     logger.info(f"Setting cursor to row {row} and col {col}")
     set_cursor(nvim, row, col)
+    actions_yaml.append({"action": "set_cursor", "row": row, "col": col})
 
     logger.info(f"Performing action {action} in visual mode {visual_mode}")
     nvim.feedkeys(nvim.replace_termcodes(visual_mode, True, True, True))
@@ -115,9 +117,16 @@ def generate_test_select(row, col, visual_mode, action):
             "on_bytes"
         ), f"on_bytes event should not be triggered but got {event['name']}"
         logger.info(f"Event from nvim: {event}")
-    events_ret.extend(events_d)
+    events_yaml.extend(events_d)
 
     nvim.feedkeys(nvim.replace_termcodes("<esc>", True, True, True))
+    actions_yaml.append(
+        {
+            "action": "feedkeys",
+            "keys": f"{visual_mode}{action}<esc>",
+            "replace_termcodes": True,
+        }
+    )
 
     # Print all messages so far.
     # WARNING: do not use nvim.next_message() as it will lose track of how many messages have been received.
@@ -143,9 +152,8 @@ def generate_test_select(row, col, visual_mode, action):
     for event in events_d:
         logger.info(f"Event from nvim: {event}")
 
-    events_ret.extend(events_d)
-    # TODO: save events as YAML
-    return events_ret
+    events_yaml.extend(events_d)
+    return actions_yaml, events_yaml
 
 
 def generate_test_select_star(args):
@@ -221,12 +229,17 @@ def main():
             # results = pool.starmap(generate_test_select, params)
             results = pool.imap(generate_test_select_star, params)
 
-            for events in results:
+            for actions, events in results:
+                for event in events:
+                    del event["type"]
+
+                action_event_yaml = [{"actions": actions, "events": events}]
+
                 # write as yaml
                 with open("test.yaml", "a") as f:
                     # https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
                     # sort_keys=False to preserve the order of the keys
-                    yaml.dump(events, f, sort_keys=False)
+                    yaml.dump(action_event_yaml, f, sort_keys=False)
 
     except Exception:
         logger.exception("Exception occurred")

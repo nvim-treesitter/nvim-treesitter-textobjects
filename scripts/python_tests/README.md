@@ -37,6 +37,7 @@ also add `nvim-treesitter` to `~/.local/share/nvim/site/pack/tests/opt/nvim-tree
 5. Once you saw it working, run `pytest`. It will essentially do the same thing. It is just a template for now, but we need to make more tests.
   - The coverage report is reporting test coverage of this python test program, not the treesitter-textobjects. You can ignore this report.
 6. You can automatically generate tests with pseudo ground-truths using `tools/auto_generate_tests.py`.  
+Run `tools/auto_generate_tests_demo.py --sleep 1` and see how it works.  
 <img src=https://user-images.githubusercontent.com/12980409/209483492-c7ab0e3c-bc35-47cf-a0be-2396021ff1d9.gif width=100%>
 
 ## Note

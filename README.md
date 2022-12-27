@@ -142,6 +142,7 @@ require'nvim-treesitter.configs'.setup {
     lsp_interop = {
       enable = true,
       border = 'none',
+      max_height = 0,
       peek_definition_code = {
         ["<leader>df"] = "@function.outer",
         ["<leader>dF"] = "@class.outer",
@@ -189,6 +190,7 @@ EOF
 ## Built-in Textobjects
 
 <!--textobjectinfo-->
+
 1. @attribute.inner
 2. @attribute.outer
 3. @block.inner

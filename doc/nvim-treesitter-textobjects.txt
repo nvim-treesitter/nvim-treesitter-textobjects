@@ -157,6 +157,8 @@ LSP interop~
 Supported options:
 - enable: `true` or `false`.
 - border: 'none' (default), 'single', 'double', 'rounded', 'solid', 'shadow'.
+- max_height: `0` (default). Set maximum height of floating window. 0 is no
+  max.
 >
   lua <<EOF
   require'nvim-treesitter.configs'.setup {
@@ -164,6 +166,7 @@ Supported options:
       lsp_interop = {
         enable = true,
         border = "none",
+        max_height = 0,
         peek_definition_code = {
           ["<leader>df"] = "@function.outer",
           ["<leader>dF"] = "@class.outer",

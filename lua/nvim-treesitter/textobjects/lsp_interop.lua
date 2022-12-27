@@ -46,6 +46,9 @@ function M.preview_location(location, context)
 
   local config = configs.get_module "textobjects.lsp_interop"
   local opts = {}
+  if config.max_height > 0 then
+    opts.max_height = config.max_height
+  end
   if config.border ~= "none" then
     opts.border = config.border
   end

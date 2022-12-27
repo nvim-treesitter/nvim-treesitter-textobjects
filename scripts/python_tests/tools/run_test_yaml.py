@@ -141,9 +141,7 @@ def get_parser():
         "DO NOT interact with nvim during the execution. It will generate wrong events (wrong test samples)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument(
-        "--test_yaml_path", default="test.yaml", help="test yaml to read"
-    )
+    parser.add_argument("test_yaml_path", help="test yaml to read")
     parser.add_argument(
         "--packpath",
         default="~/.local/share/nvim/site",

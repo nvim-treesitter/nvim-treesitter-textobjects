@@ -1,4 +1,4 @@
-name: Tests
+name: Consistency Tests
 
 on:
   - push
@@ -44,4 +44,4 @@ jobs:
           python -m pip install --upgrade pip
           cd scripts/python_tests && pip install -e .
       - name: Test
-        run: cd scripts/python_tests/tools && bash download_and_run_tests.sh
+        run: cd scripts/python_tests/tools && bash download_and_run_tests.sh || exit 1

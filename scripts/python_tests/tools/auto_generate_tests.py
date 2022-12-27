@@ -1,17 +1,17 @@
 #!/use/bin/env python3
 
+import tqdm
+import random
 import argparse
-from functools import partial
 import logging
 from multiprocessing import Pool
 import os
 from pathlib import Path
-import sys
 import tempfile
-import time
 
 import coloredlogs
 import pynvim
+import re
 import requests
 import yaml
 
@@ -32,8 +32,8 @@ VISUAL_MODES = ["v"]
 ACTIONS = [
     "am",
     "im",
-    "aC",
-    "iC",
+    "al",
+    "il",
     "ab",
     "ib",
     "ad",
@@ -53,27 +53,113 @@ ACTIONS = [
     "ie",
     "as",
     "is",
+    "]m",
+    "]f",
+    "]d",
+    "]o",
+    "]s",
+    "]a",
+    "]c",
+    "]b",
+    "]l",
+    "]r",
+    "]t",
+    "]e",
+    "]]m",
+    "]]f",
+    "]]d",
+    "]]o",
+    "]]a",
+    "]]b",
+    "]]l",
+    "]]r",
+    "]]t",
+    "]]e",
+    "]M",
+    "]F",
+    "]D",
+    "]O",
+    "]S",
+    "]A",
+    "]C",
+    "]B",
+    "]L",
+    "]R",
+    "]T",
+    "]E",
+    "]]M",
+    "]]F",
+    "]]D",
+    "]]O",
+    "]]A",
+    "]]B",
+    "]]L",
+    "]]R",
+    "]]T",
+    "]]E",
+    "[m",
+    "[f",
+    "[d",
+    "[o",
+    "[s",
+    "[a",
+    "[c",
+    "[b",
+    "[l",
+    "[r",
+    "[t",
+    "[e",
+    "[[m",
+    "[[f",
+    "[[d",
+    "[[o",
+    "[[a",
+    "[[b",
+    "[[l",
+    "[[r",
+    "[[t",
+    "[[e",
+    "[M",
+    "[F",
+    "[D",
+    "[O",
+    "[S",
+    "[A",
+    "[C",
+    "[B",
+    "[L",
+    "[R",
+    "[T",
+    "[E",
+    "[[M",
+    "[[F",
+    "[[D",
+    "[[O",
+    "[[A",
+    "[[B",
+    "[[L",
+    "[[R",
+    "[[T",
+    "[[E",
 ]
 
 nvim: pynvim.Nvim | None = None
 
 
-def init_nvim(content, packpath):
+def init_nvim(filepath, packpath):
     global nvim
     with tempfile.TemporaryDirectory() as tmp:
-        path = os.path.join(tmp, "nvim")
-        os.system(f"nvim --clean --headless --listen {path} &")
-        nvim = pynvim_helpers.wait_until_attached_socket(path, timeout=100)
+        listen_path = os.path.join(tmp, "nvim")
+        os.system(
+            f"nvim --clean --headless --listen {listen_path} '{filepath}' > /dev/null 2> /dev/null &"
+        )
+        nvim = pynvim_helpers.wait_until_attached_socket(listen_path, timeout=100)
 
         nvim.command(f"set packpath+={packpath}")
         nvim.command("packadd nvim-treesitter")
         nvim.command("packadd nvim-treesitter-textobjects")
 
         nvim.command("TSUpdate")
-
-        # This will modify the entire buffer
-        nvim.current.buffer[:] = content
-        nvim.command("set filetype=python")
 
         pynvim_helpers.init_nvim_communicator(
             nvim,
@@ -92,23 +178,18 @@ def init_nvim(content, packpath):
         nvim.feedkeys(nvim.replace_termcodes("<esc>", True, True, True))
 
 
-def generate_test_select(row, col, visual_mode, action):
+def generate_test_visual(row, col, feedkeys):
     global nvim
     global logger
 
     if nvim is None:
         return None
 
-    actions_yaml = []
-    events_yaml = []
-
-    logger.info(f"Setting cursor to row {row} and col {col}")
+    # logger.info(f"Setting cursor to row {row} and col {col}")
     set_cursor(nvim, row, col)
-    actions_yaml.append({"action": "set_cursor", "row": row, "col": col})
 
-    logger.info(f"Performing action {action} in visual mode {visual_mode}")
-    nvim.feedkeys(nvim.replace_termcodes(visual_mode, True, True, True))
-    nvim.feedkeys(action)
+    # logger.info(f"Performing action {feedkeys}")
+    nvim.feedkeys(feedkeys)
 
     events = receive_all_pending_messages(nvim)
     events_d = events_to_listdict(events)
@@ -116,17 +197,9 @@ def generate_test_select(row, col, visual_mode, action):
         assert not event["name"].startswith(
             "on_bytes"
         ), f"on_bytes event should not be triggered but got {event['name']}"
-        logger.info(f"Event from nvim: {event}")
-    events_yaml.extend(events_d)
+        # logger.info(f"Event from nvim: {event}")
 
     nvim.feedkeys(nvim.replace_termcodes("<esc>", True, True, True))
-    actions_yaml.append(
-        {
-            "action": "feedkeys",
-            "keys": f"{visual_mode}{action}<esc>",
-            "replace_termcodes": True,
-        }
-    )
 
     # Print all messages so far.
     # WARNING: do not use nvim.next_message() as it will lose track of how many messages have been received.
@@ -149,15 +222,29 @@ def generate_test_select(row, col, visual_mode, action):
         assert (
             events_d[1]["name"] == "CursorMoved"
         ), f"Expected CursorMoved event, got {events_d[1]['name']}"
-    for event in events_d:
-        logger.info(f"Event from nvim: {event}")
+    # for event in events_d:
+    #     logger.info(f"Event from nvim: {event}")
 
-    events_yaml.extend(events_d)
-    return actions_yaml, events_yaml
+    visual_leave_event = events_d[0]["args"]
+    test_info = {
+        "test": "visual",
+        "actions": {"cursor_pos": [row, col], "feedkeys": feedkeys},
+        "results": {
+            "mode": visual_leave_event["old_mode"],
+            "range": [
+                visual_leave_event["start_row"],
+                visual_leave_event["start_col"],
+                visual_leave_event["end_row"],
+                visual_leave_event["end_col"],
+            ],
+        },
+    }
+
+    return test_info
 
 
-def generate_test_select_star(args):
-    return generate_test_select(*args)
+def generate_test_visual_star(params):
+    return generate_test_visual(*params)
 
 
 def get_parser():
@@ -170,8 +257,13 @@ def get_parser():
     parser.add_argument(
         "--URL",
         default="https://raw.githubusercontent.com/pytorch/pytorch/fc4acd4425ca0896ca1c4f0a8bd7e22a51e94731/torch/nn/modules/loss.py",
-        help="",
+        help="File to use for testing",
     )
+    parser.add_argument("--seed", default=0, type=int, help="Random seed")
+    parser.add_argument(
+        "--num_tests", default=10_000, type=int, help="Number of tests to generate"
+    )
+    parser.add_argument("--output", default="test.yaml", help="Output yaml file path")
     parser.add_argument(
         "--packpath",
         default="~/.local/share/nvim/site",
@@ -191,55 +283,71 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
+    random.seed(args.seed)
+
     try:
         # TODO: Generalise this programme. For now, it assumes python file and only perform select visual mode.
         # TODO: Lookahead, lookbehind, include_whitespaces options
 
-        # Open nvim to check basic row and col length of the file.
-        # Nvim is probably not needed for this, but still doing this for consistency.
-        with tempfile.TemporaryDirectory() as tmp:
-            path = os.path.join(tmp, "nvim")
-            os.system(f"nvim --clean --headless --listen {path} &")
-            temp_nvim = pynvim_helpers.wait_until_attached_socket(path, timeout=100)
+        # grab content from URL
+        response = requests.get(args.URL)
+        # get filename from URL using content-disposition
+        content_disposition = response.headers.get("content-disposition")
+        if content_disposition:
+            filename = re.findall("filename=(.+)", content_disposition)[0]
+        else:
+            filename = args.URL.split("/")[-1]
 
-            # Read file from URL
-            response = requests.get(args.URL)
-            content = response.text
-            content = content.split("\n")
+        # save content to file in temp directory
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            filepath = Path(tmpdirname) / filename
+            logger.info(f"Saving {args.URL} to {filepath}")
+            with open(filepath, "w") as f:
+                f.write(response.text)
 
-            # This will modify the entire buffer
-            temp_nvim.current.buffer[:] = content
+            # Open nvim to check basic row and col length of the file.
+            # Nvim is probably not needed for this, but still doing this for consistency.
+            with tempfile.TemporaryDirectory() as tmp:
+                listen_path = os.path.join(tmp, "nvim")
+                os.system(
+                    f"nvim --clean --headless --listen {listen_path} '{filepath}' &"
+                )
+                temp_nvim = pynvim_helpers.wait_until_attached_socket(
+                    listen_path, timeout=100
+                )
 
-            params = []
-            row_len = len(temp_nvim.current.buffer)
-            for row in range(row_len):
-                for col in range(len(temp_nvim.current.buffer[row])):
-                    for visual_mode in VISUAL_MODES:
-                        for action in ACTIONS:
-                            params.append((row, col, visual_mode, action))
+                params = []
+                row_len = len(temp_nvim.current.buffer)
+                for row in range(row_len):
+                    for col in range(len(temp_nvim.current.buffer[row])):
+                        for visual_mode in VISUAL_MODES:
+                            for action in ACTIONS:
+                                params.append((row, col, f"{visual_mode}{action}"))
 
-            try:
-                temp_nvim.command("qa!")
-            except Exception:
-                # ignore teardown errors because the pynvim will
-                # lose connection and raise an error
-                pass
+                try:
+                    temp_nvim.command("qa!")
+                except Exception:
+                    # ignore teardown errors because the pynvim will
+                    # lose connection and raise an error
+                    pass
 
-        with Pool(initializer=init_nvim, initargs=(content, args.packpath)) as pool:
-            # results = pool.starmap(generate_test_select, params)
-            results = pool.imap(generate_test_select_star, params)
+            params = random.sample(params, args.num_tests)
+            commit = os.popen(f"git -C '{SOURCE_DIR}' rev-parse HEAD").read().strip()
+            tests_info = {"commit": commit, "URL": args.URL, "seed": args.seed}
 
-            for actions, events in results:
-                for event in events:
-                    del event["type"]
+            with Pool(
+                initializer=init_nvim, initargs=(filepath, args.packpath)
+            ) as pool:
+                results = list(
+                    tqdm.tqdm(
+                        pool.imap(generate_test_visual_star, params), total=len(params)
+                    )
+                )
 
-                action_event_yaml = [{"actions": actions, "events": events}]
-
-                # write as yaml
-                with open("test.yaml", "a") as f:
-                    # https://stackoverflow.com/questions/5121931/in-python-how-can-you-load-yaml-mappings-as-ordereddicts
-                    # sort_keys=False to preserve the order of the keys
-                    yaml.dump(action_event_yaml, f, sort_keys=False)
+            tests_info["tests"] = results
+            with open(args.output, "w") as f:
+                # sort_keys=False to preserve the order of the keys
+                yaml.dump(tests_info, f, sort_keys=False)
 
     except Exception:
         logger.exception("Exception occurred")

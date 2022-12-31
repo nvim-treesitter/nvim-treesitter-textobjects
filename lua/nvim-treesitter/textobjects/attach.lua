@@ -41,12 +41,12 @@ function M.make_attach(normal_mode_functions, submodule, keymap_modes, opts)
         if opts.repeatable then
           fn = make_repeatable(fn)
         end
-        vim.keymap.set(
-          keymap_modes,
-          mapping,
-          fn,
-          { buffer = bufnr, silent = true, remap = false, desc = mapping_description }
-        )
+        -- vim.keymap.set(
+        --   keymap_modes,
+        --   mapping,
+        --   fn,
+        --   { buffer = bufnr, silent = true, remap = false, desc = mapping_description }
+        -- )
       end
     end
   end

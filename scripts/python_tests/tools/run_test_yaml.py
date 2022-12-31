@@ -128,16 +128,10 @@ def run_test_visual(row, col, feedkeys, test_result_ground_truth, filepath, pack
             test_results == test_result_ground_truth
         ), f"Test result does not match: {test_results}, {test_result_ground_truth}"
     except OnBytesException:
-        # Reinitialise nvim
-        try:
-            for _ in range(5):
-                nvim.input("<esc>")
-            nvim.command("qa!")
-        except Exception:
-            # ignore teardown errors because the pynvim will
-            # lose connection and raise an error
-            pass
-        nvim = None
+        for _ in range(5):
+            nvim.input("<esc>")
+        nvim.command("earlier 1f")
+        events = receive_all_pending_messages(nvim)
 
         logger.exception(f"Test failed for row {row}, col {col}, feedkeys {feedkeys}")
         return False
@@ -145,6 +139,7 @@ def run_test_visual(row, col, feedkeys, test_result_ground_truth, filepath, pack
         for _ in range(5):
             nvim.input("<esc>")
         events = receive_all_pending_messages(nvim)
+
         logger.exception(f"Test failed for row {row}, col {col}, feedkeys {feedkeys}")
         return False
     except Exception:

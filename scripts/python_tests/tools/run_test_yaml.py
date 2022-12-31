@@ -8,12 +8,12 @@ from pathlib import Path
 import re
 import sys
 import tempfile
+import time
 
 import coloredlogs
 import pynvim
 import requests
 import tqdm
-import verboselogs
 import yaml
 
 from nvim_communicator import pynvim_helpers
@@ -22,10 +22,15 @@ from nvim_communicator import (
     receive_all_pending_messages,
     set_cursor,
 )
+import verboselogs
 
 logger = verboselogs.VerboseLogger(__name__)
 SOURCE_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
 LUA_DIR = SOURCE_DIR / ".." / "lua"
+
+
+class OnBytesException(Exception):
+    pass
 
 
 nvim: pynvim.Nvim | None = None
@@ -60,56 +65,55 @@ def init_nvim(filepath, packpath):
             ],
         )
 
-        nvim.feedkeys(nvim.replace_termcodes("<esc>", True, True, True))
+        nvim.input("<esc>")
 
 
-def run_test_visual(row, col, feedkeys, test_result_ground_truth):
+def run_test_visual(row, col, feedkeys, test_result_ground_truth, filepath, packpath):
     global nvim
     global logger
 
     if nvim is None:
-        return False
+        init_nvim(filepath, packpath)
+        if nvim is None:
+            raise RuntimeError("Failed to initialize nvim")
 
     try:
         set_cursor(nvim, row, col)
 
         nvim.feedkeys(feedkeys)
 
+        # WARNING: Do NOT use nvim.feedkeys() for ESC here as it will block when vim is in operator pending mode.
+        # Spam ESC to exit operator pending / input / visual mode.
+        for _ in range(5):
+            nvim.input("<esc>")
+
+        for _ in range(5):
+            nvim.feedkeys(nvim.replace_termcodes("<esc>", True, True, True))
+
         events = receive_all_pending_messages(nvim)
         events_d = events_to_listdict(events)
         for event in events_d:
-            assert not event["name"].startswith(
-                "on_bytes"
-            ), f"on_bytes event should not be triggered but got {event}"
-            # logger.info(f"Event from nvim: {event}")
+            if event["name"].startswith("on_bytes"):
+                raise OnBytesException(
+                    f"on_bytes event should not be triggered but got {event}"
+                )
 
-        nvim.feedkeys(nvim.replace_termcodes("<esc>", True, True, True))
-
-        # Print all messages so far.
-        # WARNING: do not use nvim.next_message() as it will lose track of how many messages have been received.
-        # We need that info in order to receive all messages without having to wait and add timeout.
-
-        # len(events) is 1 if the selection is not made. (visual_leave)
-        # len(events) is 2 if the selection is made. (visual_leave, CursorMoved)
-        events = receive_all_pending_messages(nvim)
-        assert len(events) in [
-            1,
-            2,
-        ], f"Expected 1 or 2 events, got {len(events)}, events: {events}"
-
-        events_d = events_to_listdict(events)
-        assert (
-            events_d[0]["name"] == "visual_leave"
-        ), f"Expected visual_leave event, got {events_d[0]['name']}"
-
-        if len(events_d) == 2:
-            assert (
-                events_d[1]["name"] == "CursorMoved"
-            ), f"Expected CursorMoved event, got {events_d[1]['name']}"
+        # time.sleep(1)
+        # events = receive_all_pending_messages(nvim)
+        # events_d.extend(events_to_listdict(events))
         # for event in events_d:
-        #     logger.info(f"Event from nvim: {event}")
+        #     if event["name"].startswith("on_bytes"):
+        #         raise OnBytesException(f"on_bytes event should not be triggered but got {event}")
 
-        visual_leave_event = events_d[0]["args"]
+        if events_d[-1]["name"] == "CursorMoved":
+            visual_leave_event_idx = -2
+        else:
+            visual_leave_event_idx = -1
+        assert (
+            events_d[visual_leave_event_idx]["name"] == "visual_leave"
+        ), f"Expected visual_leave event, got {events_d[visual_leave_event_idx]['name']}"
+
+        visual_leave_event = events_d[visual_leave_event_idx]["args"]
         test_results = {
             "mode": visual_leave_event["old_mode"],
             "range": [
@@ -123,8 +127,38 @@ def run_test_visual(row, col, feedkeys, test_result_ground_truth):
         assert (
             test_results == test_result_ground_truth
         ), f"Test result does not match: {test_results}, {test_result_ground_truth}"
-    except AssertionError:
+    except OnBytesException:
+        # Reinitialise nvim
+        try:
+            for _ in range(5):
+                nvim.input("<esc>")
+            nvim.command("qa!")
+        except Exception:
+            # ignore teardown errors because the pynvim will
+            # lose connection and raise an error
+            pass
+        nvim = None
+
         logger.exception(f"Test failed for row {row}, col {col}, feedkeys {feedkeys}")
+        return False
+    except AssertionError:
+        for _ in range(5):
+            nvim.input("<esc>")
+        events = receive_all_pending_messages(nvim)
+        logger.exception(f"Test failed for row {row}, col {col}, feedkeys {feedkeys}")
+        return False
+    except Exception:
+        # Reinitialise nvim
+        try:
+            for _ in range(5):
+                nvim.input("<esc>")
+            nvim.command("qa!")
+        except Exception:
+            # ignore teardown errors because the pynvim will
+            # lose connection and raise an error
+            pass
+        nvim = None
+        logger.exception(f"Test crashed for row {row}, col {col}, feedkeys {feedkeys}")
         return False
 
     return True
@@ -198,14 +232,18 @@ def main():
                             test_info["actions"]["cursor_pos"][1],
                             test_info["actions"]["feedkeys"],
                             test_info["results"],
+                            filepath,
+                            args.packpath,
                         )
                     )
 
             logger.info(f"Running {len(params)} tests")
 
-            with Pool(
-                initializer=init_nvim, initargs=(filepath, args.packpath)
-            ) as pool:
+            # Testing without multiprocessing
+            # for param in params:
+            #     run_test_visual(*param)
+
+            with Pool() as pool:
                 results = list(
                     tqdm.tqdm(
                         pool.imap(run_test_visual_star, params), total=len(params)

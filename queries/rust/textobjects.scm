@@ -104,6 +104,40 @@
   . (identifier) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
+(tuple_expression
+  "," @_start
+  . (_) @parameter.inner
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+
+(tuple_expression
+  . (_) @parameter.inner
+  . ","? @_end
+ (#make-range! "parameter.outer" @parameter.inner @_end))
+
+(struct_item
+  body: (field_declaration_list
+    "," @_start
+    . (_) @parameter.inner
+   (#make-range! "parameter.outer" @_start @parameter.inner)))
+
+(struct_item
+  body: (field_declaration_list
+    . (_) @parameter.inner
+    . ","? @_end
+   (#make-range! "parameter.outer" @parameter.inner @_end)))
+
+(struct_expression
+  body: (field_initializer_list
+    "," @_start
+    . (_) @parameter.inner
+   (#make-range! "parameter.outer" @_start @parameter.inner)))
+
+(struct_expression
+  body: (field_initializer_list
+    . (_) @parameter.inner
+    . ","? @_end
+   (#make-range! "parameter.outer" @parameter.inner @_end)))
+
 ((closure_parameters
   "," @_start . (_) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner))

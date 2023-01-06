@@ -93,6 +93,8 @@
 
 (member_call_expression) @call.outer
 
+(nullsafe_member_call_expression) @call.outer
+
 (scoped_call_expression) @call.outer
 
 (function_call_expression
@@ -100,6 +102,10 @@
   (#make-range! "call.inner" @_start @_end)))
 
 (member_call_expression
+  arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))
+
+(nullsafe_member_call_expression
   arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
   (#make-range! "call.inner" @_start @_end)))
 

@@ -3,7 +3,7 @@ local parsers = require "nvim-treesitter.parsers"
 local queries = require "nvim-treesitter.query"
 local M = {}
 
-local function make_repeatable(fn)
+local function make_dot_repeatable(fn)
   return function()
     _G._nvim_treesitter_textobject_last_function = fn
     vim.o.opfunc = "v:lua._nvim_treesitter_textobject_last_function"
@@ -11,7 +11,7 @@ local function make_repeatable(fn)
   end
 end
 
-function M.make_attach(normal_mode_functions, submodule, keymap_modes, opts)
+function M.make_attach(functions, submodule, keymap_modes, opts)
   keymap_modes = keymap_modes or "n"
   opts = opts or {}
   return function(bufnr, lang)
@@ -22,7 +22,7 @@ function M.make_attach(normal_mode_functions, submodule, keymap_modes, opts)
 
     local config = configs.get_module("textobjects." .. submodule)
 
-    for _, function_call in pairs(normal_mode_functions) do
+    for _, function_call in pairs(functions) do
       local function_description = function_call:gsub("_", " "):gsub("^%l", string.upper)
       for mapping, query_metadata in pairs(config[function_call] or {}) do
         local mapping_description, query
@@ -38,8 +38,8 @@ function M.make_attach(normal_mode_functions, submodule, keymap_modes, opts)
         local fn = function()
           require("nvim-treesitter.textobjects." .. submodule)[function_call](query)
         end
-        if opts.repeatable then
-          fn = make_repeatable(fn)
+        if opts.dot_repeatable then
+          fn = make_dot_repeatable(fn)
         end
         vim.keymap.set(
           keymap_modes,
@@ -52,7 +52,7 @@ function M.make_attach(normal_mode_functions, submodule, keymap_modes, opts)
   end
 end
 
-function M.make_detach(normal_mode_functions, submodule, keymap_modes)
+function M.make_detach(functions, submodule, keymap_modes)
   keymap_modes = keymap_modes or "n"
   return function(bufnr)
     local config = configs.get_module("textobjects." .. submodule)
@@ -66,7 +66,7 @@ function M.make_detach(normal_mode_functions, submodule, keymap_modes)
         vim.keymap.del({ "o", "x" }, mapping, { buffer = bufnr })
       end
     end
-    for _, function_call in pairs(normal_mode_functions) do
+    for _, function_call in pairs(functions) do
       for mapping, query in pairs(config[function_call] or {}) do
         if type(query) == "table" then
           query = query[lang]

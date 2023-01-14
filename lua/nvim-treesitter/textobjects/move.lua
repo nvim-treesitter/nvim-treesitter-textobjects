@@ -87,7 +87,6 @@ local function move(query_strings_regex, forward, start, winid)
 
         if current_match then
           local score = scoring_function(start_, current_match)
-          print(score)
           if not best_match then
             best_match = current_match
             best_score = score

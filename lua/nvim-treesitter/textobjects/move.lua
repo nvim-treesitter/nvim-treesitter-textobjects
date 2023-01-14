@@ -17,7 +17,7 @@ M.last_move = nil
 -- move_fn's first argument must be a boolean indicating whether to move forward (true) or backward (false)
 -- Then you can use four functions:
 --   M.repeat_last_move
---   M.repeat_last_move_oppisite
+--   M.repeat_last_move_opposite
 --   M.repeat_last_move_next
 --   M.repeat_last_move_previous
 function M.make_repeatable_move(move_fn)

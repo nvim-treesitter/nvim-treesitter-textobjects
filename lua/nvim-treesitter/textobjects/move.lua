@@ -27,6 +27,31 @@ function M.make_repeatable_move(move_fn)
   end
 end
 
+-- Alternatively, you can use this function
+-- Returns:
+--   repeatable_forward_move_fn, repeatable_backward_move_fn
+function M.make_repeatable_move_pair(forward_move_fn, backward_move_fn)
+  local general_repeatable_move_fn = function(forward, ...)
+    if forward then
+      forward_move_fn(...)
+    else
+      backward_move_fn(...)
+    end
+  end
+
+  local repeatable_forward_move_fn = function(...)
+    M.last_move = { func = general_repeatable_move_fn, args = { true, ... } }
+    forward_move_fn(...)
+  end
+
+  local repeatable_backward_move_fn = function(...)
+    M.last_move = { func = general_repeatable_move_fn, args = { false, ... } }
+    backward_move_fn(...)
+  end
+
+  return repeatable_forward_move_fn, repeatable_backward_move_fn
+end
+
 local function move(forward, query_strings, start, winid)
   query_strings = shared.make_query_strings_table(query_strings)
   winid = winid or vim.api.nvim_get_current_win()

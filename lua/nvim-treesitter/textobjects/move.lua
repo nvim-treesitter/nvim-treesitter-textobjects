@@ -9,8 +9,25 @@ local M = {}
 M.last_move = nil
 -- { func = move, args = { ... } }
 -- { func = builtin_find, args = { ... } }
+-- register any other function, but make sure the the first args is `forward` boolean.
 
-local function move(query_strings, forward, start, winid)
+-- If you are a plugin developer,
+-- you can register your own independent move functions using this
+-- even if they are not related to treesitter-textobjects.
+-- move_fn's first argument must be a boolean indicating whether to move forward (true) or backward (false)
+-- Then you can use four functions:
+--   M.repeat_last_move
+--   M.repeat_last_move_oppisite
+--   M.repeat_last_move_next
+--   M.repeat_last_move_previous
+function M.make_repeatable_move(move_fn)
+  return function(...)
+    M.last_move = { func = move_fn, args = { ... } } -- remember that the first args should be `forward` boolean
+    move_fn(...)
+  end
+end
+
+local function move(forward, query_strings, start, winid)
   query_strings = shared.make_query_strings_table(query_strings)
   winid = winid or vim.api.nvim_get_current_win()
   local bufnr = vim.api.nvim_win_get_buf(winid)
@@ -73,25 +90,19 @@ local function move(query_strings, forward, start, winid)
   end
 end
 
+local move_repeatable = M.make_repeatable_move(move)
+
 M.goto_next_start = function(query_strings)
-  local args = { query_strings, "forward", "start" }
-  move(unpack(args))
-  M.last_move = { func = move, args = args }
+  move_repeatable("forward", query_strings, "start")
 end
 M.goto_next_end = function(query_strings)
-  local args = { query_strings, "forward", not "start" }
-  move(unpack(args))
-  M.last_move = { func = move, args = args }
+  move_repeatable("forward", query_strings, not "start")
 end
 M.goto_previous_start = function(query_strings)
-  local args = { query_strings, not "forward", "start" }
-  move(unpack(args))
-  M.last_move = { func = move, args = args }
+  move_repeatable(not "forward", query_strings, "start")
 end
 M.goto_previous_end = function(query_strings)
-  local args = { query_strings, not "forward", not "start" }
-  move(unpack(args))
-  M.last_move = { func = move, args = args }
+  move_repeatable(not "forward", query_strings, not "start")
 end
 
 -- implements naive f, F, t, T with repeat support
@@ -155,6 +166,10 @@ local function builtin_find(forward, inclusive, char, repeating, winid)
   return char
 end
 
+-- We are not using M.make_repeatable_move and instead registering at M.last_move manually
+-- because we don't want to behave the same way as the first movement.
+-- For example, we want to repeat the search character given to f, F, t, T.
+-- Also, we want to be able to to find the next occurence when using t, T with repeat, excluding the current position.
 M.builtin_f = function()
   local char = builtin_find("forward", "inclusive")
   if builtin_find ~= nil then
@@ -192,12 +207,7 @@ end
 M.repeat_last_move_opposite = function()
   if M.last_move then
     local args = { unpack(M.last_move.args) } -- copy the table
-    if M.last_move.func == move then
-      args[2] = not args[2] -- reverse the direction
-    else
-      -- builtin_find
-      args[1] = not args[1] -- reverse the direction
-    end
+    args[1] = not args[1] -- reverse the direction
     M.last_move.func(unpack(args))
   end
 end
@@ -205,12 +215,7 @@ end
 M.repeat_last_move_next = function()
   if M.last_move then
     local args = { unpack(M.last_move.args) } -- copy the table
-    if M.last_move.func == move then
-      args[2] = "forward" -- set the direction to forward
-    else
-      -- builtin_find
-      args[1] = "forward" -- set the direction to forward
-    end
+    args[1] = true -- set the direction to forward
     M.last_move.func(unpack(args))
   end
 end
@@ -218,12 +223,7 @@ end
 M.repeat_last_move_previous = function()
   if M.last_move then
     local args = { unpack(M.last_move.args) } -- copy the table
-    if M.last_move.func == move then
-      args[2] = not "forward" -- set the direction to backward
-    else
-      -- builtin_find
-      args[1] = not "forward" -- set the direction to backward
-    end
+    args[1] = false -- set the direction to backward
     M.last_move.func(unpack(args))
   end
 end

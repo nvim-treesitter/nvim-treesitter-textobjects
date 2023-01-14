@@ -7,10 +7,11 @@ local parsers = require "nvim-treesitter.parsers"
 
 local M = {}
 
-local function move(query_strings_regex, forward, start, winid)
+local function move(query_strings_regex, query_group, forward, start, winid)
   -- start: bool or nil. If true, choose the start of the node, and false is for the end.
   -- If nil, it considers both and chooses the closer side.
   query_strings_regex = shared.make_query_strings_table(query_strings_regex)
+  query_group = query_group or "textobjects"
   local starts
   if start == nil then
     starts = { true, false }
@@ -25,7 +26,7 @@ local function move(query_strings_regex, forward, start, winid)
   local bufnr = vim.api.nvim_win_get_buf(winid)
 
   -- Get query strings from regex
-  local available_textobjects = shared.available_textobjects(parsers.get_buf_lang(bufnr))
+  local available_textobjects = shared.available_textobjects(parsers.get_buf_lang(bufnr), query_group)
   local query_strings = {}
   for _, query_string_regex in ipairs(query_strings_regex) do
     for _, available_textobject in ipairs(available_textobjects) do
@@ -79,7 +80,7 @@ local function move(query_strings_regex, forward, start, winid)
     local best_start
     for _, query_string in ipairs(query_strings) do
       for _, start_ in ipairs(starts) do
-        local current_match = queries.find_best_match(bufnr, query_string, "textobjects", function(match)
+        local current_match = queries.find_best_match(bufnr, query_string, query_group, function(match)
           return filter_function(start_, match)
         end, function(match)
           return scoring_function(start_, match)
@@ -104,24 +105,25 @@ local function move(query_strings_regex, forward, start, winid)
   end
 end
 
-M.goto_next_start = function(query_strings)
-  move(query_strings, "forward", "start")
+M.goto_next_start = function(query_strings, query_group)
+  query_group = query_group or "textobjects"
+  move(query_strings, query_group, "forward", "start")
 end
-M.goto_next_end = function(query_strings)
-  move(query_strings, "forward", not "start")
+M.goto_next_end = function(query_strings, query_group)
+  move(query_strings, query_group, "forward", not "start")
 end
-M.goto_previous_start = function(query_strings)
-  move(query_strings, not "forward", "start")
+M.goto_previous_start = function(query_strings, query_group)
+  move(query_strings, query_group, not "forward", "start")
 end
-M.goto_previous_end = function(query_strings)
-  move(query_strings, not "forward", not "start")
+M.goto_previous_end = function(query_strings, query_group)
+  move(query_strings, query_group, not "forward", not "start")
 end
 
-M.goto_next = function(query_strings)
-  move(query_strings, "forward")
+M.goto_next = function(query_strings, query_group)
+  move(query_strings, query_group, "forward")
 end
-M.goto_previous = function(query_strings)
-  move(query_strings, not "forward")
+M.goto_previous = function(query_strings, query_group)
+  move(query_strings, query_group, not "forward")
 end
 
 local nxo_mode_functions = {

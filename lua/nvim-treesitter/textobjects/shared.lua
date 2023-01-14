@@ -17,9 +17,10 @@ function M.make_query_strings_table(query_strings)
   return type(query_strings) == "string" and { query_strings } or query_strings
 end
 
-function M.available_textobjects(lang)
+function M.available_textobjects(lang, query_group)
   lang = lang or parsers.get_buf_lang()
-  local parsed_queries = queries.get_query(lang, "textobjects")
+  query_group = query_group or "textobjects"
+  local parsed_queries = queries.get_query(lang, query_group)
   if not parsed_queries then
     return {}
   end
@@ -43,7 +44,8 @@ function M.available_textobjects(lang)
   --}
 end
 
-function M.textobject_at_point(query_string, pos, bufnr, opts)
+function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
+  query_group = query_group or "textobjects"
   opts = opts or {}
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
@@ -57,7 +59,7 @@ function M.textobject_at_point(query_string, pos, bufnr, opts)
   if not string.match(query_string, "^@.*") then
     error 'Captures must start with "@"'
   end
-  local matches = queries.get_capture_matches_recursively(bufnr, query_string, "textobjects")
+  local matches = queries.get_capture_matches_recursively(bufnr, query_string, query_group)
 
   local match_length
   local smallest_range

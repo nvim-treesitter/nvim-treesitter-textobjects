@@ -95,13 +95,14 @@ M.goto_previous_end = function(query_strings)
 end
 
 -- implements naive f, F, t, T with repeat support
-local function builtin_find(forward, inclusive, char, repeating)
+local function builtin_find(forward, inclusive, char, repeating, winid)
   -- forward = true -> f, t
   -- inclusive = false -> t, T
   -- if repeating with till (t or T, inclusive = false) then search from the next character
   -- returns nil if cancelled or char
   char = char or vim.fn.nr2char(vim.fn.getchar())
   repeating = repeating or false
+  winid = winid or vim.api.nvim_get_current_win()
 
   if char == vim.fn.nr2char(27) then
     -- escape
@@ -109,7 +110,7 @@ local function builtin_find(forward, inclusive, char, repeating)
   end
 
   local line = vim.api.nvim_get_current_line()
-  local cursor = vim.api.nvim_win_get_cursor(0)
+  local cursor = vim.api.nvim_win_get_cursor(winid)
 
   -- find the count-th occurrence of the char in the line
   local found
@@ -150,7 +151,7 @@ local function builtin_find(forward, inclusive, char, repeating)
   end
 
   -- move to the found position
-  vim.api.nvim_win_set_cursor(0, { cursor[1], cursor[2] })
+  vim.api.nvim_win_set_cursor(winid, { cursor[1], cursor[2] })
   return char
 end
 

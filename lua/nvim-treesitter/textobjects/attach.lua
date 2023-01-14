@@ -29,7 +29,7 @@ function M.make_attach(normal_mode_functions, submodule, keymap_modes, opts)
 
         if type(query_metadata) == "table" then
           query = query_metadata.query
-          query_group = query_metadata.query_group
+          query_group = query_metadata.query_group or "textobjects"
           mapping_description = query_metadata.desc
         else
           query = query_metadata

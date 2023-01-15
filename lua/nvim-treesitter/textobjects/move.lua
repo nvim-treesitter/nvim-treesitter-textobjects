@@ -24,17 +24,8 @@ local function move(query_strings_regex, query_group, forward, start, winid)
   end
   winid = winid or vim.api.nvim_get_current_win()
   local bufnr = vim.api.nvim_win_get_buf(winid)
-
-  -- Get query strings from regex
-  local available_textobjects = shared.available_textobjects(parsers.get_buf_lang(bufnr), query_group)
-  local query_strings = {}
-  for _, query_string_regex in ipairs(query_strings_regex) do
-    for _, available_textobject in ipairs(available_textobjects) do
-      if string.match("@" .. available_textobject, query_string_regex) then
-        table.insert(query_strings, "@" .. available_textobject)
-      end
-    end
-  end
+  local query_strings =
+    shared.get_query_strings_from_regex(query_strings_regex, query_group, parsers.get_buf_lang(bufnr))
 
   local config = configs.get_module "textobjects.move"
 

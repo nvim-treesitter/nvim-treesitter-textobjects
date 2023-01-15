@@ -1,7 +1,6 @@
 local ts_utils = require "nvim-treesitter.ts_utils"
 local shared = require "nvim-treesitter.textobjects.shared"
 local attach = require "nvim-treesitter.textobjects.attach"
-local parsers = require "nvim-treesitter.parsers"
 
 local M = {}
 

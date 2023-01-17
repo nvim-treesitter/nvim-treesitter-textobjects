@@ -44,6 +44,8 @@ function M.init()
         goto_next_end = {},
         goto_previous_start = {},
         goto_previous_end = {},
+        goto_next = {},
+        goto_previous = {},
       },
       swap = {
         module_path = "nvim-treesitter.textobjects.swap",
@@ -64,7 +66,7 @@ function M.init()
       },
     },
   }
-  for _, m in ipairs { "select", "move", "swap", "lsp_interop" } do
+  for _, m in ipairs { "select", "move", "repeatable_move", "swap", "lsp_interop" } do
     utils.setup_commands("textobjects." .. m, require("nvim-treesitter.textobjects." .. m).commands)
   end
 end

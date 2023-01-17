@@ -1,7 +1,6 @@
 local api = vim.api
 local configs = require "nvim-treesitter.configs"
 local parsers = require "nvim-treesitter.parsers"
-local queries = require "nvim-treesitter.query"
 
 local shared = require "nvim-treesitter.textobjects.shared"
 local ts_utils = require "nvim-treesitter.ts_utils"
@@ -145,6 +144,8 @@ function M.detect_selection_mode(query_string, keymap_mode)
   return selection_mode
 end
 
+M.keymaps_per_buf = {}
+
 function M.attach(bufnr, lang)
   bufnr = bufnr or api.nvim_get_current_buf()
   local config = configs.get_module "textobjects.select"
@@ -178,38 +179,34 @@ function M.attach(bufnr, lang)
     end
 
     if query_string then
-      local cmd_o = function()
-        M.select_textobject(query_string, query_group, "o")
+      for _, keymap_mode in ipairs { "o", "x" } do
+        local cmd = function()
+          M.select_textobject(query_string, query_group, keymap_mode)
+        end
+        local status, _ = pcall(
+          vim.keymap.set,
+          { keymap_mode },
+          mapping,
+          cmd,
+          { buffer = bufnr, silent = true, remap = false, desc = desc }
+        )
+        if status then
+          M.keymaps_per_buf[bufnr] = M.keymaps_per_buf[bufnr] or {}
+          table.insert(M.keymaps_per_buf[bufnr], { mode = keymap_mode, lhs = mapping })
+        end
       end
-      local cmd_x = function()
-        M.select_textobject(query_string, query_group, "x")
-      end
-      vim.keymap.set({ "o" }, mapping, cmd_o, { buffer = bufnr, silent = true, remap = false, desc = desc })
-      vim.keymap.set({ "x" }, mapping, cmd_x, { buffer = bufnr, silent = true, remap = false, desc = desc })
     end
   end
 end
 
 function M.detach(bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
-  local config = configs.get_module "textobjects.select"
-  local lang = parsers.get_buf_lang(bufnr)
 
-  for mapping, query in pairs(config.keymaps) do
-    if not queries.get_query(lang, "textobjects") then
-      query = nil
-    end
-    if type(query) == "table" then
-      query = query.query
-    end
-    if query then
-      for _, mode in ipairs { "o", "x" } do
-        if vim.fn.mapcheck(mapping, mode, false) ~= "" then
-          vim.keymap.del(mode, mapping, { buffer = bufnr })
-        end
-      end
-    end
+  for _, keymap in ipairs(M.keymaps_per_buf[bufnr] or {}) do
+    -- Even if it fails make it silent
+    pcall(vim.keymap.del, { keymap.mode }, keymap.lhs, { buffer = bufnr })
   end
+  M.keymaps_per_buf[bufnr] = nil
 end
 
 M.commands = {

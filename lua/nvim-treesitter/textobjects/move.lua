@@ -160,7 +160,7 @@ local nxo_mode_functions = {
 }
 
 M.attach = attach.make_attach(nxo_mode_functions, "move", { "n", "x", "o" })
-M.detach = attach.make_detach(nxo_mode_functions, "move", { "n", "x", "o" })
+M.detach = attach.make_detach "move"
 
 M.commands = {
   TSTextobjectGotoNextStart = {

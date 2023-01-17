@@ -168,6 +168,16 @@ vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t)
 vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T)
 ```
 
+You can even make a custom repeat behaviour.
+
+````lua
+local function repeat_last_move_next_end()
+  -- This repeats last query with always forward direction and end of the range.
+  return ts_repeat_move.repeat_last_move({forward = true, start = false})
+end
+vim.keymap.set({ "n", "x", "o" }, "<end>", repeat_last_move_next_end)
+```
+
 Furthermore, you can make any custom movements (e.g. from another plugin) repeatable with the same keys.
 This doesn't need to be treesitter-related.
 
@@ -187,7 +197,7 @@ local right2_repeat, left2_repeat = ts_repeat_move.make_repeatable_move_pair(rig
 
 vim.keymap.set({ "n", "x", "o" }, "l", right2_repeat)
 vim.keymap.set({ "n", "x", "o" }, "h", left2_repeat)
-```
+````
 
 Alternative way is to use a repeatable movement managing plugin such as [nvim-next](https://github.com/ghostbuster91/nvim-next).
 

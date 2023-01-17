@@ -87,34 +87,39 @@ M.make_repeatable_move_pair = function(forward_move_fn, backward_move_fn)
   return repeatable_forward_move_fn, repeatable_backward_move_fn
 end
 
-M.repeat_last_move = function()
+M.repeat_last_move = function(opts_extend)
   if M.last_move then
-    M.last_move.func(M.last_move.opts, unpack(M.last_move.additional_args))
+    local opts
+    if opts_extend ~= nil then
+      if type(opts_extend) ~= "table" then
+        vim.notify(
+          "nvim-treesitter-textobjects: opts_extend has to be a table but got " .. vim.inspect(opts_extend),
+          vim.log.levels.ERROR
+        )
+        return false
+      end
+
+      opts = vim.tbl_deep_extend("force", {}, M.last_move.opts, opts_extend)
+    else
+      opts = M.last_move.opts
+    end
+
+    M.last_move.func(opts, unpack(M.last_move.additional_args))
+    return true
   end
+  return false
 end
 
 M.repeat_last_move_opposite = function()
-  if M.last_move then
-    local opts = vim.deepcopy(M.last_move.opts)
-    opts.forward = not opts.forward
-    M.last_move.func(opts, unpack(M.last_move.additional_args))
-  end
+  return M.repeat_last_move { forward = not M.last_move.opts.forward }
 end
 
 M.repeat_last_move_next = function()
-  if M.last_move then
-    local opts = vim.deepcopy(M.last_move.opts)
-    opts.forward = true
-    M.last_move.func(opts, unpack(M.last_move.additional_args))
-  end
+  return M.repeat_last_move { forward = true }
 end
 
 M.repeat_last_move_previous = function()
-  if M.last_move then
-    local opts = vim.deepcopy(M.last_move.opts)
-    opts.forward = false
-    M.last_move.func(opts, unpack(M.last_move.additional_args))
-  end
+  return M.repeat_last_move { forward = false }
 end
 
 -- implements naive f, F, t, T with repeat support

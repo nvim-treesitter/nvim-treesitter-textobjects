@@ -12,8 +12,13 @@ local function make_dot_repeatable(fn)
 end
 
 function M.make_attach(functions, submodule, keymap_modes, opts)
-  keymap_modes = keymap_modes or "n"
+  if type(keymap_modes) == "string" then
+    keymap_modes = { keymap_modes }
+  elseif type(keymap_modes) ~= "table" then
+    keymap_modes = { "n" }
+  end
   opts = opts or {}
+
   return function(bufnr, lang)
     lang = lang or parsers.get_buf_lang(bufnr)
     if not queries.get_query(lang, "textobjects") then

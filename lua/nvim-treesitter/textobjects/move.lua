@@ -1,28 +1,32 @@
 local ts_utils = require "nvim-treesitter.ts_utils"
 local attach = require "nvim-treesitter.textobjects.attach"
 local shared = require "nvim-treesitter.textobjects.shared"
+local repeatable_move = require "nvim-treesitter.textobjects.repeatable_move"
 local queries = require "nvim-treesitter.query"
 local configs = require "nvim-treesitter.configs"
 local parsers = require "nvim-treesitter.parsers"
 
 local M = {}
 
-local function move(query_strings_regex, query_group, forward, start, winid)
+local function move(opts)
+  -- opts includes query_strings_regex, query_group, forward, start, winid
   -- start: bool or nil. If true, choose the start of the node, and false is for the end.
   -- If nil, it considers both and chooses the closer side.
-  query_strings_regex = shared.make_query_strings_table(query_strings_regex)
-  query_group = query_group or "textobjects"
+  local query_strings_regex = shared.make_query_strings_table(opts.query_strings_regex)
+  local query_group = opts.query_group or "textobjects"
+  local forward = opts.forward
   local starts
-  if start == nil then
+  if opts.start == nil then
     starts = { true, false }
   else
-    if start then
+    if opts.start then
       starts = { true }
     else
       starts = { false }
     end
   end
-  winid = winid or vim.api.nvim_get_current_win()
+  local winid = opts.winid or vim.api.nvim_get_current_win()
+
   local bufnr = vim.api.nvim_win_get_buf(winid)
   local query_strings =
     shared.get_query_strings_from_regex(query_strings_regex, query_group, parsers.get_buf_lang(bufnr))
@@ -96,25 +100,54 @@ local function move(query_strings_regex, query_group, forward, start, winid)
   end
 end
 
-M.goto_next_start = function(query_strings, query_group)
-  query_group = query_group or "textobjects"
-  move(query_strings, query_group, "forward", "start")
+local move_repeatable = repeatable_move.make_repeatable_move(move)
+
+M.goto_next_start = function(query_strings_regex, query_group)
+  move_repeatable {
+    forward = true,
+    start = true,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
-M.goto_next_end = function(query_strings, query_group)
-  move(query_strings, query_group, "forward", not "start")
+M.goto_next_end = function(query_strings_regex, query_group)
+  move_repeatable {
+    forward = true,
+    start = false,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
-M.goto_previous_start = function(query_strings, query_group)
-  move(query_strings, query_group, not "forward", "start")
+M.goto_previous_start = function(query_strings_regex, query_group)
+  move_repeatable {
+    forward = false,
+    start = true,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
-M.goto_previous_end = function(query_strings, query_group)
-  move(query_strings, query_group, not "forward", not "start")
+M.goto_previous_end = function(query_strings_regex, query_group)
+  move_repeatable {
+    forward = false,
+    start = false,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
 
-M.goto_next = function(query_strings, query_group)
-  move(query_strings, query_group, "forward")
+M.goto_next = function(query_strings_regex, query_group)
+  move_repeatable {
+    forward = true,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
-M.goto_previous = function(query_strings, query_group)
-  move(query_strings, query_group, not "forward")
+M.goto_previous = function(query_strings_regex, query_group)
+  move_repeatable {
+    forward = false,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
 
 local nxo_mode_functions = {

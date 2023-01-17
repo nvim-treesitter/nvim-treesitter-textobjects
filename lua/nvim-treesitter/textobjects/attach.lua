@@ -60,7 +60,12 @@ function M.make_attach(functions, submodule, keymap_modes, opts)
 end
 
 function M.make_detach(functions, submodule, keymap_modes)
-  keymap_modes = keymap_modes or "n"
+  if type(keymap_modes) == "string" then
+    keymap_modes = { keymap_modes }
+  elseif type(keymap_modes) ~= "table" then
+    keymap_modes = { "n" }
+  end
+
   return function(bufnr)
     local config = configs.get_module("textobjects." .. submodule)
     local lang = parsers.get_buf_lang(bufnr)

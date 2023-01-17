@@ -103,23 +103,51 @@ end
 local move_repeatable = repeatable_move.make_repeatable_move(move)
 
 M.goto_next_start = function(query_strings_regex, query_group)
-  move_repeatable { forward = true, start = true, query_strings_regex = query_strings_regex, query_group = query_group }
+  move_repeatable {
+    forward = true,
+    start = true,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
 M.goto_next_end = function(query_strings_regex, query_group)
-  move_repeatable { forward = true, start = true, query_strings_regex = query_strings_regex, query_group = query_group }
+  move_repeatable {
+    forward = true,
+    start = false,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
 M.goto_previous_start = function(query_strings_regex, query_group)
-  move_repeatable { forward = false, start = true, query_strings_regex = query_strings_regex, query_group = query_group }
+  move_repeatable {
+    forward = false,
+    start = true,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
 M.goto_previous_end = function(query_strings_regex, query_group)
-  move_repeatable { forward = false, start = false, query_strings_regex = query_strings_regex, query_group = query_group }
+  move_repeatable {
+    forward = false,
+    start = false,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
 
 M.goto_next = function(query_strings_regex, query_group)
-  move_repeatable { forward = true, query_strings_regex = query_strings_regex, query_group = query_group }
+  move_repeatable {
+    forward = true,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
 M.goto_previous = function(query_strings_regex, query_group)
-  move_repeatable { forward = false, query_strings_regex = query_strings_regex, query_group = query_group }
+  move_repeatable {
+    forward = false,
+    query_strings_regex = query_strings_regex,
+    query_group = query_group,
+  }
 end
 
 local nxo_mode_functions = {

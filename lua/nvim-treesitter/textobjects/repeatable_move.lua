@@ -24,7 +24,8 @@ M.clear_last_move = function()
   M.last_move = nil
 end
 
--- move_fn's first argument must be a table of options, and it should include a `forward` boolean indicating whether to move forward (true) or backward (false)
+-- move_fn's first argument must be a table of options, and it should include a `forward` boolean
+-- indicating whether to move forward (true) or backward (false)
 M.set_last_move = function(move_fn, opts, ...)
   if type(move_fn) ~= "function" then
     vim.notify(

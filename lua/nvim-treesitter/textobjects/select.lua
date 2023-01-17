@@ -203,7 +203,11 @@ function M.detach(bufnr)
       query = query.query
     end
     if query then
-      vim.keymap.del({ "o", "x" }, mapping, { buffer = bufnr })
+      for _, mode in ipairs { "o", "x" } do
+        if vim.fn.mapcheck(mapping, mode, false) ~= "" then
+          vim.keymap.del(mode, mapping, { buffer = bufnr })
+        end
+      end
     end
   end
 end

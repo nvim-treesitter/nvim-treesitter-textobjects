@@ -170,7 +170,7 @@ vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T)
 
 You can even make a custom repeat behaviour.
 
-````lua
+```lua
 local function repeat_last_move_next_end()
   -- This repeats last query with always forward direction and end of the range.
   return ts_repeat_move.repeat_last_move({forward = true, start = false})
@@ -197,7 +197,7 @@ local right2_repeat, left2_repeat = ts_repeat_move.make_repeatable_move_pair(rig
 
 vim.keymap.set({ "n", "x", "o" }, "l", right2_repeat)
 vim.keymap.set({ "n", "x", "o" }, "h", left2_repeat)
-````
+```
 
 Alternative way is to use a repeatable movement managing plugin such as [nvim-next](https://github.com/ghostbuster91/nvim-next).
 

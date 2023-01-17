@@ -119,7 +119,7 @@ function M.peek_definition_code(query_string, query_group, lsp_request, context)
 end
 
 M.attach = attach.make_attach(nx_mode_functions, "lsp_interop", { "n", "x" })
-M.detach = attach.make_detach(nx_mode_functions, "lsp_interop", { "n", "x" })
+M.detach = attach.make_detach "lsp_interop"
 M.commands = {
   TSTextobjectPeekDefinitionCode = {
     run = M.peek_definition_code,

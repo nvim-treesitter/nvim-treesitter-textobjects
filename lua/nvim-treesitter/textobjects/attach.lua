@@ -11,6 +11,8 @@ local function make_dot_repeatable(fn)
   end
 end
 
+M.keymaps_per_submodule = {}
+
 function M.make_attach(functions, submodule, keymap_modes, opts)
   if type(keymap_modes) == "string" then
     keymap_modes = { keymap_modes }
@@ -18,6 +20,9 @@ function M.make_attach(functions, submodule, keymap_modes, opts)
     keymap_modes = { "n" }
   end
   opts = opts or {}
+
+  M.keymaps_per_submodule[submodule] = M.keymaps_per_submodule[submodule] or {}
+  local keymaps_per_buf = M.keymaps_per_submodule[submodule]
 
   return function(bufnr, lang)
     lang = lang or parsers.get_buf_lang(bufnr)
@@ -48,52 +53,36 @@ function M.make_attach(functions, submodule, keymap_modes, opts)
         if opts.dot_repeatable then
           fn = make_dot_repeatable(fn)
         end
-        vim.keymap.set(
-          keymap_modes,
-          mapping,
-          fn,
-          { buffer = bufnr, silent = true, remap = false, desc = mapping_description }
-        )
+        for _, mode in pairs(keymap_modes) do
+          local status, _ = pcall(
+            vim.keymap.set,
+            mode,
+            mapping,
+            fn,
+            { buffer = bufnr, silent = true, remap = false, desc = mapping_description }
+          )
+          if status then
+            keymaps_per_buf[bufnr] = keymaps_per_buf[bufnr] or {}
+            table.insert(keymaps_per_buf[bufnr], { mode = mode, lhs = mapping })
+          end
+        end
       end
     end
   end
 end
 
-function M.make_detach(functions, submodule, keymap_modes)
-  if type(keymap_modes) == "string" then
-    keymap_modes = { keymap_modes }
-  elseif type(keymap_modes) ~= "table" then
-    keymap_modes = { "n" }
-  end
-
+function M.make_detach(submodule)
   return function(bufnr)
-    local config = configs.get_module("textobjects." .. submodule)
-    local lang = parsers.get_buf_lang(bufnr)
+    M.keymaps_per_submodule[submodule] = M.keymaps_per_submodule[submodule] or {}
+    local keymaps_per_buf = M.keymaps_per_submodule[submodule]
 
-    for mapping, query in pairs(config.keymaps or {}) do
-      if not queries.get_query(lang, "textobjects") then
-        query = nil
-      end
-      if query then
-        vim.keymap.del({ "o", "x" }, mapping, { buffer = bufnr })
-      end
+    bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+    for _, keymap in ipairs(keymaps_per_buf[bufnr] or {}) do
+      -- Even if it fails make it silent
+      pcall(vim.keymap.del, { keymap.mode }, keymap.lhs, { buffer = bufnr })
     end
-    for _, function_call in pairs(functions) do
-      for mapping, query in pairs(config[function_call] or {}) do
-        if type(query) == "table" then
-          query = query[lang]
-        elseif not queries.get_query(lang, "textobjects") then
-          query = nil
-        end
-        if query then
-          for _, mode in ipairs(keymap_modes) do
-            if vim.fn.mapcheck(mapping, mode, false) ~= "" then
-              vim.keymap.del(mode, mapping, { buffer = bufnr })
-            end
-          end
-        end
-      end
-    end
+    keymaps_per_buf[bufnr] = nil
   end
 end
 

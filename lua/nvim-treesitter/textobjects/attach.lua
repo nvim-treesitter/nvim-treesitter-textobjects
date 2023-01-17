@@ -25,18 +25,20 @@ function M.make_attach(normal_mode_functions, submodule, keymap_modes, opts)
     for _, function_call in pairs(normal_mode_functions) do
       local function_description = function_call:gsub("_", " "):gsub("^%l", string.upper)
       for mapping, query_metadata in pairs(config[function_call] or {}) do
-        local mapping_description, query
+        local mapping_description, query, query_group
 
         if type(query_metadata) == "table" then
           query = query_metadata.query
+          query_group = query_metadata.query_group or "textobjects"
           mapping_description = query_metadata.desc
         else
           query = query_metadata
+          query_group = "textobjects"
           mapping_description = function_description .. " " .. query_metadata
         end
 
         local fn = function()
-          require("nvim-treesitter.textobjects." .. submodule)[function_call](query)
+          require("nvim-treesitter.textobjects." .. submodule)[function_call](query, query_group)
         end
         if opts.repeatable then
           fn = make_repeatable(fn)

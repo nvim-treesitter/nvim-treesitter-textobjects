@@ -17,9 +17,28 @@ function M.make_query_strings_table(query_strings)
   return type(query_strings) == "string" and { query_strings } or query_strings
 end
 
-function M.available_textobjects(lang)
+-- Get query strings from regex
+function M.get_query_strings_from_regex(query_strings_regex, query_group, lang)
+  query_strings_regex = M.make_query_strings_table(query_strings_regex)
+  query_group = query_group or "textobjects"
+  lang = lang or parsers.get_buf_lang(0)
+  local available_textobjects = M.available_textobjects(lang, query_group)
+  local query_strings = {}
+  for _, query_string_regex in ipairs(query_strings_regex) do
+    for _, available_textobject in ipairs(available_textobjects) do
+      if string.match("@" .. available_textobject, query_string_regex) then
+        table.insert(query_strings, "@" .. available_textobject)
+      end
+    end
+  end
+
+  return query_strings
+end
+
+function M.available_textobjects(lang, query_group)
   lang = lang or parsers.get_buf_lang()
-  local parsed_queries = queries.get_query(lang, "textobjects")
+  query_group = query_group or "textobjects"
+  local parsed_queries = queries.get_query(lang, query_group)
   if not parsed_queries then
     return {}
   end
@@ -43,7 +62,8 @@ function M.available_textobjects(lang)
   --}
 end
 
-function M.textobject_at_point(query_string, pos, bufnr, opts)
+function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
+  query_group = query_group or "textobjects"
   opts = opts or {}
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local lang = parsers.get_buf_lang(bufnr)
@@ -57,7 +77,7 @@ function M.textobject_at_point(query_string, pos, bufnr, opts)
   if not string.match(query_string, "^@.*") then
     error 'Captures must start with "@"'
   end
-  local matches = queries.get_capture_matches_recursively(bufnr, query_string, "textobjects")
+  local matches = queries.get_capture_matches_recursively(bufnr, query_string, query_group)
 
   local match_length
   local smallest_range
@@ -143,12 +163,14 @@ function M.textobject_at_point(query_string, pos, bufnr, opts)
   end
 end
 
-function M.get_adjacent(forward, node, query_string, same_parent, overlapping_range_ok, bufnr)
+function M.get_adjacent(forward, node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
+  query_group = query_group or "textobjects"
   local fn = forward and M.next_textobject or M.previous_textobject
-  return fn(node, query_string, same_parent, overlapping_range_ok, bufnr)
+  return fn(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
 end
 
-function M.next_textobject(node, query_string, same_parent, overlapping_range_ok, bufnr)
+function M.next_textobject(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
+  query_group = query_group or "textobjects"
   local node = node or ts_utils.get_node_at_cursor()
   local bufnr = bufnr or api.nvim_get_current_buf()
   if not node then
@@ -177,12 +199,13 @@ function M.next_textobject(node, query_string, same_parent, overlapping_range_ok
     return -node_start
   end
 
-  local next_node = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
+  local next_node = queries.find_best_match(bufnr, query_string, query_group, filter_function, scoring_function)
 
   return next_node and next_node.node
 end
 
-function M.previous_textobject(node, query_string, same_parent, overlapping_range_ok, bufnr)
+function M.previous_textobject(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
+  query_group = query_group or "textobjects"
   local node = node or ts_utils.get_node_at_cursor()
   local bufnr = bufnr or api.nvim_get_current_buf()
   if not node then
@@ -211,7 +234,7 @@ function M.previous_textobject(node, query_string, same_parent, overlapping_rang
     return node_end
   end
 
-  local previous_node = queries.find_best_match(bufnr, query_string, "textobjects", filter_function, scoring_function)
+  local previous_node = queries.find_best_match(bufnr, query_string, query_group, filter_function, scoring_function)
 
   return previous_node and previous_node.node
 end

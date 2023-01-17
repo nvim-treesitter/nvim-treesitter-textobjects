@@ -95,12 +95,13 @@ local val_or_return = function(val, opts)
   end
 end
 
-function M.select_textobject(query_string, keymap_mode)
+function M.select_textobject(query_string, query_group, keymap_mode)
+  query_group = query_group or "textobjects"
   local lookahead = configs.get_module("textobjects.select").lookahead
   local lookbehind = configs.get_module("textobjects.select").lookbehind
   local surrounding_whitespace = configs.get_module("textobjects.select").include_surrounding_whitespace
   local bufnr, textobject =
-    shared.textobject_at_point(query_string, nil, nil, { lookahead = lookahead, lookbehind = lookbehind })
+    shared.textobject_at_point(query_string, query_group, nil, nil, { lookahead = lookahead, lookbehind = lookbehind })
   if textobject then
     local selection_mode = M.detect_selection_mode(query_string, keymap_mode)
     if
@@ -145,33 +146,52 @@ function M.detect_selection_mode(query_string, keymap_mode)
 end
 
 function M.attach(bufnr, lang)
-  local buf = bufnr or api.nvim_get_current_buf()
+  bufnr = bufnr or api.nvim_get_current_buf()
   local config = configs.get_module "textobjects.select"
-  lang = lang or parsers.get_buf_lang(buf)
+  lang = lang or parsers.get_buf_lang(bufnr)
 
   for mapping, query in pairs(config.keymaps) do
-    local desc
+    local desc, query_string, query_group
     if type(query) == "table" then
       desc = query.desc
-      query = query.query
+      query_string = query.query
+      query_group = query.query_group or "textobjects"
+    else
+      query_string = query
+      query_group = "textobjects"
     end
     if not desc then
-      desc = "Select textobject " .. query
+      desc = "Select textobject " .. query_string
     end
-    if not queries.get_query(lang, "textobjects") then
-      query = nil
+
+    local available_textobjects = shared.available_textobjects(lang, query_group)
+    local available = false
+    for _, available_textobject in ipairs(available_textobjects) do
+      if "@" .. available_textobject == query_string then
+        available = true
+        break
+      end
     end
-    if query then
-      local cmd_o = "<cmd>lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'o')<CR>"
-      local cmd_x = "<cmd>lua require'nvim-treesitter.textobjects.select'.select_textobject('" .. query .. "', 'x')<CR>"
-      vim.keymap.set({ "o" }, mapping, cmd_o, { buffer = buf, silent = true, remap = false, desc = desc })
-      vim.keymap.set({ "x" }, mapping, cmd_x, { buffer = buf, silent = true, remap = false, desc = desc })
+
+    if not available then
+      query_string = nil
+    end
+
+    if query_string then
+      local cmd_o = function()
+        M.select_textobject(query_string, query_group, "o")
+      end
+      local cmd_x = function()
+        M.select_textobject(query_string, query_group, "x")
+      end
+      vim.keymap.set({ "o" }, mapping, cmd_o, { buffer = bufnr, silent = true, remap = false, desc = desc })
+      vim.keymap.set({ "x" }, mapping, cmd_x, { buffer = bufnr, silent = true, remap = false, desc = desc })
     end
   end
 end
 
 function M.detach(bufnr)
-  local buf = bufnr or api.nvim_get_current_buf()
+  bufnr = bufnr or api.nvim_get_current_buf()
   local config = configs.get_module "textobjects.select"
   local lang = parsers.get_buf_lang(bufnr)
 
@@ -183,7 +203,7 @@ function M.detach(bufnr)
       query = query.query
     end
     if query then
-      vim.keymap.del({ "o", "x" }, mapping, { buffer = buf })
+      vim.keymap.del({ "o", "x" }, mapping, { buffer = bufnr })
     end
   end
 end

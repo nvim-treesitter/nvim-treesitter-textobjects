@@ -76,7 +76,11 @@ function M.make_detach(normal_mode_functions, submodule, keymap_modes)
           query = nil
         end
         if query then
-          vim.keymap.del(keymap_modes, mapping, { buffer = bufnr })
+          for _, mode in ipairs(keymap_modes) do
+            if vim.fn.mapcheck(mapping, mode, false) ~= "" then
+              vim.keymap.del(mode, mapping, { buffer = bufnr })
+            end
+          end
         end
       end
     end

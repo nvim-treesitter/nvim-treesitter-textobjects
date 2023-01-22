@@ -90,6 +90,9 @@
   . (_) @parameter.inner
  (#make-range! "parameter.outer" @_start @parameter.inner))
 
+; number
+(number) @number.inner
+
 ; scopename
 
 ; statement

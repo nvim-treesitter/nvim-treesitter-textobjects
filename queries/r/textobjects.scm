@@ -81,3 +81,6 @@
   . ","? @_end
   )
   (#make-range! "parameter.outer" @parameter.inner @_end))
+
+; number
+(float) @number.inner

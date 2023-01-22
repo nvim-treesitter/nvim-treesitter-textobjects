@@ -78,3 +78,5 @@
 ((argument_list
   . (_) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end))
+
+(number_literal) @number.inner

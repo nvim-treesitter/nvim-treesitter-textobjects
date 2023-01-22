@@ -25,3 +25,8 @@
 (if_expression
   (_) @conditional.inner
 ) @conditional.outer
+
+[
+  (integer_expression)
+  (float_expression)
+] @number.inner

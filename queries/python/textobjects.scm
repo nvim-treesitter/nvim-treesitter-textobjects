@@ -159,4 +159,9 @@
   )
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
+[
+  (integer)
+  (float)
+] @number.inner
+
 ; TODO: exclude comments using the future negate syntax from tree-sitter

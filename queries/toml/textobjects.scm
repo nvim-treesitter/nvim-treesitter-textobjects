@@ -1,0 +1,4 @@
+[
+  (integer)
+  (float)
+] @number.inner

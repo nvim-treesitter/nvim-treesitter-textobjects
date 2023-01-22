@@ -17,3 +17,6 @@
 (comment) @comment.outer
 
 (regex) @regex.inner
+
+((word) @number.inner
+ (#lua-match? @number.inner "^[0-9]+$"))

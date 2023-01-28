@@ -143,9 +143,18 @@ local function builtin_find(opts)
   local line = vim.api.nvim_get_current_line()
   local cursor = vim.api.nvim_win_get_cursor(winid)
 
+  -- count works like this with builtin vim motions.
+  -- weird, but we're matching the behaviour
+  local count
+  if not inclusive and repeating then
+    count = math.max(vim.v.count1 - 1, 1)
+  else
+    count = vim.v.count1
+  end
+
   -- find the count-th occurrence of the char in the line
   local found
-  for _ = 1, vim.v.count1 do
+  for _ = 1, count do
     if forward then
       if not inclusive and repeating then
         cursor[2] = cursor[2] + 1

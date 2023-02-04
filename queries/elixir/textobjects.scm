@@ -70,12 +70,21 @@
 ; Documentation Objects
 (unary_operator 
   operator: "@"
-  operand: (call target: ((identifier) @_identifier (#any-of? @_identifier
-    "moduledoc" 
-    "typedoc" 
-    "shortdoc" 
-    "doc"
-  )))
+  operand: (
+    call target: ((identifier) @_identifier (#any-of? @_identifier
+      "moduledoc" 
+      "typedoc" 
+      "shortdoc" 
+      "doc"
+    ))
+  (arguments [
+    ; attributes style documentation
+    ; @doc deprecated: "...."
+    (keywords) @comment.inner
+    ; heredoc style documentation
+    ; @moduledoc """"""
+    (string (quoted_content) @comment.inner)
+  ]))
 ) @comment.outer
 
 ; Regex Objects

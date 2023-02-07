@@ -5,6 +5,7 @@
 ] (#make-range! "block.inner" @_do @_end)) @block.outer
 
 ; Class Objects (Modules, Protocols)
+; multiple children
 (call
   target: ((identifier) @_identifier (#any-of? @_identifier 
     "defmodule" 
@@ -12,11 +13,19 @@
     "defimpl"
   ))
   (arguments (alias))
-  [
-    (do_block "do" . (_) @_do (_) @_end . "end")
-    (do_block "do" . ((_) @_do) @_end . "end")
-  ]
+  (do_block "do" . (_) @_do (_) @_end . "end")
   (#make-range! "class.inner" @_do @_end)
+) @class.outer
+
+; single child match
+(call
+  target: ((identifier) @_identifier (#any-of? @_identifier 
+    "defmodule" 
+    "defprotocol" 
+    "defimpl"
+  ))
+  (arguments (alias))
+  (do_block "do" . (_) @class.inner . "end")
 ) @class.outer
 
 ; Function, Parameter, and Call Objects

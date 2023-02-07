@@ -3,10 +3,6 @@ local M = {}
 local assert = require "luassert"
 local Path = require "plenary.path"
 
--- Test in all possible col position
--- f, F, t, T
--- ; , repeat
--- count repeat
 function M.run_equal_cmds_test(file, spec)
   assert.are.same(1, vim.fn.filereadable(file), string.format('File "%s" not readable', file))
 

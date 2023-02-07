@@ -19,4 +19,8 @@ describe("command equality Python:", function()
       "cia<bs>",
     },
   })
+  -- select using built-in finds (f, F, t, T)
+  run:equal_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "dfi", "vfid", "cfi" } })
+  -- select using move
+  run:equal_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "d]a", "v]ad", "c]a" } })
 end)

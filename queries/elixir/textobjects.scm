@@ -28,12 +28,7 @@
   (do_block "do" . (_) @class.inner . "end")
 ) @class.outer
 
-; Function, Parameter, and Call Objects
-(anonymous_function
-  (stab_clause 
-    right: (body) @function.inner)
-) @function.outer
-
+; Parameters
 (call 
   target: ((identifier) @_identifier (#any-of? @_identifier 
     "def" 
@@ -47,13 +42,15 @@
     (arguments (_) @parameter.inner . "," @_delimiter)
     (arguments ((_) @parameter.inner) @_delimiter .) 
   ] (#make-range! "parameter.outer" @parameter.inner @_delimiter)))
-  [
-    (do_block "do" . (_) @_do (_) @_end . "end")
-    (do_block "do" . ((_) @_do) @_end . "end")
-  ]
-  (#make-range! "function.inner" @_do @_end)
 ) @function.outer
 
+; Function and Call Objects
+(anonymous_function
+  (stab_clause 
+    right: (body) @function.inner)
+) @function.outer
+
+; single child
 (call 
   target: ((identifier) @_identifier (#any-of? @_identifier 
     "def" 
@@ -63,10 +60,37 @@
     "defnp" 
     "defp"
   ))
-  (arguments (call [
-    (arguments (_) @parameter.inner . "," @_delimiter)
-    (arguments ((_) @parameter.inner) @_delimiter .) 
-  ] (#make-range! "parameter.outer" @parameter.inner @_delimiter))
+  (arguments (call))
+  (do_block "do" . (_) @function.inner . "end")
+) @function.outer
+
+; multi child
+(call 
+  target: ((identifier) @_identifier (#any-of? @_identifier 
+    "def" 
+    "defmacro" 
+    "defmacrop" 
+    "defn" 
+    "defnp" 
+    "defp"
+  ))
+  (arguments (call))
+  (do_block "do" . (_) @_do (_) @_end . "end")
+  (#make-range! "function.inner" @_do @_end)
+) @function.outer
+
+; def function(), do: ....
+(call 
+  target: ((identifier) @_identifier (#any-of? @_identifier 
+    "def" 
+    "defmacro" 
+    "defmacrop" 
+    "defn" 
+    "defnp" 
+    "defp"
+  ))
+  (arguments
+    (call)
     (keywords
       (pair
         value: (_) @function.inner))

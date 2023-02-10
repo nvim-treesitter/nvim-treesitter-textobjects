@@ -1,32 +1,40 @@
 ;; functions
+(function_signature_item) @function.outer
+(function_item) @function.outer
 (function_item
   body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "function.inner" @_start @_end))) @function.outer
+  (#make-range! "function.inner" @_start @_end)))
 
 ;; quantifies as class(es)
+(struct_item) @class.outer
 (struct_item
   body: (field_declaration_list . "{" . (_) @_start [(_)","]? @_end . "}"
-  (#make-range! "class.inner" @_start @_end))) @class.outer
+  (#make-range! "class.inner" @_start @_end)))
 
+(enum_item) @class.outer
 (enum_item
   body: (enum_variant_list . "{" . (_) @_start [(_)","]? @_end . "}"
-  (#make-range! "class.inner" @_start @_end))) @class.outer
+  (#make-range! "class.inner" @_start @_end)))
 
+(union_item) @class.outer
 (union_item
   body: (field_declaration_list . "{" . (_) @_start [(_)","]? @_end . "}"
-  (#make-range! "class.inner" @_start @_end))) @class.outer
+  (#make-range! "class.inner" @_start @_end)))
 
+(trait_item) @class.outer
 (trait_item
   body: (declaration_list . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "class.inner" @_start @_end))) @class.outer
+  (#make-range! "class.inner" @_start @_end)))
 
+(impl_item) @class.outer
 (impl_item
   body: (declaration_list . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "class.inner" @_start @_end))) @class.outer
+  (#make-range! "class.inner" @_start @_end)))
 
+(mod_item) @class.outer
 (mod_item
   body: (declaration_list . "{" . (_) @_start @_end (_)? @_end . "}"
-  (#make-range! "class.inner" @_start @_end))) @class.outer
+  (#make-range! "class.inner" @_start @_end)))
 
 ;; conditionals
 (if_expression

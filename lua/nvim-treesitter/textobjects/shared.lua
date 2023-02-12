@@ -91,7 +91,7 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
   local lookbehind_earliest_start
 
   for _, m in pairs(matches) do
-    if m.node and ts_utils.is_in_node_range(m.node, row, col) then
+    if m.node and vim.treesitter.is_in_node_range(m.node, row, col) then
       local length = ts_utils.node_length(m.node)
       if not match_length or length < match_length then
         smallest_range = m

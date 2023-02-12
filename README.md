@@ -12,11 +12,21 @@ You can install nvim-treesitter-textobjects with your favorite package manager, 
 
 ### Using a package manager
 
-If you are using vim-plug, put this in your init.vim file:
+If you are using [vim-plug](https://github.com/junegunn/vim-plug), put this in your init.vim file:
 
 ```vim
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'nvim-treesitter/nvim-treesitter-textobjects'
+```
+
+If you are using [Packer](https://github.com/wbthomason/packer.nvim), put it in your init.lua file:
+
+```lua
+use({
+  "nvim-treesitter/nvim-treesitter-textobjects",
+  after = "nvim-treesitter",
+  requires = "nvim-treesitter/nvim-treesitter",
+})
 ```
 
 ## Text objects: select

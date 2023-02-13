@@ -1,6 +1,4 @@
 local configs = require "nvim-treesitter.configs"
-local parsers = require "nvim-treesitter.parsers"
-local queries = require "nvim-treesitter.query"
 local M = {}
 
 local function make_dot_repeatable(fn)
@@ -25,11 +23,7 @@ function M.make_attach(functions, submodule, keymap_modes, opts)
   local keymaps_per_buf = M.keymaps_per_submodule[submodule]
 
   return function(bufnr, lang)
-    lang = lang or parsers.get_buf_lang(bufnr)
-    if not queries.get_query(lang, "textobjects") then
-      return
-    end
-
+    -- lang = lang or parsers.get_buf_lang(bufnr)
     local config = configs.get_module("textobjects." .. submodule)
 
     for _, function_call in pairs(functions) do

@@ -62,23 +62,14 @@ function M.available_textobjects(lang, query_group)
   --}
 end
 
-function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
-  query_group = query_group or "textobjects"
-  opts = opts or {}
-  bufnr = bufnr or vim.api.nvim_get_current_buf()
-  local lang = parsers.get_buf_lang(bufnr)
-  if not lang then
-    return
-  end
-
-  local row, col = unpack(pos or vim.api.nvim_win_get_cursor(0))
-  row = row - 1
-
-  if not string.match(query_string, "^@.*") then
-    error 'Captures must start with "@"'
-  end
-  local matches = queries.get_capture_matches_recursively(bufnr, query_string, query_group)
-
+--- Get the best match at a given point
+--- If the point is inside a node, the smallest node is returned
+--- If the point is not inside a node, the closest node is returned (if opts.lookahead or opts.lookbehind is true)
+---@param matches table list of matches
+---@param row number 0-indexed
+---@param col number 0-indexed
+---@param opts table lookahead and lookbehind options
+local function best_match_at_point(matches, row, col, opts)
   local match_length
   local smallest_range
   local earliest_start
@@ -152,14 +143,95 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
     if smallest_range.start then
       local start_range = get_range(smallest_range.start)
       local node_range = get_range(smallest_range)
-      return bufnr, { start_range[1], start_range[2], node_range[3], node_range[4] }, smallest_range.node
+      return { start_range[1], start_range[2], node_range[3], node_range[4] }, smallest_range.node
     else
-      return bufnr, get_range(smallest_range), smallest_range.node
+      return get_range(smallest_range), smallest_range.node
     end
   elseif lookahead_largest_range then
-    return bufnr, get_range(lookahead_largest_range), lookahead_largest_range.node
+    return get_range(lookahead_largest_range), lookahead_largest_range.node
   elseif lookbehind_largest_range then
-    return bufnr, get_range(lookbehind_largest_range), lookbehind_largest_range.node
+    return get_range(lookbehind_largest_range), lookbehind_largest_range.node
+  end
+end
+
+--- Get the best match at a given point
+--- Similar to best_match_at_point but it will search within the @*.outer capture if possible.
+--- For example, @function.inner will select the inner part of what @function.outer would select.
+--- Without this logic, @function.inner can select the larger context (e.g. the main function)
+--- when it's just before the start of the inner range.
+--- Or it will look ahead and choose the next inner range instead of selecting the current function
+--- when it's just after the end of the inner range (e.g. the "end" keyword of the function)
+function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
+  query_group = query_group or "textobjects"
+  opts = opts or {}
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local lang = parsers.get_buf_lang(bufnr)
+  if not lang then
+    return
+  end
+
+  local row, col = unpack(pos or vim.api.nvim_win_get_cursor(0))
+  row = row - 1
+
+  if not string.match(query_string, "^@.*") then
+    error 'Captures must start with "@"'
+    return
+  end
+
+  local matches = queries.get_capture_matches_recursively(bufnr, query_string, query_group)
+  if string.match(query_string, "^@.*%.outer$") then
+    local range, node = best_match_at_point(matches, row, col, opts)
+    return bufnr, range, node
+  else
+    -- query string is @*.inner or @*
+    -- First search the @*.outer instead, and then search the @*.inner within the range of the @*.outer
+    local query_string_outer = string.gsub(query_string, "%..*", ".outer")
+    if query_string_outer == query_string then
+      query_string_outer = query_string .. ".outer"
+    end
+
+    local matches_outer = queries.get_capture_matches_recursively(bufnr, query_string_outer, query_group)
+    if #matches_outer == 0 then
+      -- Outer query doesn't exist or doesn't match anything
+      -- Return the best match from the entire buffer, just like the @*.outer case
+      local range, node = best_match_at_point(matches, row, col, opts)
+      return bufnr, range, node
+    end
+
+    -- Note that outer matches don't perform lookahead
+    local range_outer, node_outer = best_match_at_point(matches_outer, row, col, {})
+    if range_outer == nil then
+      -- No @*.outer found
+      -- Return the best match from the entire buffer, just like the @*.outer case
+      local range, node = best_match_at_point(matches, row, col, opts)
+      return bufnr, range, node
+    end
+
+    local matches_within_outer = {}
+    for _, match in ipairs(matches) do
+      if vim.treesitter.node_contains(node_outer, { match.node:range() }) then
+        table.insert(matches_within_outer, match)
+      end
+    end
+    if #matches_within_outer == 0 then
+      -- No @*.inner found within the range of the @*.outer
+      -- Return the best match from the entire buffer, just like the @*.outer case
+      local range, node = best_match_at_point(matches, row, col, opts)
+      return bufnr, range, node
+    else
+      -- Find the best match from the cursor position
+      local range, node = best_match_at_point(matches_within_outer, row, col, opts)
+      if range ~= nil then
+        return bufnr, range, node
+      else
+        -- If failed,
+        -- find the best match within the range of the @*.outer
+        -- starting from the outer range's start position (not the cursor position)
+        -- with lookahead enabled
+        range, node = best_match_at_point(matches_within_outer, range_outer[1], range_outer[2], { lookahead = true })
+        return bufnr, range, node
+      end
+    end
   end
 end
 
@@ -171,7 +243,7 @@ end
 
 function M.next_textobject(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
   query_group = query_group or "textobjects"
-  local node = node or ts_utils.get_node_at_cursor()
+  local node = node or vim.treesitter.get_node_at_cursor()
   local bufnr = bufnr or api.nvim_get_current_buf()
   if not node then
     return
@@ -206,7 +278,7 @@ end
 
 function M.previous_textobject(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
   query_group = query_group or "textobjects"
-  local node = node or ts_utils.get_node_at_cursor()
+  local node = node or vim.treesitter.get_node_at_cursor()
   local bufnr = bufnr or api.nvim_get_current_buf()
   if not node then
     return

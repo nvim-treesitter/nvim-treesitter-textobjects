@@ -28,6 +28,9 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
 
+      - name: Install tree-sitter CLI
+        run: npm i -g tree-sitter-cli
+
       - name: Test Dependencies
         run: |
           mkdir -p ~/.local/share/nvim/site/pack/ci/opt

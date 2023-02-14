@@ -27,3 +27,10 @@
   (integer_literal)
   (float_literal)
 ] @number.inner
+
+(let_statement
+  (_) @assignment.lhs
+  (_) @assignment.rhs @assignment.inner) @assignment.outer
+
+(let_statement
+  (_) @assignment.inner)

@@ -28,7 +28,7 @@ jobs:
           wget https://github.com/neovim/neovim/releases/download/${NVIM_TAG}/nvim.appimage
           chmod u+x nvim.appimage && sudo mv nvim.appimage /usr/local/bin/nvim
 
-          git clone -b v0.1.0 --depth 1 https://github.com/kiyoon/nvim-treesitter-textobjects-tests
+          git clone -b v0.1.1 --depth 1 https://github.com/kiyoon/nvim-treesitter-textobjects-tests
 
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/opt
           ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/opt

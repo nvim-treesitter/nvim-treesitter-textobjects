@@ -171,3 +171,17 @@
   (integer_literal)
   (float_literal)
 ] @number.inner
+
+(let_declaration
+ pattern: (_) @assignment.lhs
+ value: (_) @assignment.inner @assignment.rhs) @assignment.outer
+
+(let_declaration
+ pattern: (_) @assignment.inner)
+
+(assignment_expression
+ left: (_) @assignment.lhs
+ right: (_) @assignment.inner @assignment.rhs) @assignment.outer
+
+(assignment_expression
+ left: (_) @assignment.inner)

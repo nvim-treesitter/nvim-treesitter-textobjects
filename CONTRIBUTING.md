@@ -23,6 +23,10 @@ Each capture group can be declared as `inner` or `outer`.
 @parameter.outer
 @regex.inner
 @regex.outer
+@comment.inner
+@comment.outer
+@assignment.inner
+@assignment.outer
 
 # For LaTeX frames
 @frame.inner
@@ -32,11 +36,18 @@ Each capture group can be declared as `inner` or `outer`.
 Some nodes only have one type:
 
 ```
-@comment.outer
 @statement.outer
 @scopename.inner
 @number.inner
 ```
+
+Some nodes have more captures available:
+
+```
+@assignment.lhs
+@assignment.rhs
+```
+
 ### Automatic README Generation
 
 You don't have to update the support matrix in the README manually.

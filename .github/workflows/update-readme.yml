@@ -11,6 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+
+      - name: Install tree-sitter CLI
+        run: npm i -g tree-sitter-cli
+
       - name: Prepare
         run: |
           sudo apt-get update && sudo apt-get install libfuse2

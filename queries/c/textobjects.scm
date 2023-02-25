@@ -45,6 +45,9 @@
   arguments: (argument_list . "(" . (_) @_start (_)? @_end . ")"
   (#make-range! "call.inner" @_start @_end)))
 
+(return_statement
+  (_)? @return.inner) @return.outer
+
 ; Statements
 
 ;(expression_statement ;; this is what we actually want to capture in most cases (";" is missing) probably

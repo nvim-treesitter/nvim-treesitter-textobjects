@@ -27,6 +27,8 @@ Each capture group can be declared as `inner` or `outer`.
 @comment.outer
 @assignment.inner
 @assignment.outer
+@return.inner
+@return.outer
 
 # For LaTeX frames
 @frame.inner

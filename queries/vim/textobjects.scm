@@ -16,6 +16,9 @@
 
 (call_expression) @call.outer
 
+(return_statement
+  (_)? @return.inner) @return.outer
+
 (_ (body) @block.inner) @block.outer
 (body (_) @statement.outer)
 

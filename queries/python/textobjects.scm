@@ -36,6 +36,9 @@
   arguments: (argument_list . "(" . (_) @_start (_)? @_end . ")"
   (#make-range! "call.inner" @_start @_end)))
 
+(return_statement
+  (_)? @return.inner) @return.outer
+
 ;; Parameters
 
 ((parameters

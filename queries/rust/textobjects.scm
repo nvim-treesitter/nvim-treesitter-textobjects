@@ -75,6 +75,10 @@
   arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
   (#make-range! "call.inner" @_start @_end)))
 
+;; returns
+(return_expression
+  (_)? @return.inner) @return.outer
+
 ;; statements
 (block (_) @statement.outer)
 

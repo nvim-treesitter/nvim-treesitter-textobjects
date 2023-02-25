@@ -44,6 +44,11 @@
 
 (function_definition body: (_) @function.inner)
 
+; return
+
+(return_statement
+  (_)? @return.inner) @return.outer
+
 ; loop
 
 [

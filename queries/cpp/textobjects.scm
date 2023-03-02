@@ -55,3 +55,10 @@
 
 (new_expression
   (argument_list) @call.inner) @call.outer
+
+(declaration
+ type: (_) @assignment.lhs
+ declarator: (_) @assignment.inner @assignment.rhs) @assignment.outer
+
+(declaration
+ type: (_) @assignment.inner)

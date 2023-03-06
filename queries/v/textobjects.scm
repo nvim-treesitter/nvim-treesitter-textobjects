@@ -59,6 +59,11 @@
   body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
     (#make-range! "loop.inner" @_start @_end))?) @loop.outer
 
+[
+  (int_literal)
+  (float_literal)
+] @number.inner
+
 ;; parameter
 (parameter_list
   "," @_start .

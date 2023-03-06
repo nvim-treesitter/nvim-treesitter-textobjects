@@ -26,7 +26,8 @@
   condition: (_) @conditional.inner)
 
 (_ (block) @block.inner) @block.outer
-(comment) @comment.outer
+((comment) @comment.inner @comment.outer
+  (#offset! @comment.inner 0 2 0))
 
 (block (_) @statement.outer)
 (module (_) @statement.outer)

@@ -1,10 +1,20 @@
 ;; assignment
 [(short_var_declaration
     left: (_) @assignment.lhs
-    right: (_)* @assignment.rhs @assignment.inner)
+    right: (_)* @assignment.rhs)
   (assignment_statement
     left: (_) @assignment.lhs
-    right: (_)* @assignment.rhs @assignment.inner)] @assignment.outer
+    right: (_)* @assignment.rhs)]
+
+[(short_var_declaration
+    left: (_) @assignment.inner)
+  (assignment_statement
+    left: (_) @assignment.inner)]
+
+[(short_var_declaration
+    right: (_) @assignment.inner)
+  (assignment_statement
+    right: (_) @assignment.inner)]
 
 ;; block
 (_ (block) @block.inner) @block.outer

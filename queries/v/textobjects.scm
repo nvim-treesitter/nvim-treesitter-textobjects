@@ -33,8 +33,14 @@
 (struct_declaration) @class.outer
 
 ;; comment
+; leave space after comment marker if there is one
 ((comment) @comment.inner @comment.outer
-  (#offset! @comment.inner 0 3 0))
+           (#offset! @comment.inner 0 3 0)
+           (#lua-match? @comment.outer "// .*"))
+
+; else remove everything accept comment marker
+((comment) @comment.inner @comment.outer
+  (#offset! @comment.inner 0 2 0))
 
 ;; conditional
 (if_expression

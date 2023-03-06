@@ -11,13 +11,17 @@
   argument: (_)* @assignment.inner
   (#eq? @_name "set"))
 
-; ;; block
-; ([
-;  (case_clause)
-;  (if_statement)
-;  (switch_statement)
-;  (else_clause)
-; ] (_) @block.inner) @block.outer
+;; block
+([
+ (case_clause)
+ (if_statement)
+ (switch_statement)
+ (else_clause)
+ (for_statement)
+ (while_statement)
+]) @block.outer
+
+
 
 ;; call
 ; call.inner doesn't work because it can't select *all* arguments

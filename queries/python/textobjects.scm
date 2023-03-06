@@ -26,8 +26,16 @@
   condition: (_) @conditional.inner)
 
 (_ (block) @block.inner) @block.outer
+
+; leave space after comment marker if there is one
 ((comment) @comment.inner @comment.outer
-  (#offset! @comment.inner 0 2 0))
+           (#offset! @comment.inner 0 2 0)
+           (#lua-match? @comment.outer "# .*"))
+
+; else remove everything accept comment marker
+((comment) @comment.inner @comment.outer
+  (#offset! @comment.inner 0 1 0))
+
 
 (block (_) @statement.outer)
 (module (_) @statement.outer)

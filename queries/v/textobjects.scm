@@ -17,7 +17,8 @@
     right: (_) @assignment.inner)]
 
 ;; block
-(_ (block) @block.inner) @block.outer
+(_ (block . "{" . (_) @_start @_end (_)? @_end . "}")
+   (#make-range! "block.inner" @_start @_end)) @block.outer
 
 ;; call
 (call_expression) @call.outer

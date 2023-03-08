@@ -12,6 +12,63 @@ if not unpack then
   -- luacheck: pop
 end
 
+--- Similar functions from vim.treesitter, but it accepts node as table type, not necessarily a TSNode
+local function _cmp_pos(a_row, a_col, b_row, b_col)
+  if a_row == b_row then
+    if a_col > b_col then
+      return 1
+    elseif a_col < b_col then
+      return -1
+    else
+      return 0
+    end
+  elseif a_row > b_row then
+    return 1
+  end
+
+  return -1
+end
+
+local cmp_pos = {
+  lt = function(...)
+    return _cmp_pos(...) == -1
+  end,
+  le = function(...)
+    return _cmp_pos(...) ~= 1
+  end,
+  gt = function(...)
+    return _cmp_pos(...) == 1
+  end,
+  ge = function(...)
+    return _cmp_pos(...) ~= -1
+  end,
+  eq = function(...)
+    return _cmp_pos(...) == 0
+  end,
+  ne = function(...)
+    return _cmp_pos(...) ~= 0
+  end,
+}
+
+-- This can be replaced to vim.treesitter.node_contains once Neovim 0.9 is released
+-- In 0.8, it only accepts TSNode type and sometimes it causes issues.
+function M.node_contains(node, range)
+  local srow_1, scol_1, erow_1, ecol_1 = node:range()
+  local srow_2, scol_2, erow_2, ecol_2 = unpack(range)
+
+  -- start doesn't fit
+  if cmp_pos.gt(srow_1, scol_1, srow_2, scol_2) then
+    return false
+  end
+
+  -- end doesn't fit
+  if cmp_pos.lt(erow_1, ecol_1, erow_2, ecol_2) then
+    return false
+  end
+
+  return true
+end
+
 -- Convert single query string to list for backwards compatibility and the Vim commands
 function M.make_query_strings_table(query_strings)
   return type(query_strings) == "string" and { query_strings } or query_strings
@@ -209,7 +266,7 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
 
     local matches_within_outer = {}
     for _, match in ipairs(matches) do
-      if vim.treesitter.node_contains(node_outer, { match.node:range() }) then
+      if M.node_contains(node_outer, { match.node:range() }) then
         table.insert(matches_within_outer, match)
       end
     end

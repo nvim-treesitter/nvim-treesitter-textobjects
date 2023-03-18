@@ -123,7 +123,7 @@ require'nvim-treesitter.configs'.setup {
         ["]m"] = "@function.outer",
         ["]]"] = { query = "@class.outer", desc = "Next class start" },
         --
-        -- You can use regex matching and/or pass a list in a "query" key to group multiple queires.
+        -- You can use regex matching (i.e. lua pattern) and/or pass a list in a "query" key to group multiple queires.
         ["]o"] = "@loop.*",
         -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
         --
@@ -246,7 +246,7 @@ and use it in any of the textobject modules, for example:
 ```scm
 -- after/queries/python/textobjects.scm
 ; extends
-(function_definition) @custom-capture
+(function_definition) @custom_capture
 ```
 
 ```lua
@@ -257,7 +257,7 @@ require'nvim-treesitter.configs'.setup {
       enable = true,
       keymaps = {
         -- Your custom capture.
-        ["aF"] = "@custom-capture",
+        ["aF"] = "@custom_capture",
 
         -- Built-in captures.
         ["af"] = "@function.outer",
@@ -268,6 +268,15 @@ require'nvim-treesitter.configs'.setup {
 }
 EOF
 ```
+
+Here are some rules about the query names that should be noted.  
+
+1. Avoid using special characters in the query name, because in `move` module the names are read as regex (lua) patterns.
+  - `@custom-capture.inner` (X)
+  - `@custom_capture.inner` (O)
+2. In `select` module, it will be preferred to select within the `@*.outer` matches. For example,
+  - `@assignment.inner`, `@assignment.lhs`, and even `@assignment` will be selected within the `@assignment.outer` range if available. This means it will sometimes look behind.
+  - You can write something like `@function.name` or `@call.name` and make sure `@function.outer` and `@call.outer` covers the range.
 
 ## Built-in Textobjects
 

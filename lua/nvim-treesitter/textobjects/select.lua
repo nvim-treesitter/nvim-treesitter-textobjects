@@ -141,6 +141,10 @@ function M.detect_selection_mode(query_string, keymap_mode)
   visual_mode = visual_mode:sub(#visual_mode)
   selection_mode = visual_mode == "o" and selection_mode or visual_mode
 
+  if selection_mode == "n" then
+    selection_mode = "v"
+  end
+
   return selection_mode
 end
 

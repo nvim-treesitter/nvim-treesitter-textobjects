@@ -29,7 +29,9 @@ local function do_check()
   for _, lang in pairs(parsers) do
     for _, query_type in pairs(query_types) do
       print("Checking " .. lang .. " " .. query_type)
-      local query = vim.treesitter.query.get_query(lang, query_type)
+      -- get_query deprecated since nvim 0.9
+      local get_query = vim.treesitter.query.get or vim.treesitter.query.get_query
+      local query = get_query(lang, query_type)
 
       if query then
         for _, capture in ipairs(query.captures) do

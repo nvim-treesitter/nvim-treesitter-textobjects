@@ -4,7 +4,12 @@ local utils = require "nvim-treesitter.utils"
 local M = {}
 
 M.has_textobjects = function(lang)
-  return vim.treesitter.query.get_query_files(lang, "textobjects") ~= nil
+  if vim.treesitter.query.get_files then
+    return vim.treesitter.query.get_files(lang, "textobjects") ~= nil
+  else
+    -- deprecated since nvim 0.9
+    return vim.treesitter.query.get_query_files(lang, "textobjects") ~= nil
+  end
 end
 
 local function has_some_textobject_mapping(lang)

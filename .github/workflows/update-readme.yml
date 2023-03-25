@@ -9,6 +9,10 @@ jobs:
   update-readme:
     name: Update README.md
     runs-on: ubuntu-latest
+    permissions:                                                                                                        
+      # Give the default GITHUB_TOKEN write permission to commit and push the                                           
+      # added or changed files to the repository.                                                                       
+      contents: write                                                                                                   
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -34,17 +38,9 @@ jobs:
       # inspired by nvim-lspconfigs
       - name: Check README
         run: |
-          git config user.email "actions@github"
-          git config user.name "Github Actions"
           ./nvim.appimage --headless -c "luafile ./scripts/update-readme.lua" -c "q" || echo "Needs update"
-          git add README.md
-          git commit -m "Update README" || echo 'No commit necessary!'
-          git clean -xf
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
-        with:
-          commit-message: Update README
-          title: Update README
-          branch: update-readme
-          base: ${{ github.head_ref }}
+      - name: Automated README update
+        uses: stefanzweifel/git-auto-commit-action@v4                                                                     
+        with:                                                                                                             
+          commit_message: Automated README update

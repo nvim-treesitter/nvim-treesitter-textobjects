@@ -16,10 +16,13 @@
 
 [
   (parameter (simple_identifier) @parameter.inner)
-  (class_parameter (simple_identifier) @parameter.inner) 
+  (class_parameter (simple_identifier) @parameter.inner)
 ] @parameter.outer
 
-(comment) @comment.outer
+[
+  (line_comment)
+  (multiline_comment)
+] @comment.outer
 
 (if_expression (control_structure_body) @conditional.inner) @conditional.outer
 

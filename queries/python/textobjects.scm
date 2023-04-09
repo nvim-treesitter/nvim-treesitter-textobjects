@@ -183,11 +183,6 @@
  (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ((import_from_statement
-   "from" @_start
-   . (_) @parameter.inner)
- (#make-range! "parameter.outer" @_start @parameter.inner))
-
-((import_from_statement
    "," @_start
    . (_) @parameter.inner)
  (#make-range! "parameter.outer" @_start @parameter.inner))

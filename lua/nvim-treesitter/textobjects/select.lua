@@ -137,9 +137,16 @@ function M.detect_selection_mode(query_string, keymap_mode)
   -- According to "mode()" mapping, if we are in operator pending mode or visual mode,
   -- then last char is {v,V,<C-v>}, exept for "no", which is "o", in which case we honor
   -- last set `selection_mode`
+  -- Also, we need to handle cases that 
+  -- the value returned from vim.fn.mode()
+  -- ends with {'nov', 'noV', 'v', 'V'}
   local visual_mode = vim.fn.mode(1)
   visual_mode = visual_mode:sub(#visual_mode)
-  selection_mode = visual_mode ~= "o" and selection_mode or visual_mode
+
+  local valid_chars = {"o", "v", "V"}
+  if not vim.tbl_contains(valid_chars, visual_mode) then
+    selection_mode = visual_mode
+  end
 
   if selection_mode == "n" then
     selection_mode = "v"

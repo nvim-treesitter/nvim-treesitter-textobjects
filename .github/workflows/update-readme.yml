@@ -38,13 +38,13 @@ jobs:
           git config user.name "Github Actions"
           ./nvim.appimage --headless -c "luafile ./scripts/update-readme.lua" -c "q" || echo "Needs update"
           git add README.md
-          git commit -m "Update README" || echo 'No commit necessary!'
+          git commit -m "docs: update queries in README" || echo 'No commit necessary!'
           git clean -xf
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
-          commit-message: Update README
-          title: Update README
+          commit-message: "docs: update queries in README"
+          title: "docs: update queries in README"
           branch: update-readme
           base: ${{ github.head_ref }}

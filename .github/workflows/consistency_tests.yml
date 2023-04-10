@@ -28,15 +28,13 @@ jobs:
           wget https://github.com/neovim/neovim/releases/download/${NVIM_TAG}/nvim.appimage
           chmod u+x nvim.appimage && sudo mv nvim.appimage /usr/local/bin/nvim
 
-          git clone -b v0.1.1 --depth 1 https://github.com/kiyoon/nvim-treesitter-textobjects-tests
+          git clone -b v0.1.2 --depth 1 https://github.com/kiyoon/nvim-treesitter-textobjects-tests
 
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/opt
           ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/opt
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/opt
           cd ~/.local/share/nvim/site/pack/nvim-treesitter/opt
           git clone https://github.com/nvim-treesitter/nvim-treesitter.git
-      - name: Compile parsers
-        run: nvim --headless -c "packadd nvim-treesitter" -c "TSInstallSync all" -c "q"
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4

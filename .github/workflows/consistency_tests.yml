@@ -35,6 +35,9 @@ jobs:
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/opt
           cd ~/.local/share/nvim/site/pack/nvim-treesitter/opt
           git clone https://github.com/nvim-treesitter/nvim-treesitter.git
+          
+      - name: Compile parsers
+        run: nvim --headless -c "packadd nvim-treesitter" -c "TSInstallSync python" -c "q"
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4

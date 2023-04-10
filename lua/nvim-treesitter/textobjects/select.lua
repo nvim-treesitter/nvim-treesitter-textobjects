@@ -1,9 +1,9 @@
 local api = vim.api
-local configs = require "nvim-treesitter.configs"
-local parsers = require "nvim-treesitter.parsers"
+local configs = require("nvim-treesitter.configs")
+local parsers = require("nvim-treesitter.parsers")
 
-local shared = require "nvim-treesitter.textobjects.shared"
-local ts_utils = require "nvim-treesitter.ts_utils"
+local shared = require("nvim-treesitter.textobjects.shared")
+local ts_utils = require("nvim-treesitter.ts_utils")
 
 local M = {}
 
@@ -101,15 +101,15 @@ function M.select_textobject(query_string, query_group, keymap_mode)
   local surrounding_whitespace = configs.get_module("textobjects.select").include_surrounding_whitespace
   local bufnr, textobject = shared.textobject_at_point(query_string, query_group, nil, nil, {
     lookahead = lookahead,
-    lookbehind = lookbehind
+    lookbehind = lookbehind,
   })
   if textobject then
     local selection_mode = M.detect_selection_mode(query_string, keymap_mode)
     if
-        val_or_return(surrounding_whitespace, {
-          query_string = query_string,
-          selection_mode = selection_mode,
-        })
+      val_or_return(surrounding_whitespace, {
+        query_string = query_string,
+        selection_mode = selection_mode,
+      })
     then
       textobject = include_surrounding_whitespace(bufnr, textobject, selection_mode)
     end
@@ -127,7 +127,7 @@ function M.detect_selection_mode(query_string, keymap_mode)
   }
   local method = keymap_to_method[keymap_mode]
 
-  local config = configs.get_module "textobjects.select"
+  local config = configs.get_module("textobjects.select")
   local selection_modes = val_or_return(config.selection_modes, { query_string = query_string, method = method })
   local selection_mode
   if type(selection_modes) == "table" then
@@ -161,7 +161,7 @@ M.keymaps_per_buf = {}
 
 function M.attach(bufnr, lang)
   bufnr = bufnr or api.nvim_get_current_buf()
-  local config = configs.get_module "textobjects.select"
+  local config = configs.get_module("textobjects.select")
   lang = lang or parsers.get_buf_lang(bufnr)
 
   for mapping, query in pairs(config.keymaps) do
@@ -192,7 +192,7 @@ function M.attach(bufnr, lang)
     end
 
     if query_string then
-      for _, keymap_mode in ipairs { "o", "x" } do
+      for _, keymap_mode in ipairs({ "o", "x" }) do
         local cmd = function()
           M.select_textobject(query_string, query_group, keymap_mode)
         end

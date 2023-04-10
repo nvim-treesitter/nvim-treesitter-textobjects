@@ -139,7 +139,7 @@ function M.detect_selection_mode(query_string, keymap_mode)
   -- last set `selection_mode`
   -- Also, we need to handle cases that 
   -- the value returned from vim.fn.mode()
-  -- ends with {'nov', 'noV', 'v', 'V'}
+  -- ends with "v" e.g. {'nov', 'noV', 'v', 'V'}
   local visual_mode = vim.fn.mode(1)
   visual_mode = visual_mode:sub(#visual_mode)
 

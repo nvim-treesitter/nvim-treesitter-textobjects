@@ -171,6 +171,28 @@
   )
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
+((import_statement
+   . (_) @parameter.inner
+   . ","? @_end
+   )
+   (#make-range! "parameter.outer" @parameter.inner @_end))
+((import_statement
+   "," @_start
+   . (_) @parameter.inner
+   )
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+
+((import_from_statement
+   "," @_start
+   . (_) @parameter.inner)
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+
+((import_from_statement
+   "import"
+   . (_) @parameter.inner
+   . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end))
+
 [
   (integer)
   (float)

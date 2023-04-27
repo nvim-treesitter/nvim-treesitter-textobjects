@@ -311,6 +311,7 @@ function M.next_textobject(node, query_string, query_group, same_parent, overlap
   local search_start, _
   if overlapping_range_ok then
     _, _, search_start = node:start()
+    search_start = search_start + 1
   else
     _, _, search_start = node:end_()
   end
@@ -321,7 +322,7 @@ function M.next_textobject(node, query_string, query_group, same_parent, overlap
     if not same_parent or node:parent() == match.node:parent() then
       local _, _, start = match.node:start()
       local _, _, end_ = match.node:end_()
-      return start > search_start and end_ >= node_end
+      return start >= search_start and end_ >= node_end
     end
   end
   local function scoring_function(match)
@@ -346,7 +347,7 @@ function M.previous_textobject(node, query_string, query_group, same_parent, ove
   local search_end, _
   if overlapping_range_ok then
     _, _, search_end = node:end_()
-    search_end = search_end + 1
+    search_end = search_end - 1
   else
     _, _, search_end = node:start()
   end
@@ -355,7 +356,7 @@ function M.previous_textobject(node, query_string, query_group, same_parent, ove
     if not same_parent or node:parent() == match.node:parent() then
       local _, _, end_ = match.node:end_()
       local _, _, start = match.node:start()
-      return end_ < search_end and start < node_start
+      return end_ <= search_end and start < node_start
     end
   end
 

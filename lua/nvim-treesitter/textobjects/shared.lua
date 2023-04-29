@@ -3,6 +3,7 @@ local api = vim.api
 local parsers = require "nvim-treesitter.parsers"
 local queries = require "nvim-treesitter.query"
 local ts_utils = require "nvim-treesitter.ts_utils"
+local ts = require "nvim-treesitter.compat"
 
 local M = {}
 
@@ -95,7 +96,7 @@ end
 function M.available_textobjects(lang, query_group)
   lang = lang or parsers.get_buf_lang()
   query_group = query_group or "textobjects"
-  local parsed_queries = queries.get_query(lang, query_group)
+  local parsed_queries = ts.get_query(lang, query_group)
   if not parsed_queries then
     return {}
   end

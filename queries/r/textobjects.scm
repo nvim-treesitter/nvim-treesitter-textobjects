@@ -88,12 +88,21 @@
 ; assignment
 (left_assignment
   name: (_) @assignment.lhs
-  value: (_) @assignment.rhs @assignment.inner) @assignment.outer
+  value: (_) @assignment.inner @assignment.rhs) @assignment.outer
+
+(left_assignment
+  name: (_) @assignment.inner)
 
 (right_assignment
-  value: (_) @assignment.lhs @assignment.inner
+  value: (_) @assignment.inner @assignment.lhs
   name: (_) @assignment.rhs) @assignment.outer
+
+(right_assignment
+  name: (_) @assignment.inner)
 
 (equals_assignment
   name: (_) @assignment.lhs
-  value: (_) @assignment.rhs @assignment.inner) @assignment.outer
+  value: (_) @assignment.inner @assignment.rhs) @assignment.outer
+
+(equals_assignment
+  name: (_) @assignment.inner)

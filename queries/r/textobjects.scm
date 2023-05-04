@@ -84,3 +84,16 @@
 
 ; number
 (float) @number.inner
+
+; assignment
+(left_assignment
+  name: (_) @assignment.lhs
+  value: (_) @assignment.rhs @assignment.inner) @assignment.outer
+
+(right_assignment
+  value: (_) @assignment.lhs @assignment.inner
+  name: (_) @assignment.rhs) @assignment.outer
+
+(equals_assignment
+  name: (_) @assignment.lhs
+  value: (_) @assignment.rhs @assignment.inner) @assignment.outer

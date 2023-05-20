@@ -184,9 +184,6 @@ function M.attach(bufnr, lang)
 
     if query_string then
       for _, keymap_mode in ipairs { "o", "x" } do
-        local cmd = function()
-          M.select_textobject(query_string, query_group, keymap_mode)
-        end
         local status, _ = pcall(
           vim.keymap.set,
           { keymap_mode },

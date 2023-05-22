@@ -22,7 +22,7 @@ for i, o in ipairs(textobjects) do
   generated_text = generated_text .. i .. ". " .. o .. "\n"
 end
 
-local generated_text = generated_text .. "<table>\n"
+generated_text = generated_text .. "<table>\n"
 
 generated_text = generated_text .. "<th>\n"
 for i, _ in ipairs(textobjects) do
@@ -32,17 +32,28 @@ generated_text = generated_text .. "</th>\n"
 
 for _, v in ipairs(sorted_parsers) do
   local lang = (v.parser.readme_name or v.name)
-  generated_text = generated_text .. "<tr>\n"
-  generated_text = generated_text .. "<td>" .. lang .. "</td>"
-
   local found_textobjects = shared.available_textobjects(lang)
 
+  local none_found = true
   for _, o in ipairs(textobjects) do
     local found = vim.tbl_contains(found_textobjects, o:sub(2))
-    local status = found and "🟩" or "⬜"
-    generated_text = generated_text .. "<td>" .. '<span title="' .. o .. '">' .. status .. "</span>" .. "</td> "
+    if found then
+      none_found = false
+      break
+    end
   end
-  generated_text = generated_text .. "</tr>\n"
+
+  if not none_found then
+    generated_text = generated_text .. "<tr>\n"
+    generated_text = generated_text .. "<td>" .. lang .. "</td>"
+
+    for _, o in ipairs(textobjects) do
+      local found = vim.tbl_contains(found_textobjects, o:sub(2))
+      local status = found and "🟩" or "⬜"
+      generated_text = generated_text .. "<td>" .. '<span title="' .. o .. '">' .. status .. "</span>" .. "</td> "
+    end
+    generated_text = generated_text .. "</tr>\n"
+  end
 end
 generated_text = generated_text .. "</table>\n"
 

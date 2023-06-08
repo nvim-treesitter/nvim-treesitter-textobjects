@@ -77,11 +77,11 @@
 
 (parameter_declaration
   name: (identifier)
-  type: (_) @parameter.inner)
+  type: (_)) @parameter.inner
 
 (parameter_declaration
-  name: (identifier) @parameter.inner
-  type: (_))
+  name: (identifier) 
+  type: (_)) @parameter.inner
 
 (parameter_list
   "," @_start .

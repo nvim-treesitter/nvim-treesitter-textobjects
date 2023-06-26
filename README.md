@@ -43,7 +43,9 @@ require'nvim-treesitter.configs'.setup {
 
       -- Automatically jump forward to textobj, similar to targets.vim
       lookahead = true,
-
+      on_not_selected = function(query_string, query_group, keymap_mode)
+        -- callback on could not find the textobject
+      end
       keymaps = {
         -- You can use the capture groups defined in textobjects.scm
         ["af"] = "@function.outer",

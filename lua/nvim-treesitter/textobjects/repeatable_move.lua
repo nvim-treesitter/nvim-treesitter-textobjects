@@ -111,7 +111,7 @@ M.repeat_last_move = function(opts_extend)
 end
 
 M.repeat_last_move_opposite = function()
-  return M.repeat_last_move { forward = not M.last_move.opts.forward }
+  return M.last_move and M.repeat_last_move { forward = not M.last_move.opts.forward }
 end
 
 M.repeat_last_move_next = function()

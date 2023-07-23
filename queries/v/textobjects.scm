@@ -1,18 +1,18 @@
 ;; assignment
-[(short_var_declaration
-    left: (_) @assignment.lhs
-    right: (_)* @assignment.rhs)
+[(var_declaration
+    var_list: (_) @assignment.lhs
+    expression_list: (_)* @assignment.rhs)
   (assignment_statement
     left: (_) @assignment.lhs
     right: (_)* @assignment.rhs)]
 
-[(short_var_declaration
-    left: (_) @assignment.inner)
+[(var_declaration
+    var_list: (_) @assignment.inner)
   (assignment_statement
     left: (_) @assignment.inner)]
 
-[(short_var_declaration
-    right: (_) @assignment.inner)
+[(var_declaration
+    expression_list: (_) @assignment.inner)
   (assignment_statement
     right: (_) @assignment.inner)]
 
@@ -28,7 +28,7 @@
 
 ;; class: structs
 (struct_declaration
-  (struct_field_declaration_list . "{" . (_) @_start @_end (_)? @_end . "}"
+  ("{" . (_) @_start @_end (_)? @_end . "}"
   (#make-range! "class.inner" @_start @_end)))
 
 (struct_declaration) @class.outer
@@ -45,7 +45,7 @@
 
 ;; conditional
 (if_expression
-  consequence: (block . "{" . (_) @_start @_end (_)? @_end . "}"
+  block: (block . "{" . (_) @_start @_end (_)? @_end . "}"
     (#make-range! "conditional.inner" @_start @_end))?) @conditional.outer
 
 ;; function
@@ -73,7 +73,7 @@
 
 (parameter_list
   . (parameter_declaration) @parameter.inner
-  . ","? " "? @_end
+  . ","? @_end
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ;; return

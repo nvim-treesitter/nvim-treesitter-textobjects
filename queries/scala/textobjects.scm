@@ -13,4 +13,7 @@
 (class_parameter
   name: (identifier) @parameter.inner) @parameter.outer
 
+(case_clause
+  body: (_) @conditional.inner) @conditional.outer
+
 (comment) @comment.outer

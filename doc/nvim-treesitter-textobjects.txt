@@ -25,7 +25,9 @@ Supported options:
   choose a selection mode per capture, default is `v`(charwise).
 - include_surrounding_whitespace: `true` or `false`, when `true` textobjects
   are extended to include preceding or succeeding whitespace, defaults is
-  `false`.
+  `false`. Can also be a function which gets passed a table with the keys
+  `query_string` (`@function.inner`) and `selection_mode` (`v`) and returns
+  `true` of `false`.
 
 >
   lua <<EOF
@@ -54,7 +56,7 @@ Supported options:
 	-- If you set this to `true` (default is `false`) then any textobject is
 	-- extended to include preceding or succeeding whitespace. Succeeding
 	-- whitespace has priority in order to act similarly to eg the built-in
-	-- `ap`.
+	-- `ap`. Can also be a function (see above).
 	include_surrounding_whitespace = true,
       },
     },

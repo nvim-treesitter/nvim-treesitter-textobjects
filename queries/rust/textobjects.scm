@@ -133,6 +133,13 @@
   . ","? @_end
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
+((tuple_type
+  "," @_start . (_) @parameter.inner)
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+((tuple_type
+  . (_) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end))
+
 (struct_item
   body: (field_declaration_list
     "," @_start

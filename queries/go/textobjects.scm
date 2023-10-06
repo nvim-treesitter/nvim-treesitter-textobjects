@@ -107,15 +107,13 @@
   right: (_) @assignment.rhs @assignment.inner) @assignment.outer
 (var_spec
   name: (_) @assignment.lhs
-  value: (_) @assignment.rhs @assignment.inner)
+  value: (_) @assignment.rhs @assignment.inner) @assignment.outer
 (var_spec
   name: (_) @assignment.inner
-  type: (_))
-(var_spec) @assignment.outer
+  type: (_)) @assignment.outer
 (const_spec
   name: (_) @assignment.lhs
-  value: (_) @assignment.rhs @assignment.inner)
+  value: (_) @assignment.rhs @assignment.inner) @assignment.outer
 (const_spec
   name: (_) @assignment.inner
-  type: (_))
-(const_spec) @assignment.outer
+  type: (_)) @assignment.outer

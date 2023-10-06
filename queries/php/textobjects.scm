@@ -15,6 +15,24 @@
   (#make-range! "function.inner" @_start @_end)))
 (method_declaration) @function.outer
 
+;; traits
+(trait_declaration
+  body: (declaration_list . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "class.inner" @_start @_end)))
+(trait_declaration) @class.outer
+
+;; interfaces
+(interface_declaration
+  body: (declaration_list . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "class.inner" @_start @_end)))
+(interface_declaration) @class.outer
+
+;; enums
+(enum_declaration
+  body: (enum_declaration_list . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "class.inner" @_start @_end)))
+(enum_declaration) @class.outer
+
 ;; classes
 (class_declaration
   body: (declaration_list . "{" . (_) @_start @_end (_)? @_end . "}"

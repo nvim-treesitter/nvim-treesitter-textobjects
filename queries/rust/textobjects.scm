@@ -185,6 +185,13 @@
   . (_) @parameter.inner . ","? @_end)
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
+((token_tree
+  "," @_start . (_) @parameter.inner)
+ (#make-range! "parameter.outer" @_start @parameter.inner))
+((token_tree
+  . (_) @parameter.inner . ","? @_end)
+ (#make-range! "parameter.outer" @parameter.inner @_end))
+
 (scoped_use_list
   list: (use_list "," @_start . (_) @parameter.inner
     (#make-range! "parameter.outer" @_start @parameter.inner)))

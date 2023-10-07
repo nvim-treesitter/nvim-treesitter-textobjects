@@ -97,3 +97,23 @@
   . (_) @parameter.inner
   . ","? @_end
  (#make-range! "parameter.outer" @parameter.inner @_end))
+
+;; assignments
+(short_var_declaration
+  left: (_) @assignment.lhs
+  right: (_) @assignment.rhs @assignment.inner) @assignment.outer
+(assignment_statement
+  left: (_) @assignment.lhs
+  right: (_) @assignment.rhs @assignment.inner) @assignment.outer
+(var_spec
+  name: (_) @assignment.lhs
+  value: (_) @assignment.rhs @assignment.inner) @assignment.outer
+(var_spec
+  name: (_) @assignment.inner
+  type: (_)) @assignment.outer
+(const_spec
+  name: (_) @assignment.lhs
+  value: (_) @assignment.rhs @assignment.inner) @assignment.outer
+(const_spec
+  name: (_) @assignment.inner
+  type: (_)) @assignment.outer

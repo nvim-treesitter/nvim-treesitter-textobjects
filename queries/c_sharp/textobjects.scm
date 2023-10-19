@@ -10,6 +10,10 @@
   body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
   (#make-range! "function.inner" @_start @_end))) @function.outer
 
+(constructor_declaration
+  body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "function.inner" @_start @_end))) @function.outer
+
 (lambda_expression 
   body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
   (#make-range! "function.inner" @_start @_end))) @function.outer

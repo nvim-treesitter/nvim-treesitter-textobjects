@@ -52,8 +52,8 @@
   (#make-range! "loop.inner" @_start @_end))) @loop.outer
 
 (if_statement
-  consequence: (_)? @conditional.inner
-  alternative: (_)? @conditional.inner) @conditional.outer
+  consequence: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "conditional.inner" @_start @_end))) @conditional.outer
 
 (switch_statement
   body: (_)? @conditional.inner) @conditional.outer

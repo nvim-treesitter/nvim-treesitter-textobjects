@@ -36,16 +36,20 @@
   (class_declaration) @class.outer) @class.outer.start
 
 (for_in_statement
-  body: (_)? @loop.inner) @loop.outer
+  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "loop.inner" @_start @_end))) @loop.outer
 
 (for_statement
-  body: (_)? @loop.inner) @loop.outer
+  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "loop.inner" @_start @_end))) @loop.outer
 
 (while_statement
-  body: (_)? @loop.inner) @loop.outer
+  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "loop.inner" @_start @_end))) @loop.outer
 
 (do_statement
-  body: (_)? @loop.inner) @loop.outer
+  body: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "loop.inner" @_start @_end))) @loop.outer
 
 (if_statement
   consequence: (_)? @conditional.inner

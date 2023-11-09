@@ -55,6 +55,12 @@
   consequence: (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
   (#make-range! "conditional.inner" @_start @_end))) @conditional.outer
 
+(if_statement
+  alternative: (else_clause (statement_block . "{" . (_) @_start @_end (_)? @_end . "}"
+  (#make-range! "conditional.inner" @_start @_end)))) @conditional.outer
+
+(if_statement) @conditional.outer
+
 (switch_statement
   body: (_)? @conditional.inner) @conditional.outer
 

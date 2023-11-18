@@ -16,11 +16,7 @@ similar to `ip` (inner paragraph) and `ap` (a paragraph).
 
 Query files: `textobjects.scm`.
 Supported options:
-- enable: `true` or `false`.
-- disable: list of languages.
 - lookahead: `true` or `false`, whether or not to look ahead for the textobject
-- keymaps: map of keymaps to a tree-sitter query
-  (`(function_definition) @function`) or capture group (`@function.inner`).
 - selection_modes: map of capture group to `v`(charwise), `V`(linewise), or `<c-v>`(blockwise),
   choose a selection mode per capture, default is `v`(charwise).
 - include_surrounding_whitespace: `true` or `false`, when `true` textobjects
@@ -29,39 +25,55 @@ Supported options:
   `query_string` (`@function.inner`) and `selection_mode` (`v`) and returns
   `true` of `false`.
 
->
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    textobjects = {
-      select = {
-	enable = true,
-
-	-- Automatically jump forward to textobjects, similar to targets.vim
-	lookahead = true,
-
-	keymaps = {
-	  -- You can use the capture groups defined in textobjects.scm
-	  ["af"] = "@function.outer",
-	  ["if"] = "@function.inner",
-	  ["ac"] = "@class.outer",
-	  -- you can optionally set descriptions to the mappings (used in the desc parameter of nvim_buf_set_keymap
-	  ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
-	},
-	-- You can choose the select mode (default is charwise 'v')
-	selection_modes = {
-	  ['@parameter.outer'] = 'v', -- charwise
-	  ['@function.outer'] = 'V', -- linewise
-	  ['@class.outer'] = '<c-v>', -- blockwise
-	},
-	-- If you set this to `true` (default is `false`) then any textobject is
-	-- extended to include preceding or succeeding whitespace. Succeeding
-	-- whitespace has priority in order to act similarly to eg the built-in
-	-- `ap`. Can also be a function (see above).
-	include_surrounding_whitespace = true,
+>lua
+  -- configuration
+  require("nvim-treesitter-textobjects").setup {
+    select = {
+      -- Automatically jump forward to textobj, similar to targets.vim
+      lookahead = true,
+      -- You can choose the select mode (default is charwise 'v')
+      --
+      -- Can also be a function which gets passed a table with the keys
+      -- * query_string: eg '@function.inner'
+      -- * method: eg 'v' or 'o'
+      -- and should return the mode ('v', 'V', or '<c-v>') or a table
+      -- mapping query_strings to modes.
+      selection_modes = {
+	['@parameter.outer'] = 'v', -- charwise
+	['@function.outer'] = 'V', -- linewise
+	['@class.outer'] = '<c-v>', -- blockwise
       },
     },
+      -- If you set this to `true` (default is `false`) then any textobject is
+      -- extended to include preceding or succeeding whitespace. Succeeding
+      -- whitespace has priority in order to act similarly to eg the built-in
+      -- `ap`.
+      --
+      -- Can also be a function which gets passed a table with the keys
+      -- * query_string: eg '@function.inner'
+      -- * selection_mode: eg 'v'
+      -- and should return true of false
+      include_surrounding_whitespace = false,
   }
-  EOF
+
+  -- keymaps
+  -- You can use the capture groups defined in `textobjects.scm`
+  vim.keymap.set({ "x", "o" }, "af", function()
+    require "nvim-treesitter-textobjects.select".select_textobject("@function.outer", "textobjects")
+  end)
+  vim.keymap.set({ "x", "o" }, "if", function()
+    require "nvim-treesitter-textobjects.select".select_textobject("@function.inner", "textobjects")
+  end)
+  vim.keymap.set({ "x", "o" }, "ac", function()
+    require "nvim-treesitter-textobjects.select".select_textobject("@class.outer", "textobjects")
+  end)
+  vim.keymap.set({ "x", "o" }, "ic", function()
+    require "nvim-treesitter-textobjects.select".select_textobject("@class.inner", "textobjects")
+  end)
+  -- You can also use captures from other query groups like `locals.scm`
+  vim.keymap.set({ "x", "o" }, "as", function()
+    require "nvim-treesitter-textobjects.select".select_textobject("@local.scope", "locals")
+  end)
 <
 
 ------------------------------------------------------------------------------
@@ -72,29 +84,11 @@ Define your own mappings to swap the node under the cursor with the next or prev
 like function parameters or arguments.
 
 Query files: `textobjects.scm`.
-Supported options:
-- enable: `true` or `false`.
-- disable: list of languages.
-- swap_next: map of keymaps to a list of tree-sitter capture groups (`{@parameter.inner}`). Capture groups that come earlier in the list are preferred.
-- swap_previous: same as swap_next, but it will swap with the previous text
-  object.
 
->
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    textobjects = {
-      swap = {
-        enable = true,
-        swap_next = {
-          ["<leader>a"] = "@parameter.inner",
-        },
-        swap_previous = {
-          ["<leader>A"] = "@parameter.inner",
-        },
-      },
-    },
-  }
-  EOF
+>lua
+  local swap = require("nvim-treesitter-textobjects.swap")
+  vim.keymap.set("n", "<leader>a", swap.swap_next("@parameter.inner"))
+  vim.keymap.set("n", "<leader>A", swap.swap_next("@parameter.outer"))
 <
 
 ------------------------------------------------------------------------------
@@ -107,76 +101,98 @@ or previous function.
 
 Query files: `textobjects.scm`.
 Supported options:
-- enable: `true` or `false`.
-- disable: list of languages.
 - set_jumps: whether to set jumps in the jumplist
-- goto_next_start: map of keymaps to a list of tree-sitter capture groups (`{@function.outer, @class.outer}`).
-  The one that starts closest to the cursor will be chosen, preferring row-proximity to column-proximity.
-- goto_next_end: same as goto_next_start, but it jumps to the start of
-  the text object.
-- goto_previous_start: same as goto_next_start, but it jumps to the previous
-  text object.
-- goto_previous_end: same as goto_next_end, but it jumps to the previous
-  text object.
 
->
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    textobjects = {
-      move = {
-	enable = true,
-	set_jumps = true, -- whether to set jumps in the jumplist
-	goto_next_start = {
-	  ["]m"] = "@function.outer",
-	  ["]]"] = "@class.outer",
-	},
-	goto_next_end = {
-	  ["]M"] = "@function.outer",
-	  ["]["] = "@class.outer",
-	},
-	goto_previous_start = {
-	  ["[m"] = "@function.outer",
-	  ["[["] = "@class.outer",
-	},
-	goto_previous_end = {
-	  ["[M"] = "@function.outer",
-	  ["[]"] = "@class.outer",
-	},
-      },
+>lua
+  -- configuration
+  require("nvim-treesitter-textobjects").setup {
+    move = {
+      -- whether to set jumps in the jumplist
+      set_jumps = true,
     },
   }
-  EOF
+
+  -- keymaps
+  -- You can use the capture groups defined in `textobjects.scm`
+  vim.keymap.set({ "n", "x", "o" }, "]m", function()
+    require("nvim-treesitter-textobjects.move").goto_next_start("@function.outer", "textobjects")
+  end)
+  vim.keymap.set({ "n", "x", "o" }, "]]", function()
+    require("nvim-treesitter-textobjects.move").goto_next_start("@class.outer", "textobjects")
+  end)
+  -- You can use lua patterns to group multiple queries.
+  vim.keymap.set({ "n", "x", "o" }, "]o", function()
+    require("nvim-treesitter-textobjects.move").goto_next_start("@loop.*", "textobjects")
+  end)
+  -- You can also pass a list to group multiple queries.
+  -- vim.keymap.set({ "n", "x", "o" }, "]o", function()
+  --   move.goto_next_start({"@loop.inner", "@loop.outer"}, "textobjects")
+  -- end)
+  -- You can also use captures from other query groups like `locals.scm` or `folds.scm`
+  vim.keymap.set({ "n", "x", "o" }, "]s", function()
+    require("nvim-treesitter-textobjects.move").goto_next_start("@local.scope", "locals")
+  end)
+  vim.keymap.set({ "n", "x", "o" }, "]z", function()
+    require("nvim-treesitter-textobjects.move").goto_next_start("@fold", "folds")
+  end)
+
+  vim.keymap.set({ "n", "x", "o" }, "]M", function()
+    require("nvim-treesitter-textobjects.move").goto_next_end("@funciton.outer", "textobjects")
+  end)
+  vim.keymap.set({ "n", "x", "o" }, "][", function()
+    require("nvim-treesitter-textobjects.move").goto_next_end("@class.outer", "textobjects")
+  end)
+
+  vim.keymap.set({ "n", "x", "o" }, "[m", function()
+    require("nvim-treesitter-textobjects.move").goto_previous_start("@function.outer", "textobjects")
+  end)
+  vim.keymap.set({ "n", "x", "o" }, "[[", function()
+    require("nvim-treesitter-textobjects.move").goto_previous_start("@class.outer", "textobjects")
+  end)
+
+  vim.keymap.set({ "n", "x", "o" }, "[M", function()
+    require("nvim-treesitter-textobjects.move").goto_previous_end("@function.outer", "textobjects")
+  end)
+  vim.keymap.set({ "n", "x", "o" }, "[]", function()
+    require("nvim-treesitter-textobjects.move").goto_previous_end("@class.outer", "textobjects")
+  end)
+
+  -- Go to either the start or the end, whichever is closer.
+  -- Use if you want more granular movements
+  -- Make it even more gradual by adding multiple queries and regex.
+  vim.keymap.set({ "n", "x", "o" }, "]d", function()
+    require("nvim-treesitter-textobjects.move").goto_next("@conditional.outer", "textobjects")
+  end)
+  vim.keymap.set({ "n", "x", "o" }, "[d", function()
+    require("nvim-treesitter-textobjects.move").goto_previous("@conditional.outer", "textobjects")
+  end)
 <
 
 ------------------------------------------------------------------------------
 			      *nvim-treesitter-textobjects-lsp_interop-submod*
 LSP interop~
 
-- peek_definition_code: show textobject surrounding definition as determined
+- `peek_definition_code`: show textobject surrounding definition as determined
   using Neovim's built-in LSP in a floating window. Press the shortcut twice
-  to enter the floating window (when https://github.com/neovim/neovim/pull/12720
-  or its successor is merged)
+  to enter the floating window.
 Supported options:
-- enable: `true` or `false`.
-- border: 'none' (default), 'single', 'double', 'rounded', 'solid', 'shadow'.
-  Deprecated. Should be placed in `floating_preview_opts` like so: `floating_preview_opts = {border = 'rounded'}`.
 - floating_preview_opts: {} (default). Options to pass to `vim.lsp.util.open_floating_preview`. For example, `maximum_height`.
->
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    textobjects = {
+
+>lua
+  require("nvim-treesitter-textobjects").setup {
       lsp_interop = {
-        enable = true,
-        border = "none",
         floating_preview_opts = {},
-        peek_definition_code = {
-          ["<leader>df"] = "@function.outer",
-          ["<leader>dF"] = "@class.outer",
-        },
       },
-    },
   }
-  EOF
+
+  -- keymaps
+  -- You can use the capture groups defined in `textobjects.scm`
+  vim.keymap.set({"n", "x"}, "<leader>df", function()
+    require "nvim-treesitter-textobjects.lsp_interop".peek_definition_code("@function.outer", "textobjects")
+  end)
+  vim.keymap.set({"n", "x"}, "<leader>dF", function()
+    require "nvim-treesitter-textobjects.lsp_interop".peek_definition_code("@class.outer", "textobjects")
+  end)
 <
 ------------------------------------------------------------------------------
 				       *nvim-treesitter-text-objects-override*
@@ -185,35 +201,22 @@ Overrriding or extending text objects~
 
 Textobjects are defined in the `textobjects.scm` files.
 You can extend or override those files by following the instructions at
-<https://github.com/nvim-treesitter/nvim-treesitter#adding-queries>.
+https://github.com/nvim-treesitter/nvim-treesitter#adding-queries.
 
 You can also use a custom capture for your own textobjects,
 and use it in any of the textobject modules, for example:
->
-  lua <<EOF
-  require'nvim-treesitter.configs'.setup {
-    textobjects = {
-      select = {
-	enable = true,
-	keymaps = {
-	  -- Your custom capture.
-	  ["aF"] = "@custom-capture",
-
-	  -- Built-in captures.
-	  ["af"] = "@function.outer",
-	  ["if"] = "@function.inner",
-	},
-      },
-    },
-  }
-  EOF
+>lua
+ for _, mode in ipairs { "x", "o" } do
+    vim.keymap.set(mode, "aF", function()
+      select.select_textobject("@custom_capture", "textobjects", mode)
+    end)
+  end
 <
-Where '@custom-capture' can be defined in a scheme file
->
-  ```scm
-  -- after/queries/python/textobjects.scm
-  (function_definition) @custom-capture
-  ```
+Where '@custom-capture' can be defined in a query file
+>query
+  ; queries/python/textobjects.scm
+  ;; extends
+  (function_definition) @custom_capture
 <
 
 vim:tw=78:ts=8:expandtab:noet:ft=help:norl:

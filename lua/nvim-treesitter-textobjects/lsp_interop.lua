@@ -1,6 +1,6 @@
-local attach = require "nvim-treesitter.textobjects.attach"
-local shared = require "nvim-treesitter.textobjects.shared"
-local configs = require "nvim-treesitter.configs"
+local attach = require "nvim-treesitter-textobjects.attach"
+local shared = require "nvim-treesitter-textobjects.shared"
+local _config = require "nvim-treesitter-textobjects.config"
 
 local M = {}
 
@@ -44,7 +44,7 @@ function M.preview_location(location, context)
     range["end"].line = math.max(range["end"].line, range.start.line + context)
   end
 
-  local config = configs.get_module "textobjects.lsp_interop"
+  local config = _config.lsp_interop
   local opts = config.floating_preview_opts or {}
 
   if config.border ~= "none" then
@@ -120,14 +120,5 @@ end
 
 M.attach = attach.make_attach(nx_mode_functions, "lsp_interop", { "n", "x" })
 M.detach = attach.make_detach "lsp_interop"
-M.commands = {
-  TSTextobjectPeekDefinitionCode = {
-    run = M.peek_definition_code,
-    args = {
-      "-nargs=+",
-      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
-    },
-  },
-}
 
 return M

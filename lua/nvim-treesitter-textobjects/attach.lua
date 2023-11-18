@@ -1,4 +1,4 @@
-local configs = require "nvim-treesitter.configs"
+local config = require "nvim-treesitter-textobjects.config"
 local M = {}
 
 local function make_dot_repeatable(fn)
@@ -22,9 +22,8 @@ function M.make_attach(functions, submodule, keymap_modes, opts)
   M.keymaps_per_submodule[submodule] = M.keymaps_per_submodule[submodule] or {}
   local keymaps_per_buf = M.keymaps_per_submodule[submodule]
 
-  return function(bufnr, lang)
+  return function(bufnr, _lang)
     -- lang = lang or parsers.get_buf_lang(bufnr)
-    local config = configs.get_module("textobjects." .. submodule)
 
     for _, function_call in pairs(functions) do
       local function_description = function_call:gsub("_", " "):gsub("^%l", string.upper)
@@ -42,7 +41,7 @@ function M.make_attach(functions, submodule, keymap_modes, opts)
         end
 
         local fn = function()
-          require("nvim-treesitter.textobjects." .. submodule)[function_call](query, query_group)
+          require("nvim-treesitter-textobjects." .. submodule)[function_call](query, query_group)
         end
         if opts.dot_repeatable then
           fn = make_dot_repeatable(fn)

@@ -1,10 +1,39 @@
-local ts_utils = require "nvim-treesitter.ts_utils"
-local attach = require "nvim-treesitter.textobjects.attach"
-local shared = require "nvim-treesitter.textobjects.shared"
-local repeatable_move = require "nvim-treesitter.textobjects.repeatable_move"
-local queries = require "nvim-treesitter.query"
-local configs = require "nvim-treesitter.configs"
-local parsers = require "nvim-treesitter.parsers"
+local api = vim.api
+
+local attach = require "nvim-treesitter-textobjects.attach"
+local shared = require "nvim-treesitter-textobjects.shared"
+local repeatable_move = require "nvim-treesitter-textobjects.repeatable_move"
+local _config = require "nvim-treesitter-textobjects.config"
+
+---@param node TSNode
+---@param goto_end boolean
+---@param avoid_set_jump boolean
+local function goto_node(node, goto_end, avoid_set_jump)
+  if not node then
+    return
+  end
+  if not avoid_set_jump then
+    shared.set_jump()
+  end
+  local range = { shared.get_vim_range { node:range() } }
+  ---@type table<number>
+  local position
+  if not goto_end then
+    position = { range[1], range[2] }
+  else
+    position = { range[3], range[4] }
+  end
+
+  -- Enter visual mode if we are in operator pending mode
+  -- If we don't do this, it will miss the last character.
+  local mode = vim.api.nvim_get_mode()
+  if mode.mode == "no" then
+    vim.cmd "normal! v"
+  end
+
+  -- Position is 1, 0 indexed.
+  api.nvim_win_set_cursor(0, { position[1], position[2] - 1 })
+end
 
 local M = {}
 
@@ -29,9 +58,9 @@ local function move(opts)
 
   local bufnr = vim.api.nvim_win_get_buf(winid)
   local query_strings =
-    shared.get_query_strings_from_regex(query_strings_regex, query_group, parsers.get_buf_lang(bufnr))
+    shared.get_query_strings_from_regex(query_strings_regex, query_group, shared.get_buf_lang(bufnr))
 
-  local config = configs.get_module "textobjects.move"
+  local config = _config.move
 
   -- score is a byte position.
   local function scoring_function(start_, match)
@@ -75,7 +104,7 @@ local function move(opts)
     local best_start
     for _, query_string in ipairs(query_strings) do
       for _, start_ in ipairs(starts) do
-        local current_match = queries.find_best_match(bufnr, query_string, query_group, function(match)
+        local current_match = shared.find_best_match(bufnr, query_string, query_group, function(match)
           return filter_function(start_, match)
         end, function(match)
           return scoring_function(start_, match)
@@ -96,7 +125,7 @@ local function move(opts)
         end
       end
     end
-    ts_utils.goto_node(best_match and best_match.node, not best_start, not config.set_jumps)
+    goto_node(best_match and best_match.node, not best_start, not config.set_jumps)
   end
 end
 
@@ -161,36 +190,5 @@ local nxo_mode_functions = {
 
 M.attach = attach.make_attach(nxo_mode_functions, "move", { "n", "x", "o" })
 M.detach = attach.make_detach "move"
-
-M.commands = {
-  TSTextobjectGotoNextStart = {
-    run = M.goto_next_start,
-    args = {
-      "-nargs=1",
-      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
-    },
-  },
-  TSTextobjectGotoNextEnd = {
-    run = M.goto_next_end,
-    args = {
-      "-nargs=1",
-      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
-    },
-  },
-  TSTextobjectGotoPreviousStart = {
-    run = M.goto_previous_start,
-    args = {
-      "-nargs=1",
-      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
-    },
-  },
-  TSTextobjectGotoPreviousEnd = {
-    run = M.goto_previous_end,
-    args = {
-      "-nargs=1",
-      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
-    },
-  },
-}
 
 return M

@@ -1,9 +1,36 @@
 local api = vim.api
-local configs = require "nvim-treesitter.configs"
-local parsers = require "nvim-treesitter.parsers"
+local _config = require "nvim-treesitter-textobjects.config"
+local shared = require "nvim-treesitter-textobjects.shared"
 
-local shared = require "nvim-treesitter.textobjects.shared"
-local ts_utils = require "nvim-treesitter.ts_utils"
+---@param buf integer|nil
+---@param range integer[]
+---@param selection_mode string
+local function update_selection(buf, range, selection_mode)
+  local start_row, start_col, end_row, end_col = shared.get_vim_range(range, buf)
+
+  local v_table = { charwise = "v", linewise = "V", blockwise = "<C-v>" }
+  selection_mode = selection_mode or "charwise"
+
+  -- Normalise selection_mode
+  if vim.tbl_contains(vim.tbl_keys(v_table), selection_mode) then
+    selection_mode = v_table[selection_mode]
+  end
+
+  -- enter visual mode if normal or operator-pending (no) mode
+  -- Why? According to https://learnvimscriptthehardway.stevelosh.com/chapters/15.html
+  --   If your operator-pending mapping ends with some text visually selected, Vim will operate on that text.
+  --   Otherwise, Vim will operate on the text between the original cursor position and the new position.
+  local mode = api.nvim_get_mode()
+  if mode.mode ~= selection_mode then
+    -- Call to `nvim_replace_termcodes()` is needed for sending appropriate command to enter blockwise mode
+    selection_mode = vim.api.nvim_replace_termcodes(selection_mode, true, true, true)
+    api.nvim_cmd({ cmd = "normal", bang = true, args = { selection_mode } }, {})
+  end
+
+  api.nvim_win_set_cursor(0, { start_row, start_col - 1 })
+  vim.cmd "normal! o"
+  api.nvim_win_set_cursor(0, { end_row, end_col - 1 })
+end
 
 local M = {}
 
@@ -96,9 +123,10 @@ end
 
 function M.select_textobject(query_string, query_group, keymap_mode)
   query_group = query_group or "textobjects"
-  local lookahead = configs.get_module("textobjects.select").lookahead
-  local lookbehind = configs.get_module("textobjects.select").lookbehind
-  local surrounding_whitespace = configs.get_module("textobjects.select").include_surrounding_whitespace
+  local config = _config.select
+  local lookahead = config.lookahead
+  local lookbehind = config.lookbehind
+  local surrounding_whitespace = config.include_surrounding_whitespace
   local bufnr, textobject =
     shared.textobject_at_point(query_string, query_group, nil, nil, { lookahead = lookahead, lookbehind = lookbehind })
   if textobject then
@@ -111,7 +139,7 @@ function M.select_textobject(query_string, query_group, keymap_mode)
     then
       textobject = include_surrounding_whitespace(bufnr, textobject, selection_mode)
     end
-    ts_utils.update_selection(bufnr, textobject, selection_mode)
+    update_selection(bufnr, textobject, selection_mode)
   end
 end
 
@@ -125,7 +153,7 @@ function M.detect_selection_mode(query_string, keymap_mode)
   }
   local method = keymap_to_method[keymap_mode]
 
-  local config = configs.get_module "textobjects.select"
+  local config = _config.select
   local selection_modes = val_or_return(config.selection_modes, { query_string = query_string, method = method })
   local selection_mode
   if type(selection_modes) == "table" then
@@ -152,8 +180,8 @@ M.keymaps_per_buf = {}
 
 function M.attach(bufnr, lang)
   bufnr = bufnr or api.nvim_get_current_buf()
-  local config = configs.get_module "textobjects.select"
-  lang = lang or parsers.get_buf_lang(bufnr)
+  local config = _config.select
+  lang = lang or shared.get_buf_lang(bufnr)
 
   for mapping, query in pairs(config.keymaps) do
     local desc, query_string, query_group
@@ -189,7 +217,7 @@ function M.attach(bufnr, lang)
           { keymap_mode },
           mapping,
           string.format(
-            "<cmd>lua require'nvim-treesitter.textobjects.select'.select_textobject('%s','%s','%s')<cr>",
+            "<cmd>lua require'nvim-treesitter-textobjects.select'.select_textobject('%s','%s','%s')<cr>",
             query_string,
             query_group,
             keymap_mode
@@ -214,15 +242,5 @@ function M.detach(bufnr)
   end
   M.keymaps_per_buf[bufnr] = nil
 end
-
-M.commands = {
-  TSTextobjectSelect = {
-    run = M.select_textobject,
-    args = {
-      "-nargs=1",
-      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
-    },
-  },
-}
 
 return M

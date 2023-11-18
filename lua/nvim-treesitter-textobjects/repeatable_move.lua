@@ -246,31 +246,4 @@ M.builtin_T = function()
   end
 end
 
-M.commands = {
-  TSTextobjectRepeatLastMove = {
-    run = M.repeat_last_move,
-  },
-  TSTextobjectRepeatLastMoveOpposite = {
-    run = M.repeat_last_move_opposite,
-  },
-  TSTextobjectRepeatLastMoveNext = {
-    run = M.repeat_last_move_next,
-  },
-  TSTextobjectRepeatLastMovePrevious = {
-    run = M.repeat_last_move_previous,
-  },
-  TSTextobjectBuiltinf = {
-    run = M.builtin_f,
-  },
-  TSTextobjectBuiltinF = {
-    run = M.builtin_F,
-  },
-  TSTextobjectBuiltint = {
-    run = M.builtin_t,
-  },
-  TSTextobjectBuiltinT = {
-    run = M.builtin_T,
-  },
-}
-
 return M

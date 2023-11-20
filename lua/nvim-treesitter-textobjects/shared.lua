@@ -9,25 +9,6 @@ function M.set_jump()
   vim.cmd "normal! m'"
 end
 
----@param filetype string
-local function ft_to_lang(filetype)
-  local result = ts.language.get_lang(filetype)
-  if result then
-    return result
-  else
-    filetype = vim.split(filetype, "%.")[1]
-    assert(filetype, string.format("No language for filetype %s", filetype))
-    return ts.language.get_lang(filetype) or filetype
-  end
-end
-
----@param bufnr integer
----@return string lang
-function M.get_buf_lang(bufnr)
-  local filetype = assert(vim.bo[bufnr].filetype, string.format("Buffer %s has no filetype", bufnr))
-  return ft_to_lang(filetype)
-end
-
 ---@param range integer[]
 ---@param buf integer|nil
 ---@return integer, integer, integer, integer
@@ -72,7 +53,7 @@ end
 ---@return Query?
 ---@return QueryInfo?
 local function prepare_query(bufnr, query_name, root, root_lang)
-  local buf_lang = M.get_buf_lang(bufnr)
+  local buf_lang = ts.language.get_lang(vim.bo[bufnr].filetype)
   local parser = ts.get_parser(bufnr, buf_lang)
 
   if not root then
@@ -236,7 +217,7 @@ end
 ---@param query_group string
 ---@return TSNode[]
 local function get_capture_matches_recursively(bufnr, query_string, query_group)
-  local lang = M.get_buf_lang(bufnr)
+  local lang = ts.language.get_lang(vim.bo[bufnr].filetype)
   local parser = ts.get_parser(bufnr, lang)
 
   local matches = {} ---@type TSNode[]

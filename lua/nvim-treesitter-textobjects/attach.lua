@@ -23,8 +23,6 @@ function M.make_attach(functions, submodule, keymap_modes, opts)
   local keymaps_per_buf = M.keymaps_per_submodule[submodule]
 
   return function(bufnr, _lang)
-    -- lang = lang or parsers.get_buf_lang(bufnr)
-
     for _, function_call in pairs(functions) do
       local function_description = function_call:gsub("_", " "):gsub("^%l", string.upper)
       for mapping, query_metadata in pairs(config[function_call] or {}) do

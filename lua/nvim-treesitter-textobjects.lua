@@ -1,28 +1,7 @@
 local config = require "nvim-treesitter-textobjects.config"
-local ts = vim.treesitter
 local api = vim.api
 
 local M = {}
-
----@param lang string
----@return boolean
-M.has_textobjects = function(lang)
-  return ts.query.get_files(lang, "textobjects") ~= nil
-end
-
--- TODO (TheLeoP): use in on_attach (add on_attach first)
----@param lang string
----@return boolean
-local function has_some_textobject_mapping(lang)
-  for _, v in pairs(require("nvim-treesitter-textobjects.config").select.keymaps) do
-    if type(v) == "table" then
-      if v[lang] then
-        return true
-      end
-    end
-  end
-  return false
-end
 
 local available_text_objects = function(arg_lead)
   local options = vim.tbl_map(function(o)

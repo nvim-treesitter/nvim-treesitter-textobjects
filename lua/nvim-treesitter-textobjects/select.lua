@@ -1,6 +1,7 @@
 local api = vim.api
 local _config = require "nvim-treesitter-textobjects.config"
 local shared = require "nvim-treesitter-textobjects.shared"
+local ts = vim.treesitter
 
 ---@param buf integer|nil
 ---@param range integer[]
@@ -181,7 +182,7 @@ M.keymaps_per_buf = {}
 function M.attach(bufnr, lang)
   bufnr = bufnr or api.nvim_get_current_buf()
   local config = _config.select
-  lang = lang or shared.get_buf_lang(bufnr)
+  lang = lang or ts.language.get_lang(vim.bo[bufnr].filetype)
 
   for mapping, query in pairs(config.keymaps) do
     local desc, query_string, query_group

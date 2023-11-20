@@ -1,4 +1,5 @@
 local api = vim.api
+local ts = vim.treesitter
 
 local attach = require "nvim-treesitter-textobjects.attach"
 local shared = require "nvim-treesitter-textobjects.shared"
@@ -58,7 +59,7 @@ local function move(opts)
 
   local bufnr = vim.api.nvim_win_get_buf(winid)
   local query_strings =
-    shared.get_query_strings_from_regex(query_strings_regex, query_group, shared.get_buf_lang(bufnr))
+    shared.get_query_strings_from_regex(query_strings_regex, query_group, ts.language.get_lang(vim.bo[bufnr].filetype))
 
   local config = _config.move
 

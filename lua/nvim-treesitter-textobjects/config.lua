@@ -5,7 +5,7 @@
 ---@field lookahead boolean
 ---@field lookbehind boolean
 ---@field keymaps table<string, string|table> TODO (TheLeoP): remove?
----@field selection_modes table<string, TSTextObjects.SelectionMode>
+---@field selection_modes table<string, TSTextObjects.SelectionMode>|fun(opts: {query_string: string, methodr: TSTextObjects.Method}): TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>
 ---@field include_surrounding_whitespace boolean|fun(): boolean
 
 ---@class (exact) TSTextObjects.Config.Swap

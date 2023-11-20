@@ -4,6 +4,7 @@ local _config = require "nvim-treesitter-textobjects.config"
 
 local M = {}
 
+--- @type integer|nil
 local floating_win
 
 -- peeking is not interruptive so it is okay to use in visual mode.

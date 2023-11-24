@@ -163,7 +163,7 @@ local function make_dot_repeatable(fn)
 end
 
 ---@param query_strings_regex string lua pattern describing the query string
----@param query_group string
+---@param query_group? string
 ---@return function #Function inteded to be used on mappings
 function M.swap_next(query_strings_regex, query_group)
   return make_dot_repeatable(function()
@@ -172,7 +172,7 @@ function M.swap_next(query_strings_regex, query_group)
 end
 
 ---@param query_strings_regex string lua pattern describing the query string
----@param query_group string
+---@param query_group? string
 ---@return function #Function inteded to be used on mappings
 function M.swap_previous(query_strings_regex, query_group)
   return make_dot_repeatable(function()

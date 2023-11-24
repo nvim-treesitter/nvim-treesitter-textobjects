@@ -1,4 +1,5 @@
-local attach = require "nvim-treesitter-textobjects.attach"
+local api = vim.api
+
 local shared = require "nvim-treesitter-textobjects.shared"
 local _config = require "nvim-treesitter-textobjects.config"
 
@@ -6,13 +7,6 @@ local M = {}
 
 --- @type integer|nil
 local floating_win
-
--- peeking is not interruptive so it is okay to use in visual mode.
--- in fact, visual mode peeking is very helpful because you may not want
--- to jump to the definition.
-local nx_mode_functions = {
-  "peek_definition_code",
-}
 
 local function is_new_signature_handler()
   if debug.getinfo(vim.lsp.handlers.signature_help).nparams == 4 then
@@ -22,6 +16,10 @@ local function is_new_signature_handler()
   end
 end
 
+---@param location table<string, any>
+---@param context integer|Range4
+---@return integer? preview_bufnr
+---@return integer? preview_winnr
 function M.preview_location(location, context)
   -- location may be LocationLink or Location (more useful for the former)
   local uri = location.targetUri or location.uri
@@ -33,7 +31,7 @@ function M.preview_location(location, context)
     vim.fn.bufload(bufnr)
   end
 
-  local range = location.targetRange or location.range
+  local range = location.targetRange or location.range --[[@as lsp.Range]]
   -- don't include a exclusive 0 character line
   if range["end"].character == 0 then
     range["end"].line = range["end"].line - 1
@@ -52,12 +50,16 @@ function M.preview_location(location, context)
     opts.border = config.border
   end
   local contents = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 1, false)
-  local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
+  local filetype = vim.bo[bufnr].filetype
   local preview_buf, preview_win = vim.lsp.util.open_floating_preview(contents, filetype, opts)
-  vim.api.nvim_buf_set_option(preview_buf, "filetype", filetype)
+  vim.bo[preview_buf].filetype = filetype
   return preview_buf, preview_win
 end
 
+---@param query_string string
+---@param query_group string
+---@param context? integer|Range4
+---@return fun(err?: table, method: string, result: table<string, any>|table<string, any>[])
 function M.make_preview_location_callback(query_string, query_group, context)
   query_group = query_group or "textobjects"
   context = context or 0
@@ -71,10 +73,12 @@ function M.make_preview_location_callback(query_string, query_group, context)
     end
 
     if vim.tbl_islist(result) then
+      ---@cast result table<string, any>[]
       result = result[1]
+      ---@cast result table<string, any>
     end
     local uri = result.uri or result.targetUri
-    local range = result.range or result.targetRange
+    local range = result.range or result.targetRange --[[@as lsp.Range]]
     if not uri or not range then
       return
     end
@@ -103,10 +107,20 @@ function M.make_preview_location_callback(query_string, query_group, context)
   return vim.schedule_wrap(signature_handler)
 end
 
+---@param query_string string
+---@param query_group? string
+---@param lsp_request? string
+---@param context? integer|Range4
 function M.peek_definition_code(query_string, query_group, lsp_request, context)
+  if not shared.check_support(api.nvim_get_current_buf()) then
+    vim.notify("This filetype is not supported by nvim-treesitter-textobjects", vim.log.levels.WARN)
+    return
+  end
+
   query_group = query_group or "textobjects"
   lsp_request = lsp_request or "textDocument/definition"
   if vim.tbl_contains(vim.api.nvim_list_wins(), floating_win) then
+    assert(floating_win, "The floaing window for peeking is not open")
     vim.api.nvim_set_current_win(floating_win)
   else
     local params = vim.lsp.util.make_position_params()
@@ -118,8 +132,5 @@ function M.peek_definition_code(query_string, query_group, lsp_request, context)
     )
   end
 end
-
-M.attach = attach.make_attach(nx_mode_functions, "lsp_interop", { "n", "x" })
-M.detach = attach.make_detach "lsp_interop"
 
 return M

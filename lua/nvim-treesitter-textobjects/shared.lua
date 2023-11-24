@@ -9,7 +9,7 @@ function M.set_jump()
   vim.cmd "normal! m'"
 end
 
----@param range integer[]
+---@param range Range4
 ---@param buf integer?
 ---@return integer, integer, integer, integer
 function M.get_vim_range(range, buf)
@@ -56,7 +56,7 @@ local function prepare_query(bufnr, query_name, root, root_lang)
   local buf_lang = ts.language.get_lang(vim.bo[bufnr].filetype)
   local parser = ts.get_parser(bufnr, buf_lang)
 
-  local range = { root:range() } ---@type integer[]
+  local range = { root:range() } ---@type Range4
 
   if not root_lang then
     local lang_tree = parser:language_for_range(range)
@@ -255,21 +255,31 @@ if not unpack then
   -- luacheck: pop
 end
 
--- Convert single query string to list for backwards compatibility and the Vim commands
+--- Convert single query string to list for backwards compatibility and the Vim commands
+---
+---@param query_strings string|string[]
+---@return string[]
 function M.make_query_strings_table(query_strings)
-  return type(query_strings) == "string" and { query_strings } or query_strings
+  if type(query_strings) == "string" then
+    return { query_strings }
+  else
+    return query_strings
+  end
 end
 
--- Get query strings from regex
-function M.get_query_strings_from_regex(query_strings_regex, query_group, lang)
-  query_strings_regex = M.make_query_strings_table(query_strings_regex)
+--- Get query strings from regex
+---@param query_patterns string[]
+---@param query_group? string
+---@param lang? string
+---@return string[]
+function M.get_query_strings_from_pattern(query_patterns, query_group, lang)
   query_group = query_group or "textobjects"
   lang = lang or ts.language.get_lang(vim.bo.filetype)
   local available_textobjects = M.available_textobjects(lang, query_group)
   local query_strings = {}
-  for _, query_string_regex in ipairs(query_strings_regex) do
+  for _, query_pattern in ipairs(query_patterns) do
     for _, available_textobject in ipairs(available_textobjects) do
-      if string.match("@" .. available_textobject, query_string_regex) then
+      if string.match("@" .. available_textobject, query_pattern) then
         table.insert(query_strings, "@" .. available_textobject)
       end
     end
@@ -278,6 +288,9 @@ function M.get_query_strings_from_regex(query_strings_regex, query_group, lang)
   return query_strings
 end
 
+---@param lang? string
+---@param query_group? string
+---@return
 function M.available_textobjects(lang, query_group)
   lang = lang or ts.language.get_lang(vim.bo.filetype)
   query_group = query_group or "textobjects"
@@ -312,7 +325,7 @@ end
 ---@param row number 0-indexed
 ---@param col number 0-indexed
 ---@param opts {lookahead: boolean, lookbehind: boolean} lookahead and lookbehind options
----@return integer[]|nil
+---@return Range4|nil
 ---@return TSNode|nil
 local function best_match_at_point(matches, row, col, opts)
   local match_length ---@type integer
@@ -408,11 +421,11 @@ end
 --- when it's just after the end of the inner range (e.g. the "end" keyword of the function)
 ---@param query_string string
 ---@param query_group string
----@param pos? integer[]
+---@param pos? Range4
 ---@param bufnr? integer
 ---@param opts? {lookahead: boolean, lookbehind: boolean} lookahead and lookbehind options
 ---@return integer bufnr
----@return integer[]|nil range
+---@return Range4|nil range
 ---@return TSNode|nil node
 function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
   query_group = query_group or "textobjects"
@@ -491,12 +504,27 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
   end
 end
 
+---@param forward boolean
+---@param node TSNode
+---@param query_string string
+---@param query_group string
+---@param same_parent boolean
+---@param overlapping_range_ok boolean
+---@param bufnr integer
+---@return TSNode?
 function M.get_adjacent(forward, node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
   query_group = query_group or "textobjects"
   local fn = forward and M.next_textobject or M.previous_textobject
   return fn(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
 end
 
+---@param node? TSNode
+---@param query_string string
+---@param query_group? string
+---@param same_parent boolean
+---@param overlapping_range_ok boolean
+---@param bufnr? integer
+---@return TSNode?
 function M.next_textobject(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
   query_group = query_group or "textobjects"
   node = node or vim.treesitter.get_node()
@@ -538,6 +566,13 @@ function M.next_textobject(node, query_string, query_group, same_parent, overlap
   return next_node and next_node.node
 end
 
+---@param node TSNode
+---@param query_string string
+---@param query_group? string
+---@param same_parent boolean
+---@param overlapping_range_ok boolean
+---@param bufnr integer
+---@return TSNode?
 function M.previous_textobject(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
   query_group = query_group or "textobjects"
   node = node or vim.treesitter.get_node()
@@ -576,6 +611,39 @@ function M.previous_textobject(node, query_string, query_group, same_parent, ove
   local previous_node = M.find_best_match(bufnr, query_string, query_group, filter_function, scoring_function, root)
 
   return previous_node and previous_node.node
+end
+
+---@param bufnr integer
+---@param query_group? string
+---@param queries? string[]
+--- @return boolean
+function M.check_support(bufnr, query_group, queries)
+  query_group = query_group or "textobjects"
+
+  local buf_lang = ts.language.get_lang(vim.bo[bufnr].filetype)
+  if not buf_lang then
+    return false
+  end
+  local parser = ts.get_parser(bufnr, buf_lang)
+  if not parser then
+    return false
+  end
+  local ok, _queries = pcall(ts.query.get, buf_lang, query_group)
+  if not ok or not _queries then
+    return false
+  end
+
+  if queries then
+    local available_textobjects = M.available_textobjects(buf_lang, query_group)
+    for _, query in ipairs(queries) do
+      if not vim.list_contains(available_textobjects, query:sub(2)) then
+        return false
+      end
+    end
+    return true
+  end
+
+  return true
 end
 
 return M

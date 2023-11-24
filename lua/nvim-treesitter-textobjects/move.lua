@@ -1,7 +1,6 @@
 local api = vim.api
 local ts = vim.treesitter
 
-local attach = require "nvim-treesitter-textobjects.attach"
 local shared = require "nvim-treesitter-textobjects.shared"
 local repeatable_move = require "nvim-treesitter-textobjects.repeatable_move"
 local _config = require "nvim-treesitter-textobjects.config"
@@ -38,14 +37,24 @@ end
 
 local M = {}
 
+---@class TSTextObjects.MoveOpts
+---@field query_strings_regex string
+---@field query_group string
+---@field forward boolean
+---@field start? boolean If true, choose the start of the node, and false is for the end.
+---@field winid integer
+
+---@param opts TSTextObjects.MoveOpts
 local function move(opts)
-  -- opts includes query_strings_regex, query_group, forward, start, winid
-  -- start: bool or nil. If true, choose the start of the node, and false is for the end.
-  -- If nil, it considers both and chooses the closer side.
-  local query_strings_regex = shared.make_query_strings_table(opts.query_strings_regex)
+  if not shared.check_support(api.nvim_get_current_buf()) then
+    vim.notify("This filetype is not supported by nvim-treesitter-textobjects", vim.log.levels.WARN)
+    return
+  end
+
+  local query_strings_pattern = shared.make_query_strings_table(opts.query_strings_regex)
   local query_group = opts.query_group or "textobjects"
   local forward = opts.forward
-  local starts
+  local starts ---@type {[1]: boolean, [2]: boolean}
   if opts.start == nil then
     starts = { true, false }
   else
@@ -58,14 +67,20 @@ local function move(opts)
   local winid = opts.winid or vim.api.nvim_get_current_win()
 
   local bufnr = vim.api.nvim_win_get_buf(winid)
-  local query_strings =
-    shared.get_query_strings_from_regex(query_strings_regex, query_group, ts.language.get_lang(vim.bo[bufnr].filetype))
+  local query_strings = shared.get_query_strings_from_pattern(
+    query_strings_pattern,
+    query_group,
+    ts.language.get_lang(vim.bo[bufnr].filetype)
+  )
 
   local config = _config.move
 
   -- score is a byte position.
+  ---
+  ---@param start_ boolean
+  ---@param match {node: TSNode}
   local function scoring_function(start_, match)
-    local score, _
+    local score, _ ---@type integer, integer
     if start_ then
       _, _, score = match.node:start()
     else
@@ -78,9 +93,11 @@ local function move(opts)
     end
   end
 
+  ---@param start_ boolean
+  ---@param match {node: TSNode}
   local function filter_function(start_, match)
-    local range = { match.node:range() }
-    local row, col = unpack(vim.api.nvim_win_get_cursor(winid))
+    local range = { match.node:range() } ---@type Range4
+    local row, col = unpack(vim.api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
     row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
 
     if not start_ then
@@ -100,16 +117,22 @@ local function move(opts)
   end
 
   for _ = 1, vim.v.count1 do
-    local best_match
-    local best_score
-    local best_start
+    local best_match ---@type TSNode
+    local best_score ---@type integer
+    local best_start ---@type boolean
     for _, query_string in ipairs(query_strings) do
       for _, start_ in ipairs(starts) do
+        -- TODO (TheLeoP): check this
+        local buf_lang = ts.language.get_lang(vim.bo[bufnr].filetype)
+        local parser = ts.get_parser(bufnr, buf_lang)
+        local first_tree = parser:trees()[1]
+        local root = first_tree:root()
+
         local current_match = shared.find_best_match(bufnr, query_string, query_group, function(match)
           return filter_function(start_, match)
         end, function(match)
           return scoring_function(start_, match)
-        end)
+        end, root)
 
         if current_match then
           local score = scoring_function(start_, current_match)
@@ -179,17 +202,5 @@ M.goto_previous = function(query_strings_regex, query_group)
     query_group = query_group,
   }
 end
-
-local nxo_mode_functions = {
-  "goto_next_start",
-  "goto_next_end",
-  "goto_previous_start",
-  "goto_previous_end",
-  "goto_next",
-  "goto_previous",
-}
-
-M.attach = attach.make_attach(nxo_mode_functions, "move", { "n", "x", "o" })
-M.detach = attach.make_detach "move"
 
 return M

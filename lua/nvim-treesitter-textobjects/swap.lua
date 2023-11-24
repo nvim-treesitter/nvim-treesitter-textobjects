@@ -2,16 +2,18 @@ local ts = vim.treesitter
 local api = vim.api
 
 local shared = require "nvim-treesitter-textobjects.shared"
-local attach = require "nvim-treesitter-textobjects.attach"
 
-local function get_node_text(node, bufnr)
+---@param node_or_range TSNode|Range4
+---@param bufnr integer
+---@return string[]
+local function get_node_text(node_or_range, bufnr)
   bufnr = bufnr or api.nvim_get_current_buf()
-  if not node then
+  if not node_or_range then
     return {}
   end
 
+  local start_row, start_col, end_row, end_col = ts.get_node_range(node_or_range)
   -- We have to remember that end_col is end-exclusive
-  local start_row, start_col, end_row, end_col = ts.get_node_range(node)
 
   if start_row ~= end_row then
     local lines = api.nvim_buf_get_lines(bufnr, start_row, end_row + 1, false)
@@ -35,9 +37,10 @@ end
 ---@field line integer
 ---@field character integer
 
----@param node TSNode
+---@param node TSNode|Range4
 ---@return {start: TSTextObjects.LspLocation, end: TSTextObjects.LspLocation}
 local function node_to_lsp_range(node)
+  -- TODO (TheLeoP): do not use this?
   local start_line, start_col, end_line, end_col = ts.get_node_range(node)
   local rtn = {}
   rtn.start = { line = start_line, character = start_col }
@@ -45,8 +48,8 @@ local function node_to_lsp_range(node)
   return rtn
 end
 
----@param node_or_range1 integer[]|TSNode
----@param node_or_range2 integer[]|TSNode
+---@param node_or_range1 Range4|TSNode
+---@param node_or_range2 Range4|TSNode
 ---@param bufnr integer
 ---@param cursor_to_second any
 local function swap_nodes(node_or_range1, node_or_range2, bufnr, cursor_to_second)
@@ -104,13 +107,26 @@ end
 
 local M = {}
 
+---@param query_strings_regex string|string[]
+---@param query_group? string
+---@param direction integer
 local function swap_textobject(query_strings_regex, query_group, direction)
   query_strings_regex = shared.make_query_strings_table(query_strings_regex)
   query_group = query_group or "textobjects"
 
-  local query_strings = shared.get_query_strings_from_regex(query_strings_regex, query_group)
+  if not shared.check_support(api.nvim_get_current_buf()) then
+    vim.notify("This filetype is not supported by nvim-treesitter-textobjects", vim.log.levels.WARN)
+    return
+  end
 
-  local bufnr, textobject_range, node, query_string
+  local query_strings = shared.get_query_strings_from_pattern(query_strings_regex, query_group)
+
+  if not shared.check_support(api.nvim_get_current_buf(), "textobjects", query_strings) then
+    vim.notify("This filetype is not supported by nvim-treesitter-textobjects", vim.log.levels.WARN)
+    return
+  end
+
+  local bufnr, textobject_range, node, query_string ---@type integer?, Range4?, TSNode?, string?
   for _, query_string_iter in ipairs(query_strings) do
     bufnr, textobject_range, node = shared.textobject_at_point(query_string_iter, query_group)
     if node then
@@ -118,7 +134,8 @@ local function swap_textobject(query_strings_regex, query_group, direction)
       break
     end
   end
-  if not query_string then
+  ---@cast node TSNode
+  if not query_string or not textobject_range then
     return
   end
 
@@ -129,21 +146,38 @@ local function swap_textobject(query_strings_regex, query_group, direction)
     local forward = direction > 0
     local adjacent =
       shared.get_adjacent(forward, node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
-    swap_nodes(textobject_range, adjacent, bufnr, "yes, set cursor!")
+    if adjacent then
+      swap_nodes(textobject_range, adjacent, bufnr, "yes, set cursor!")
+    end
   end
 end
 
+---@param fn function
+---@return function
+local function make_dot_repeatable(fn)
+  return function()
+    _G._nvim_treesitter_textobject_last_function = fn
+    vim.o.opfunc = "v:lua._nvim_treesitter_textobject_last_function"
+    vim.api.nvim_feedkeys("g@l", "n", false)
+  end
+end
+
+---@param query_strings_regex string lua pattern describing the query string
+---@param query_group string
+---@return function #Function inteded to be used on mappings
 function M.swap_next(query_strings_regex, query_group)
-  swap_textobject(query_strings_regex, query_group, 1)
+  return make_dot_repeatable(function()
+    swap_textobject(query_strings_regex, query_group, 1)
+  end)
 end
 
+---@param query_strings_regex string lua pattern describing the query string
+---@param query_group string
+---@return function #Function inteded to be used on mappings
 function M.swap_previous(query_strings_regex, query_group)
-  swap_textobject(query_strings_regex, query_group, -1)
+  return make_dot_repeatable(function()
+    swap_textobject(query_strings_regex, query_group, -1)
+  end)
 end
-
-local normal_mode_functions = { "swap_next", "swap_previous" }
-
-M.attach = attach.make_attach(normal_mode_functions, "swap", "n", { dot_repeatable = true })
-M.detach = attach.make_detach "swap"
 
 return M

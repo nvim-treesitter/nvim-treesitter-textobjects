@@ -1,7 +1,6 @@
 ---@alias TSTextObjects.SelectionMode 'v'|'V'|'<c-v>'
 
 ---@class (exact) TSTextObjects.Config.Select
----@field enable boolean
 ---@field lookahead boolean
 ---@field lookbehind boolean
 ---@field keymaps table<string, string|table> TODO (TheLeoP): remove?
@@ -9,12 +8,10 @@
 ---@field include_surrounding_whitespace boolean|fun(): boolean
 
 ---@class (exact) TSTextObjects.Config.Swap
----@field enable boolean
 ---@field swap_next table<string, string> TODO (TheLeoP): remove?
 ---@field swap_previous table<string, string> TODO (TheLeoP): remove?
 
 ---@class (exact) TSTextObjects.Config.Move
----@field enable boolean
 ---@field set_jumps boolean
 ---@field goto_next_start table<string, string> TODO (TheLeoP): remove?
 ---@field goto_next_end table<string, string> TODO (TheLeoP): remove?
@@ -24,20 +21,15 @@
 ---@field goto_next table<string, string> TODO (TheLeoP): remove?
 
 ---@class (exact) TSTextObjects.Config.LspInterop
----@field enable boolean
 ---@field border string|string[]
 ---@field floating_preview_opts table
 ---@field peek_definition_code table<string, string> TODO (TheLeoP): remove?
-
----@class (exact) TSTextObjects.Config.RepeatableMove
----@field enable boolean
 
 ---@class (exact) TSTextObjects.Config
 ---@field select TSTextObjects.Config.Select
 ---@field swap TSTextObjects.Config.Swap
 ---@field move TSTextObjects.Config.Move
 ---@field lsp_interop TSTextObjects.Config.LspInterop
----@field repeatable_move TSTextObjects.Config.RepeatableMove
 
 ---@class (exact) TSTextObjects.UserConfig : TSTextObjects.Config
 ---@field select TSTextObjects.Config.Select
@@ -48,7 +40,6 @@
 ---@type TSTextObjects.Config
 local default_config = {
   select = {
-    enable = false,
     lookahead = false,
     lookbehind = false,
     keymaps = {},
@@ -56,12 +47,10 @@ local default_config = {
     include_surrounding_whitespace = false,
   },
   swap = {
-    enable = false,
     swap_next = {},
     swap_previous = {},
   },
   move = {
-    enable = false,
     set_jumps = true,
     goto_next_start = {},
     goto_next_end = {},
@@ -71,7 +60,6 @@ local default_config = {
     goto_previous = {},
   },
   lsp_interop = {
-    enable = false,
     border = "none",
     floating_preview_opts = {},
     peek_definition_code = {},

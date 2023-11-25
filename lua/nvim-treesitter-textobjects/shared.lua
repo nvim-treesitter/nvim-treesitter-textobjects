@@ -465,11 +465,7 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
 
     -- Note that outer matches don't perform lookahead
     local range_outer, node_outer = best_match_at_point(matches_outer, row, col, {})
-    if not node_outer then
-      -- TODO (TheLeoP): error?
-      error "There is no outer node"
-    end
-    if range_outer == nil then
+    if range_outer == nil or node_outer == nil then
       -- No @*.outer found
       -- Return the best match from the entire buffer, just like the @*.outer case
       local range, node = best_match_at_point(matches, row, col, opts)

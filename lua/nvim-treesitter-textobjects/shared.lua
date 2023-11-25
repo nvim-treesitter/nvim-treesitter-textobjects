@@ -104,6 +104,12 @@ local function insert_to_path(object, path, value)
   curr_obj[path[#path]] = value
 end
 
+local function get_byte_offset(buf, row, col)
+  return api.nvim_buf_get_offset(buf, row) + vim.fn.byteidx(api.nvim_buf_get_lines(buf, row, row + 1, false)[1], col)
+end
+
+---@alias TSTextObjects.Predicate string[]
+
 ---@param query Query
 ---@param bufnr integer
 ---@param start_row integer
@@ -125,6 +131,33 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
           insert_to_path(prepared_match, path, node)
           local metadata_path = vim.split(name .. ".metadata", "%.")
           insert_to_path(prepared_match, metadata_path, metadata[id])
+        end
+      end
+
+      ---@type TSTextObjects.Predicate[]
+      local preds = query.info.patterns[pattern]
+      if preds then
+        for _, pred in pairs(preds) do
+          if pred[1] == "make-range!" and type(pred[2]) == "string" and #pred == 4 then
+            local start_pos = match[pred[3]] and { match[pred[3]]:start() } or { match[pred[4]]:start() }
+            local end_pos = match[pred[4]] and { match[pred[4]]:end_() } or { match[pred[3]]:end_() }
+            -- TODO (TheLeoP): use ranges always instead of nodes (?)
+            insert_to_path(prepared_match, vim.split(pred[2] .. ".node", "%."), {
+              start_pos[1],
+              start_pos[2],
+              end_pos[1],
+              end_pos[2],
+              range = function(self)
+                return self[1], self[2], self[3], self[4]
+              end,
+              start = function(self)
+                return self[1], self[2], get_byte_offset(bufnr, self[1], self[2])
+              end,
+              end_ = function(self)
+                return self[3], self[4], get_byte_offset(bufnr, self[3], self[4])
+              end,
+            })
+          end
         end
       end
 
@@ -205,10 +238,9 @@ local function get_capture_matches_recursively(bufnr, query_string, query_group)
   local matches = {} ---@type {node: TSNode}[]
   parser:for_each_tree(function(tree, lang_tree)
     local tree_lang = lang_tree:lang()
-    local capture, type_ = query_string, query_group
 
-    if capture then
-      vim.list_extend(matches, get_capture_matches(bufnr, capture, type_, tree:root(), tree_lang))
+    if query_string then
+      vim.list_extend(matches, get_capture_matches(bufnr, query_string, query_group, tree:root(), tree_lang))
     end
   end)
 

@@ -1,10 +1,3 @@
-vim.cmd [[
-packadd nvim-treesitter
-packadd nvim-treesitter-textobjects
-packadd plenary.nvim
-TSUpdate
-]]
-
 require("nvim-treesitter").setup {
   -- A list of parser names, or "all"
   ensure_installed = { "python" },
@@ -16,6 +9,23 @@ require("nvim-treesitter").setup {
   ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
   -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
   -- parser_install_dir = "/some/path/to/store/parsers",
+}
+
+vim.cmd [[
+packadd nvim-treesitter
+packadd nvim-treesitter-textobjects
+packadd plenary.nvim
+TSUpdate
+]]
+
+require("nvim-treesitter-textobjects").setup {
+  select = {
+    lookahead = true,
+    include_surrounding_whitespace = false,
+  },
+  move = {
+    set_jumps = true,
+  },
 }
 
 local select = require "nvim-treesitter-textobjects.select"
@@ -370,36 +380,6 @@ end)
 vim.keymap.set({ "n", "x", "o" }, "[[E", function()
   require("nvim-treesitter-textobjects.move").goto_previous_end "@scopename.inner"
 end)
-
-require("nvim-treesitter-textobjects.move").setup {
-  select = {
-
-    -- Automatically jump forward to textobj, similar to targets.vim
-    lookahead = true,
-
-    -- You can choose the select mode (default is charwise 'v')
-    --
-    -- Can also be a function which gets passed a table with the keys
-    -- * query_string: eg '@function.inner'
-    -- * method: eg 'v' or 'o'
-    -- and should return the mode ('v', 'V', or '<c-v>') or a table
-    -- mapping query_strings to modes.
-    -- selection_modes = treesitter_selection_mode,
-    -- if you set this to `true` (default is `false`) then any textobject is
-    -- extended to include preceding or succeeding whitespace. succeeding
-    -- whitespace has priority in order to act similarly to eg the built-in
-    -- `ap`.
-    --
-    -- can also be a function which gets passed a table with the keys
-    -- * query_string: eg '@function.inner'
-    -- * selection_mode: eg 'v'
-    -- and should return true of false
-    include_surrounding_whitespace = false,
-  },
-  move = {
-    set_jumps = true, -- whether to set jumps in the jumplist
-  },
-}
 
 local ts_repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
 

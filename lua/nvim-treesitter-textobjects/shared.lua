@@ -110,6 +110,20 @@ end
 
 ---@alias TSTextObjects.Predicate string[]
 
+local fake_node = {
+  __index = {
+    range = function(self)
+      return self[1], self[2], self[3], self[4]
+    end,
+    start = function(self)
+      return self[1], self[2], get_byte_offset(self.bufnr, self[1], self[2])
+    end,
+    end_ = function(self)
+      return self[3], self[4], get_byte_offset(self.bufnr, self[3], self[4])
+    end,
+  },
+}
+
 ---@param query Query
 ---@param bufnr integer
 ---@param start_row integer
@@ -125,11 +139,11 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
 
       -- Extract capture names from each match
       for id, node in pairs(match) do
-        local name = query.captures[id] -- name of the capture in the query
-        if name ~= nil then
-          local path = vim.split(name .. ".node", "%.")
+        local query_name = query.captures[id] -- name of the capture in the query
+        if query_name ~= nil then
+          local path = vim.split(query_name .. ".node", "%.")
           insert_to_path(prepared_match, path, node)
-          local metadata_path = vim.split(name .. ".metadata", "%.")
+          local metadata_path = vim.split(query_name .. ".metadata", "%.")
           insert_to_path(prepared_match, metadata_path, metadata[id])
         end
       end
@@ -138,25 +152,28 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
       local preds = query.info.patterns[pattern]
       if preds then
         for _, pred in pairs(preds) do
-          if pred[1] == "make-range!" and type(pred[2]) == "string" and #pred == 4 then
-            local start_pos = match[pred[3]] and { match[pred[3]]:start() } or { match[pred[4]]:start() }
-            local end_pos = match[pred[4]] and { match[pred[4]]:end_() } or { match[pred[3]]:end_() }
+          local predicate_name = pred[1]
+          local query_name = pred[2]
+          local start_node_name = pred[3]
+          local end_node_name = pred[4]
+
+          if predicate_name == "make-range!" and type(query_name) == "string" and #pred == 4 then
+            local start_pos = match[start_node_name] and { match[start_node_name]:start() }
+              or { match[end_node_name]:start() }
+            local end_pos = match[end_node_name] and { match[end_node_name]:end_() }
+              or { match[start_node_name]:end_() }
             -- TODO (TheLeoP): use ranges always instead of nodes (?)
-            insert_to_path(prepared_match, vim.split(pred[2] .. ".node", "%."), {
-              start_pos[1],
-              start_pos[2],
-              end_pos[1],
-              end_pos[2],
-              range = function(self)
-                return self[1], self[2], self[3], self[4]
-              end,
-              start = function(self)
-                return self[1], self[2], get_byte_offset(bufnr, self[1], self[2])
-              end,
-              end_ = function(self)
-                return self[3], self[4], get_byte_offset(bufnr, self[3], self[4])
-              end,
-            })
+            insert_to_path(
+              prepared_match,
+              vim.split(query_name .. ".node", "%."),
+              setmetatable({
+                start_pos[1],
+                start_pos[2],
+                end_pos[1],
+                end_pos[2],
+                bufnr = bufnr,
+              }, fake_node)
+            )
           end
         end
       end

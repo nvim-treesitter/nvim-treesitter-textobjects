@@ -1,7 +1,6 @@
 local api = vim.api
 local _config = require "nvim-treesitter-textobjects.config"
 local shared = require "nvim-treesitter-textobjects.shared"
-local ts = vim.treesitter
 
 ---@param buf? integer
 ---@param range Range4

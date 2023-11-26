@@ -122,17 +122,11 @@ local function move(opts)
     local best_start ---@type boolean
     for _, query_string in ipairs(query_strings) do
       for _, start_ in ipairs(starts) do
-        -- TODO (TheLeoP): check this
-        local buf_lang = ts.language.get_lang(vim.bo[bufnr].filetype)
-        local parser = ts.get_parser(bufnr, buf_lang)
-        local first_tree = parser:trees()[1]
-        local root = first_tree:root()
-
         local current_match = shared.find_best_match(bufnr, query_string, query_group, function(match)
           return filter_function(start_, match)
         end, function(match)
           return scoring_function(start_, match)
-        end, root)
+        end)
 
         if current_match then
           local score = scoring_function(start_, current_match)

@@ -1,11 +1,15 @@
 ---@alias TSTextObjects.SelectionMode 'v'|'V'|'<c-v>'
 
+-- luacheck: push ignore 631
+
 ---@class (exact) TSTextObjects.Config.Select
 ---@field lookahead boolean
 ---@field lookbehind boolean
 ---@field keymaps table<string, string|table> TODO (TheLeoP): remove?
----@field selection_modes table<string, TSTextObjects.SelectionMode>|fun(opts: {query_string: string, methodr: TSTextObjects.Method}): TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>
+---@field selection_modes table<string, TSTextObjects.SelectionMode>|fun(opts: {query_string: string, method: TSTextObjects.Method}): TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>
 ---@field include_surrounding_whitespace boolean|fun(): boolean
+
+-- luacheck: pop
 
 ---@class (exact) TSTextObjects.Config.Swap
 ---@field swap_next table<string, string> TODO (TheLeoP): remove?

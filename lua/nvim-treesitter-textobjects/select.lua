@@ -207,7 +207,10 @@ function M.detect_selection_mode(query_string, keymap_mode)
   local method = keymap_to_method[keymap_mode]
 
   local config = _config.select
-  local selection_modes = val_or_return(config.selection_modes, { query_string = query_string, method = method }) --[[@as TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>]]
+  local selection_modes = val_or_return(config.selection_modes, {
+    query_string = query_string,
+    method = method,
+  }) --[[@as TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>]]
   local selection_mode ---@type TSTextObjects.SelectionMode
   if type(selection_modes) == "table" then
     selection_mode = selection_modes[query_string] or "v"

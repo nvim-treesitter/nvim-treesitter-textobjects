@@ -149,7 +149,7 @@ local function include_surrounding_whitespace(bufnr, range, selection_mode)
   return range
 end
 
---- TODO (TheLeoP): remove this?
+--- TODO (TheLeoP): rename this?
 ---@param val function|any
 ---@param opts any
 local val_or_return = function(val, opts)

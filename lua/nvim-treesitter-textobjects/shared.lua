@@ -85,9 +85,6 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
   return iterator
 end
 
--- TODO (TheLeoP): delete this
--- M.find_best_match: can use range4
--- get_capture_matches_recursively: ?
 ---@param bufnr integer the buffer
 ---@param query_group string the query file to use
 ---@param root TSNode the root node
@@ -128,8 +125,6 @@ local function get_at_path(tbl, path)
   return result
 end
 
--- TODO (TheLeoP): delete this
--- textobject_at_point: ??
 ---@param bufnr integer
 ---@param query_string string
 ---@param query_group string
@@ -163,10 +158,6 @@ end
 ---@alias TSTextObjects._Match {range: TSTextObjects.Range?, metadata: table<string, any>}
 ---@alias TSTextObjects.Match TSTextObjects._Match|{start: TSTextObjects._Match}
 
--- TODO (TheLeoP): delete this
--- next_textobject: can use range4 (needs to compare ranges by value)
--- previous_textobject: can use range4 (needs to compare ranges by value)
--- move: can use range4 (only uses node:range())
 ---@param bufnr integer
 ---@param capture_string string
 ---@param query_group string
@@ -278,9 +269,6 @@ function M.available_textobjects(lang, query_group)
   --}
 end
 
--- TODO (TheLeoP): delete this
--- textobject_at_point: ??
---
 --- Get the best match at a given point
 --- If the point is inside a node, the smallest node is returned
 --- If the point is not inside a node, the closest node is returned (if opts.lookahead or opts.lookbehind is true)

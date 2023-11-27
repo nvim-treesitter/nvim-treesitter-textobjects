@@ -661,7 +661,7 @@ function M.previous_textobject(range, query_string, query_group, bufnr)
   ---@param match TSTextObjects.Match
   ---@return boolean
   local function filter_function(match)
-    if range:parent_id() == match.range.parent_id then
+    if range.parent_id == match.range.parent_id then
       local end_ = match.range.end_byte
       local start = match.range.start_byte
       return end_ <= search_end and start < node_start

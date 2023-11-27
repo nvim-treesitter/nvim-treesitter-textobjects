@@ -456,6 +456,16 @@ M.Range.__index = M.Range
 
 ---@param range2 TSTextObjects.Range
 function M.Range:__eq(range2)
+  if self.bufnr ~= range2.bufnr then
+    return false
+  end
+
+  if self.id == -1 or range2.id == -1 then
+    local srow1, scol1, erow1, ecol1 = unpack(self:range4()) ---@type integer, integer, integer, integer
+    local srow2, scol2, erow2, ecol2 = unpack(range2:range4()) ---@type integer, integer, integer, integer
+    return srow1 == srow2 and scol1 == scol2 and erow1 == erow2 and ecol1 == ecol2
+  end
+
   return self.id == range2.id
 end
 

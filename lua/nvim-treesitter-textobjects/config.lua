@@ -23,9 +23,9 @@
 ---@field lsp_interop TSTextObjects.Config.LspInterop
 
 ---@class (exact) TSTextObjects.UserConfig : TSTextObjects.Config
----@field select TSTextObjects.Config.Select
----@field move TSTextObjects.Config.Move
----@field lsp_interop TSTextObjects.Config.LspInterop
+---@field select TSTextObjects.Config.Select?
+---@field move TSTextObjects.Config.Move?
+---@field lsp_interop TSTextObjects.Config.LspInterop?
 
 ---@type TSTextObjects.Config
 local default_config = {

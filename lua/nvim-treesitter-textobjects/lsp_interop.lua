@@ -17,7 +17,7 @@ local function is_new_signature_handler()
 end
 
 ---@param location table<string, any>
----@param context integer|Range4
+---@param context integer|TSTextObjects.Range
 ---@return integer? preview_bufnr
 ---@return integer? preview_winnr
 function M.preview_location(location, context)
@@ -37,8 +37,9 @@ function M.preview_location(location, context)
     range["end"].line = range["end"].line - 1
   end
   if type(context) == "table" then
-    range.start.line = math.min(range.start.line, context[1])
-    range["end"].line = math.max(range["end"].line, context[3])
+  local start_row, _, end_row, _ = unpack(context:range4()) ---@type integer, integer, integer, integer
+    range.start.line = math.min(range.start.line, start_row)
+    range["end"].line = math.max(range["end"].line, end_row)
   elseif type(context) == "number" then
     range["end"].line = math.max(range["end"].line, range.start.line + context)
   end
@@ -58,7 +59,7 @@ end
 
 ---@param query_string string
 ---@param query_group string
----@param context? integer|Range4
+---@param context? integer|TSTextObjects.Range
 ---@return fun(err?: table, method: string, result: table<string, any>|table<string, any>[])
 function M.make_preview_location_callback(query_string, query_group, context)
   query_group = query_group or "textobjects"
@@ -110,7 +111,7 @@ end
 ---@param query_string string
 ---@param query_group? string
 ---@param lsp_request? string
----@param context? integer|Range4
+---@param context? integer|TSTextObjects.Range
 function M.peek_definition_code(query_string, query_group, lsp_request, context)
   if not shared.check_support(api.nvim_get_current_buf()) then
     vim.notify("This filetype is not supported by nvim-treesitter-textobjects", vim.log.levels.WARN)

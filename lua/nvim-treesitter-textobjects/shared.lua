@@ -9,37 +9,6 @@ function M.set_jump()
   vim.cmd "normal! m'"
 end
 
----@param range Range4
----@param buf integer?
----@return integer, integer, integer, integer
-function M.get_vim_range(range, buf)
-  ---@type integer, integer, integer, integer
-  local srow, scol, erow, ecol = unpack(range)
-  srow = srow + 1
-  scol = scol + 1
-  erow = erow + 1
-
-  if ecol == 0 then
-    -- Use the value of the last col of the previous row instead.
-    erow = erow - 1
-    if not buf or buf == 0 then
-      ecol = vim.fn.col { erow, "$" } - 1
-    else
-      ecol = #api.nvim_buf_get_lines(buf, erow - 1, erow, false)[1]
-    end
-    ecol = math.max(ecol, 1)
-  end
-  return srow, scol, erow, ecol
-end
-
----@param node TSNode
----@return integer
-local function node_length(node)
-  local _, _, start_byte = node:start()
-  local _, _, end_byte = node:end_()
-  return end_byte - start_byte
-end
-
 ---@param object any
 ---@param path string[]
 ---@param value any
@@ -58,31 +27,14 @@ local function insert_to_path(object, path, value)
   curr_obj[path[#path]] = value
 end
 
-local function get_byte_offset(buf, row, col)
-  return api.nvim_buf_get_offset(buf, row) + vim.fn.byteidx(api.nvim_buf_get_lines(buf, row, row + 1, false)[1], col)
-end
-
 ---@alias TSTextObjects.Predicate string[]
 
-local fake_node = {
-  __index = {
-    range = function(self)
-      return self[1], self[2], self[3], self[4]
-    end,
-    start = function(self)
-      return self[1], self[2], get_byte_offset(self.bufnr, self[1], self[2])
-    end,
-    end_ = function(self)
-      return self[3], self[4], get_byte_offset(self.bufnr, self[3], self[4])
-    end,
-  },
-}
-
 ---@param query Query
+---@param qnode TSNode
 ---@param bufnr integer
 ---@param start_row integer
 ---@param end_row integer
----@return fun():table|nil
+---@return fun():table<string, any|table<string, any>>?
 local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
   local matches = query:iter_matches(qnode, bufnr, start_row, end_row)
 
@@ -98,10 +50,10 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
     for id, node in pairs(match) do
       local query_name = query.captures[id] -- name of the capture in the query
       if query_name ~= nil then
-        local path = vim.split(query_name .. ".node", "%.")
-        insert_to_path(prepared_match, path, node)
-        local metadata_path = vim.split(query_name .. ".metadata", "%.")
-        insert_to_path(prepared_match, metadata_path, metadata[id])
+        local path = vim.split(query_name .. ".range", "%.")
+        local range = M.Range:from_node(node, bufnr)
+        range.metadata = metadata[id]
+        insert_to_path(prepared_match, path, range)
       end
     end
 
@@ -115,20 +67,14 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
         local end_node_name = pred[4]
 
         if predicate_name == "make-range!" and type(query_name) == "string" and #pred == 4 then
-          local start_pos = match[start_node_name] and { match[start_node_name]:start() }
+          local start_pos = match[start_node_name] and { match[start_node_name]:start(true) }
             or { match[end_node_name]:start() }
-          local end_pos = match[end_node_name] and { match[end_node_name]:end_() } or { match[start_node_name]:end_() }
-          -- TODO (TheLeoP): use ranges always instead of nodes (?)
+          local end_pos = match[end_node_name] and { match[end_node_name]:end_(true) }
+            or { match[start_node_name]:end_(true) }
           insert_to_path(
             prepared_match,
-            vim.split(query_name .. ".node", "%."),
-            setmetatable({
-              start_pos[1],
-              start_pos[2],
-              end_pos[1],
-              end_pos[2],
-              bufnr = bufnr,
-            }, fake_node)
+            vim.split(query_name .. ".range", "%."),
+            M.Range:new(start_pos[1], start_pos[2], start_pos[3], end_pos[1], end_pos[2], end_pos[3], -1, -1)
           )
         end
       end
@@ -139,6 +85,9 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
   return iterator
 end
 
+-- TODO (TheLeoP): delete this
+-- M.find_best_match: can use range4
+-- get_capture_matches_recursively: ?
 ---@param bufnr integer the buffer
 ---@param query_group string the query file to use
 ---@param root TSNode the root node
@@ -160,7 +109,7 @@ end
 
 ---@param tbl table<string, any|table<string, any>> the table to access
 ---@param path string the '.' separated path
----@return table|nil result the value at path or nil
+---@return unknown|nil result the value at path or nil
 local function get_at_path(tbl, path)
   if path == "" then
     return tbl
@@ -179,35 +128,19 @@ local function get_at_path(tbl, path)
   return result
 end
 
----@param bufnr integer the buffer
----@param capture string
----@param query_group string the name of query group (highlights or injections for example)
----@param root TSNode node from where to start the search
----@param lang string the language from where to get the captures.
----@return TSTextObjects.Match[]
-local function get_capture_matches(bufnr, capture, query_group, root, lang)
-  if capture:sub(1, 1) ~= "@" then
-    error 'Captures must start with "@"'
-    return {}
-  end
-  capture = capture:sub(2)
-
-  local matches = {} ---@type TSNode[]
-  for match in iter_group_results(bufnr, query_group, root, lang) do
-    local found = get_at_path(match, capture)
-    ---@cast found TSTextObjects.Match
-    if found then
-      table.insert(matches, found)
-    end
-  end
-  return matches
-end
-
+-- TODO (TheLeoP): delete this
+-- textobject_at_point: ??
 ---@param bufnr integer
 ---@param query_string string
 ---@param query_group string
 ---@return TSTextObjects.Match[]
 local function get_capture_matches_recursively(bufnr, query_string, query_group)
+  if query_string:sub(1, 1) ~= "@" then
+    error 'Captures must start with "@"'
+    return {}
+  end
+  query_string = query_string:sub(2)
+
   local lang = ts.language.get_lang(vim.bo[bufnr].filetype)
   local parser = ts.get_parser(bufnr, lang)
 
@@ -215,22 +148,31 @@ local function get_capture_matches_recursively(bufnr, query_string, query_group)
   parser:for_each_tree(function(tree, lang_tree)
     local tree_lang = lang_tree:lang()
 
-    if query_string then
-      vim.list_extend(matches, get_capture_matches(bufnr, query_string, query_group, tree:root(), tree_lang))
+    for match in iter_group_results(bufnr, query_group, tree:root(), tree_lang) do
+      local found = get_at_path(match, query_string)
+      if found then
+        ---@cast found TSTextObjects.Match
+        table.insert(matches, found)
+      end
     end
   end)
 
   return matches
 end
 
----@alias TSTextObjects.Match {node: TSNode?, start: {node: TSNode?}}
+---@alias TSTextObjects._Match {range: TSTextObjects.Range?, metadata: table<string, any>}
+---@alias TSTextObjects.Match TSTextObjects._Match|{start: TSTextObjects._Match}
 
+-- TODO (TheLeoP): delete this
+-- next_textobject: can use range4 (needs to compare ranges by value)
+-- previous_textobject: can use range4 (needs to compare ranges by value)
+-- move: can use range4 (only uses node:range())
 ---@param bufnr integer
 ---@param capture_string string
 ---@param query_group string
 ---@param filter_predicate fun(match: TSTextObjects.Match): boolean
 ---@param scoring_function fun(match: TSTextObjects.Match): number
----@return table|unknown
+---@return TSTextObjects.Match?
 function M.find_best_match(bufnr, capture_string, query_group, filter_predicate, scoring_function)
   local lang = assert(ts.language.get_lang(vim.bo[bufnr].filetype))
   local parser = ts.get_parser(bufnr, lang)
@@ -242,11 +184,12 @@ function M.find_best_match(bufnr, capture_string, query_group, filter_predicate,
     capture_string = string.sub(capture_string, 2)
   end
 
-  local best ---@type table|nil
+  local best ---@type TSTextObjects.Match?
   local best_score ---@type number
 
   for maybe_match in iter_group_results(bufnr, query_group, root, lang) do
     local match = get_at_path(maybe_match, capture_string)
+    ---@cast match TSTextObjects.Match
 
     if match and filter_predicate(match) then
       local current_score = scoring_function(match)
@@ -304,18 +247,21 @@ end
 
 ---@param lang? string
 ---@param query_group? string
----@return
+---@return string[]
 function M.available_textobjects(lang, query_group)
   lang = lang or ts.language.get_lang(vim.bo.filetype)
+  if not lang then
+    error(string.format("There ist no languare resgitered for filetype %s", vim.bo.filetype))
+  end
   query_group = query_group or "textobjects"
   local parsed_queries = ts.query.get(lang, query_group)
   if not parsed_queries then
     return {}
   end
   local found_textobjects = parsed_queries.captures or {}
-  for _, p in pairs(parsed_queries.info.patterns) do
-    for _, q in ipairs(p) do
-      local query, arg1 = unpack(q) --[[@as any, any]]
+  for _, pattern in pairs(parsed_queries.info.patterns) do
+    for _, q in ipairs(pattern) do
+      local query, arg1 = unpack(q) --[=[@as string, string[]]=]
       if query == "make-range!" and not vim.tbl_contains(found_textobjects, arg1) then
         table.insert(found_textobjects, arg1)
       end
@@ -332,14 +278,9 @@ function M.available_textobjects(lang, query_group)
   --}
 end
 
-local get_range = function(match)
-  if match.metadata ~= nil then
-    return match.metadata.range
-  end
-
-  return { match.node:range() }
-end
-
+-- TODO (TheLeoP): delete this
+-- textobject_at_point: ??
+--
 --- Get the best match at a given point
 --- If the point is inside a node, the smallest node is returned
 --- If the point is not inside a node, the closest node is returned (if opts.lookahead or opts.lookbehind is true)
@@ -347,23 +288,22 @@ end
 ---@param row number 0-indexed
 ---@param col number 0-indexed
 ---@param opts {lookahead: boolean, lookbehind: boolean} lookahead and lookbehind options
----@return Range4|nil
----@return TSNode|nil
+---@return TSTextObjects.Range?
 local function best_match_at_point(matches, row, col, opts)
   local match_length ---@type integer
-  local smallest_range ---@type {node: TSNode?, start: {node: TSNode?}}
+  local smallest_range ---@type TSTextObjects.Match
   local earliest_start ---@type integer
 
   local lookahead_match_length ---@type integer
-  local lookahead_largest_range ---@type {node: TSNode?, start: {node: TSNode?}}
+  local lookahead_largest_range ---@type TSTextObjects.Match
   local lookahead_earliest_start ---@type integer
   local lookbehind_match_length ---@type integer
-  local lookbehind_largest_range ---@type {node: TSNode?, start: {node: TSNode?}}
+  local lookbehind_largest_range ---@type TSTextObjects.Match
   local lookbehind_earliest_start ---@type integer
 
   for _, m in pairs(matches) do
-    if m.node and vim.treesitter.is_in_node_range(m.node, row, col) then
-      local length = node_length(m.node)
+    if m.range and m.range:is_in_range(row, col) then
+      local length = m.range:length()
       if not match_length or length < match_length then
         smallest_range = m
         match_length = length
@@ -372,7 +312,7 @@ local function best_match_at_point(matches, row, col, opts)
       if match_length and length == smallest_range then
         local start = m.start
         if start then
-          local _, _, start_byte = m.start.node:start()
+          local start_byte = m.start.range.start_byte
           if not earliest_start or start_byte < earliest_start then
             smallest_range = m
             match_length = length
@@ -381,9 +321,9 @@ local function best_match_at_point(matches, row, col, opts)
         end
       end
     elseif opts.lookahead then
-      local start_line, start_col, start_byte = m.node:start()
+      local start_line, start_col, start_byte = m.range.start_row, m.range.start_col, m.range.start_byte
       if start_line > row or start_line == row and start_col > col then
-        local length = node_length(m.node)
+        local length = m.range:length()
         if
           not lookahead_earliest_start
           or lookahead_earliest_start > start_byte
@@ -395,9 +335,9 @@ local function best_match_at_point(matches, row, col, opts)
         end
       end
     elseif opts.lookbehind then
-      local start_line, start_col, start_byte = m.node:start()
+      local start_line, start_col, start_byte = m.range.start_row, m.range.start_col, m.range.start_byte
       if start_line < row or start_line == row and start_col < col then
-        local length = node_length(m.node)
+        local length = m.range:length()
         if
           not lookbehind_earliest_start
           or lookbehind_earliest_start < start_byte
@@ -413,16 +353,14 @@ local function best_match_at_point(matches, row, col, opts)
 
   if smallest_range then
     if smallest_range.start then
-      local start_range = get_range(smallest_range.start)
-      local node_range = get_range(smallest_range)
-      return { start_range[1], start_range[2], node_range[3], node_range[4] }, smallest_range.node
+      return smallest_range.range
     else
-      return get_range(smallest_range), smallest_range.node
+      return smallest_range.range
     end
   elseif lookahead_largest_range then
-    return get_range(lookahead_largest_range), lookahead_largest_range.node
+    return lookahead_largest_range.range
   elseif lookbehind_largest_range then
-    return get_range(lookbehind_largest_range), lookbehind_largest_range.node
+    return lookbehind_largest_range.range
   end
 end
 
@@ -435,16 +373,16 @@ end
 --- when it's just after the end of the inner range (e.g. the "end" keyword of the function)
 ---@param query_string string
 ---@param query_group string
----@param pos? Range4
+---@param pos? {[1]: integer, [2]: integer}
 ---@param bufnr? integer
 ---@param opts? {lookahead: boolean, lookbehind: boolean} lookahead and lookbehind options
 ---@return integer bufnr
----@return Range4|nil range
----@return TSNode|nil node
+---@return TSTextObjects.Range? range
 function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
   query_group = query_group or "textobjects"
   opts = opts or {}
   bufnr = bufnr or vim.api.nvim_get_current_buf()
+
   local lang = ts.language.get_lang(vim.bo[bufnr].filetype)
   if not lang then
     error(string.format("There ist no languare resgitered for filetype %s", vim.bo.filetype))
@@ -459,8 +397,8 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
 
   local matches = get_capture_matches_recursively(bufnr, query_string, query_group)
   if vim.endswith(query_string, "outer") then
-    local range, node = best_match_at_point(matches, row, col, opts)
-    return bufnr, range, node
+    local range = best_match_at_point(matches, row, col, opts)
+    return bufnr, range
   else
     -- query string is @*.inner or @*
     -- First search the @*.outer instead, and then search the @*.inner within the range of the @*.outer
@@ -473,94 +411,227 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
     if #matches_outer == 0 then
       -- Outer query doesn't exist or doesn't match anything
       -- Return the best match from the entire buffer, just like the @*.outer case
-      local range, node = best_match_at_point(matches, row, col, opts)
-      return bufnr, range, node
+      local range = best_match_at_point(matches, row, col, opts)
+      return bufnr, range
     end
 
     -- Note that outer matches don't perform lookahead
-    local range_outer, node_outer = best_match_at_point(matches_outer, row, col, {})
-    if range_outer == nil or node_outer == nil then
+    local range_outer, _range_outer = best_match_at_point(matches_outer, row, col, {})
+    if range_outer == nil or _range_outer == nil then
       -- No @*.outer found
       -- Return the best match from the entire buffer, just like the @*.outer case
-      local range, node = best_match_at_point(matches, row, col, opts)
-      return bufnr, range, node
+      local range = best_match_at_point(matches, row, col, opts)
+      return bufnr, range
     end
 
     local matches_within_outer = {}
     for _, match in ipairs(matches) do
-      if ts.node_contains(node_outer, { match.node:range() }) then
+      if _range_outer:contains(match.range) then
         table.insert(matches_within_outer, match)
       end
     end
     if #matches_within_outer == 0 then
       -- No @*.inner found within the range of the @*.outer
       -- Return the best match from the entire buffer, just like the @*.outer case
-      local range, node = best_match_at_point(matches, row, col, opts)
-      return bufnr, range, node
+      local range = best_match_at_point(matches, row, col, opts)
+      return bufnr, range
     else
       -- Find the best match from the cursor position
-      local range, node = best_match_at_point(matches_within_outer, row, col, opts)
+      local range = best_match_at_point(matches_within_outer, row, col, opts)
       if range ~= nil then
-        return bufnr, range, node
+        return bufnr, range
       else
         -- If failed,
         -- find the best match within the range of the @*.outer
         -- starting from the outer range's start position (not the cursor position)
         -- with lookahead enabled
-        range, node = best_match_at_point(matches_within_outer, range_outer[1], range_outer[2], { lookahead = true })
-        return bufnr, range, node
+        range = best_match_at_point(matches_within_outer, range_outer[1], range_outer[2], { lookahead = true })
+        return bufnr, range
       end
     end
   end
 end
 
----@param forward boolean
----@param node TSNode
----@param query_string string
----@param query_group string
----@param same_parent boolean
----@param overlapping_range_ok boolean
----@param bufnr integer
----@return TSNode?
-function M.get_adjacent(forward, node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
-  query_group = query_group or "textobjects"
-  local fn = forward and M.next_textobject or M.previous_textobject
-  return fn(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
+---@class TSTextObjects.Range
+---@field start_col integer
+---@field start_row integer
+---@field start_byte integer
+---@field end_col integer
+---@field end_row integer
+---@field end_byte integer
+---@field parent_id integer
+---@field id integer
+---@field bufnr integer
+---@field metadata? {range?: Range4}
+M.Range = {}
+M.Range.__index = M.Range
+
+---@param range2 TSTextObjects.Range
+function M.Range:__eq(range2)
+  return self.id == range2.id
 end
 
----@param node? TSNode
----@param query_string string
----@param query_group? string
----@param same_parent boolean
----@param overlapping_range_ok boolean
----@param bufnr? integer
----@return TSNode?
-function M.next_textobject(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
-  query_group = query_group or "textobjects"
-  node = node or vim.treesitter.get_node()
-  bufnr = bufnr or api.nvim_get_current_buf()
-  if not node then
-    return
+---@param start_col integer
+---@param start_row integer
+---@param start_byte integer
+---@param end_col integer
+---@param end_row integer
+---@param end_byte integer
+---@param parent_id integer
+---@param id integer
+---@return TSTextObjects.Range
+function M.Range:new(start_row, start_col, start_byte, end_row, end_col, end_byte, parent_id, id, bufnr)
+  local range = {
+    start_col = start_col,
+    start_row = start_row,
+    start_byte = start_byte,
+    end_col = end_col,
+    end_row = end_row,
+    end_byte = end_byte,
+    parent_id = parent_id,
+    id = id,
+    bufnr = bufnr,
+  }
+  return setmetatable(range, self)
+end
+
+---@param node TSNode
+---@param bufnr integer
+---@return TSTextObjects.Range
+function M.Range:from_node(node, bufnr)
+  local start_row, start_col, start_byte, end_row, end_col, end_byte = node:range(true)
+  local id = node:symbol()
+  local parent_id = node:parent():symbol()
+  return M.Range:new(start_row, start_col, start_byte, end_row, end_col, end_byte, parent_id, id, bufnr)
+end
+
+--- Returns Range4 taking into account the `offset` directive
+---
+---@return Range4
+function M.Range:range4()
+  if self.metadata and self.metadata.range then
+    return self.metadata.range
   end
 
-  local _, _, node_end = node:end_()
-  local search_start, _ ---@type integer, integer
-  if overlapping_range_ok then
-    _, _, search_start = node:start()
-    search_start = search_start + 1
-  else
-    _, _, search_start = node:end_()
+  return { self.start_row, self.start_col, self.end_row, self.end_col }
+end
+
+--- Sets Range4 taking into account the `offset` directive
+---
+---@param range4 Range4
+function M.Range:set_range4(range4)
+  if self.metadata and self.metadata.range then
+    self.metadata.range = range4
   end
+  self.start_col = range4[1]
+  self.start_row = range4[2]
+  self.end_col = range4[3]
+  self.end_row = range4[4]
+end
+
+---@return lsp.Range
+function M.Range:to_lsp_range()
+  return {
+    start = {
+      line = self.start_row,
+      character = self.start_col,
+    },
+    ["end"] = {
+      line = self.end_row,
+      character = self.end_col,
+    },
+  }
+end
+
+---@return integer, integer, integer, integer
+function M.Range:to_vim_range()
+  local srow, scol, erow, ecol = unpack(self:range4()) ---@type integer, integer, integer, integer
+  srow = srow + 1
+  scol = scol + 1
+  erow = erow + 1
+
+  if ecol == 0 then
+    -- Use the value of the last col of the previous row instead.
+    erow = erow - 1
+    if not self.bufnr or self.bufnr == 0 then
+      ecol = vim.fn.col { erow, "$" } - 1
+    else
+      ecol = #api.nvim_buf_get_lines(self.bufnr, erow - 1, erow, false)[1]
+    end
+    ecol = math.max(ecol, 1)
+  end
+  return srow, scol, erow, ecol
+end
+
+---@return string[]
+function M.Range:get_text()
+  if self.start_row == self.end_row then
+    local line = api.nvim_buf_get_lines(self.bufnr, self.start_row, self.start_row + 1, false)[1]
+    return line and { string.sub(line, self.start_col + 1, self.end_col) } or {}
+  else
+    local lines = api.nvim_buf_get_lines(self.bufnr, self.start_row, self.end_row + 1, false)
+    if vim.tbl_isempty(lines) == nil then
+      return lines
+    end
+    lines[1] = string.sub(lines[1], self.start_col + 1)
+    -- end_row might be just after the last line. In this case the last line is not truncated.
+    if #lines == self.end_row - self.start_row + 1 then
+      lines[#lines] = string.sub(lines[#lines], 1, self.end_col)
+    end
+    return lines
+  end
+end
+
+---@param row integer
+---@param col integer
+---@return boolean
+function M.Range:is_in_range(row, col)
+  return self.start_row <= row and self.end_row >= row and self.start_col <= col and self.end_col >= col
+end
+
+---@param range TSTextObjects.Range
+---@return boolean
+function M.Range:contains(range)
+  return self:is_in_range(range.start_row, range.start_col) and self:is_in_range(range.end_row, range.end_col)
+end
+
+---@return integer
+function M.Range:length()
+  return self.end_byte - self.start_byte
+end
+
+---@param forward boolean
+---@param range TSTextObjects.Range
+---@param query_string string
+---@param query_group string
+---@param bufnr integer
+---@return TSTextObjects.Range?
+function M.get_adjacent(forward, range, query_string, query_group, bufnr)
+  query_group = query_group or "textobjects"
+  local fn = forward and M.next_textobject or M.previous_textobject
+  return fn(range, query_string, query_group, bufnr)
+end
+
+---@param range TSTextObjects.Range
+---@param query_string string
+---@param query_group? string
+---@param bufnr integer
+---@return TSTextObjects.Range?
+function M.next_textobject(range, query_string, query_group, bufnr)
+  query_group = query_group or "textobjects"
+
+  local node_end = range.end_byte
+  local search_start = node_end
 
   ---@param match TSTextObjects.Match
   ---@return boolean
   local function filter_function(match)
-    if match.node == node then
+    if match.range == range then
       return false
     end
-    if not same_parent or node:parent() == match.node:parent() then
-      local _, _, start = match.node:start()
-      local _, _, end_ = match.node:end_()
+    if range.parent_id == match.range.parent_id then
+      local start = match.range.start_byte
+      local end_ = match.range.end_byte
       return start >= search_start and end_ >= node_end
     end
     return false
@@ -569,45 +640,32 @@ function M.next_textobject(node, query_string, query_group, same_parent, overlap
   ---@param match TSTextObjects.Match
   ---@return integer
   local function scoring_function(match)
-    local _, _, node_start = match.node:start()
+    local node_start = match.range.start_byte
     return -node_start
   end
 
-  local next_node = M.find_best_match(bufnr, query_string, query_group, filter_function, scoring_function)
+  local next_range = M.find_best_match(bufnr, query_string, query_group, filter_function, scoring_function)
 
-  return next_node and next_node.node
+  return next_range and next_range.range
 end
 
----@param node TSNode
+---@param range TSTextObjects.Range
 ---@param query_string string
 ---@param query_group? string
----@param same_parent boolean
----@param overlapping_range_ok boolean
 ---@param bufnr integer
----@return TSNode?
-function M.previous_textobject(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
+---@return TSTextObjects.Range?
+function M.previous_textobject(range, query_string, query_group, bufnr)
   query_group = query_group or "textobjects"
-  node = node or vim.treesitter.get_node()
-  bufnr = bufnr or api.nvim_get_current_buf()
-  if not node then
-    return
-  end
 
-  local _, _, node_start = node:start() ---@type integer, integer, integer
-  local search_end, _ ---@type integer, integer
-  if overlapping_range_ok then
-    _, _, search_end = node:end_() ---@type integer, integer, integer
-    search_end = search_end - 1
-  else
-    _, _, search_end = node:start() ---@type integer, integer, integer
-  end
+  local node_start = range.start_byte
+  local search_end = node_start
 
   ---@param match TSTextObjects.Match
   ---@return boolean
   local function filter_function(match)
-    if not same_parent or node:parent() == match.node:parent() then
-      local _, _, end_ = match.node:end_()
-      local _, _, start = match.node:start()
+    if range:parent_id() == match.range.parent_id then
+      local end_ = match.range.end_byte
+      local start = match.range.start_byte
       return end_ <= search_end and start < node_start
     end
     return false
@@ -616,13 +674,13 @@ function M.previous_textobject(node, query_string, query_group, same_parent, ove
   ---@param match TSTextObjects.Match
   ---@return integer
   local function scoring_function(match)
-    local _, _, node_end = match.node:end_()
+    local node_end = match.range.end_byte
     return node_end
   end
 
   local previous_node = M.find_best_match(bufnr, query_string, query_group, filter_function, scoring_function)
 
-  return previous_node and previous_node.node
+  return previous_node and previous_node.range
 end
 
 ---@param bufnr integer

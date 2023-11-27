@@ -1,55 +1,13 @@
-local ts = vim.treesitter
 local api = vim.api
 
 local shared = require "nvim-treesitter-textobjects.shared"
-
----@param node_or_range TSNode|Range4
----@param bufnr integer
----@return string[]
-local function get_node_text(node_or_range, bufnr)
-  bufnr = bufnr or api.nvim_get_current_buf()
-  if not node_or_range then
-    return {}
-  end
-
-  local start_row, start_col, end_row, end_col = ts.get_node_range(node_or_range)
-  -- We have to remember that end_col is end-exclusive
-
-  if start_row ~= end_row then
-    local lines = api.nvim_buf_get_lines(bufnr, start_row, end_row + 1, false)
-    if next(lines) == nil then
-      return {}
-    end
-    lines[1] = string.sub(lines[1], start_col + 1)
-    -- end_row might be just after the last line. In this case the last line is not truncated.
-    if #lines == end_row - start_row + 1 then
-      lines[#lines] = string.sub(lines[#lines], 1, end_col)
-    end
-    return lines
-  else
-    local line = api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
-    -- If line is nil then the line is empty
-    return line and { string.sub(line, start_col + 1, end_col) } or {}
-  end
-end
 
 ---@class TSTextObjects.LspLocation
 ---@field line integer
 ---@field character integer
 
----@param node TSNode|Range4
----@return {start: TSTextObjects.LspLocation, end: TSTextObjects.LspLocation}
-local function node_to_lsp_range(node)
-  -- TODO (TheLeoP): do not use this?
-  local start_line, start_col, end_line, end_col = ts.get_node_range(node)
-  local rtn = {}
-  rtn.start = { line = start_line, character = start_col }
-  rtn["end"] = { line = end_line, character = end_col }
-  return rtn
-end
-
----@param node_or_range1 Range4|TSNode
----@param node_or_range2 Range4|TSNode
+---@param node_or_range1 TSTextObjects.Range
+---@param node_or_range2 TSTextObjects.Range
 ---@param bufnr integer
 ---@param cursor_to_second any
 local function swap_nodes(node_or_range1, node_or_range2, bufnr, cursor_to_second)
@@ -57,11 +15,11 @@ local function swap_nodes(node_or_range1, node_or_range2, bufnr, cursor_to_secon
     return
   end
 
-  local range1 = node_to_lsp_range(node_or_range1)
-  local range2 = node_to_lsp_range(node_or_range2)
+  local range1 = node_or_range1:to_lsp_range()
+  local range2 = node_or_range2:to_lsp_range()
 
-  local text1 = get_node_text(node_or_range1, bufnr)
-  local text2 = get_node_text(node_or_range2, bufnr)
+  local text1 = node_or_range1:get_text()
+  local text2 = node_or_range2:get_text()
 
   local edit1 = { range = range1, newText = table.concat(text2, "\n") }
   local edit2 = { range = range2, newText = table.concat(text1, "\n") }
@@ -126,26 +84,22 @@ local function swap_textobject(query_strings_regex, query_group, direction)
     return
   end
 
-  local bufnr, textobject_range, node, query_string ---@type integer?, Range4?, TSNode?, string?
+  local bufnr, textobject_range, query_string ---@type integer?, TSTextObjects.Range?, string?
   for _, query_string_iter in ipairs(query_strings) do
-    bufnr, textobject_range, node = shared.textobject_at_point(query_string_iter, query_group)
-    if node then
+    bufnr, textobject_range = shared.textobject_at_point(query_string_iter, query_group)
+    if textobject_range then
       query_string = query_string_iter
       break
     end
   end
-  ---@cast node TSNode
   if not query_string or not textobject_range then
     return
   end
 
   local step = direction > 0 and 1 or -1
-  local overlapping_range_ok = false
-  local same_parent = true
   for _ = 1, math.abs(direction), step do
     local forward = direction > 0
-    local adjacent =
-      shared.get_adjacent(forward, node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
+    local adjacent = shared.get_adjacent(forward, textobject_range, query_string, query_group, bufnr)
     if adjacent then
       swap_nodes(textobject_range, adjacent, bufnr, "yes, set cursor!")
     end

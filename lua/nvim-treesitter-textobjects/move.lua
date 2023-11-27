@@ -5,23 +5,24 @@ local shared = require "nvim-treesitter-textobjects.shared"
 local repeatable_move = require "nvim-treesitter-textobjects.repeatable_move"
 local _config = require "nvim-treesitter-textobjects.config"
 
----@param node TSNode
+---@param range TSTextObjects.Range?
 ---@param goto_end boolean
 ---@param avoid_set_jump boolean
-local function goto_node(node, goto_end, avoid_set_jump)
-  if not node then
+local function goto_node(range, goto_end, avoid_set_jump)
+  if not range then
     return
   end
+
   if not avoid_set_jump then
     shared.set_jump()
   end
-  local range = { shared.get_vim_range { node:range() } }
+  local vim_range = { range:to_vim_range() } ---@type Range4
   ---@type table<number>
   local position
   if not goto_end then
-    position = { range[1], range[2] }
+    position = { vim_range[1], vim_range[2] }
   else
-    position = { range[3], range[4] }
+    position = { vim_range[3], vim_range[4] }
   end
 
   -- Enter visual mode if we are in operator pending mode
@@ -78,13 +79,14 @@ local function move(opts)
   -- score is a byte position.
   ---
   ---@param start_ boolean
-  ---@param match {node: TSNode}
+  ---@param match TSTextObjects.Match
+  ---@return integer
   local function scoring_function(start_, match)
     local score, _ ---@type integer, integer
     if start_ then
-      _, _, score = match.node:start()
+      score = match.range.start_byte
     else
-      _, _, score = match.node:end_()
+      score = match.range.end_byte
     end
     if forward then
       return -score
@@ -94,9 +96,10 @@ local function move(opts)
   end
 
   ---@param start_ boolean
-  ---@param match {node: TSNode}
+  ---@param match TSTextObjects.Match
+  ---@return boolean
   local function filter_function(start_, match)
-    local range = { match.node:range() } ---@type Range4
+    local range = match.range:range4()
     local row, col = unpack(vim.api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
     row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
 
@@ -117,7 +120,7 @@ local function move(opts)
   end
 
   for _ = 1, vim.v.count1 do
-    local best_match ---@type TSNode
+    local best_match ---@type TSTextObjects.Match
     local best_score ---@type integer
     local best_start ---@type boolean
     for _, query_string in ipairs(query_strings) do
@@ -143,7 +146,7 @@ local function move(opts)
         end
       end
     end
-    goto_node(best_match and best_match.node, not best_start, not config.set_jumps)
+    goto_node(best_match and best_match.range, not best_start, not config.set_jumps)
   end
 end
 

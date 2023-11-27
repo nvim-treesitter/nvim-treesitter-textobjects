@@ -2,11 +2,10 @@ local api = vim.api
 local _config = require "nvim-treesitter-textobjects.config"
 local shared = require "nvim-treesitter-textobjects.shared"
 
----@param buf? integer
----@param range Range4
+---@param range TSTextObjects.Range
 ---@param selection_mode string
-local function update_selection(buf, range, selection_mode)
-  local start_row, start_col, end_row, end_col = shared.get_vim_range(range, buf)
+local function update_selection(range, selection_mode)
+  local start_row, start_col, end_row, end_col = range:to_vim_range()
 
   local v_table = { charwise = "v", linewise = "V", blockwise = "<C-v>" }
   selection_mode = selection_mode or "charwise"
@@ -105,12 +104,11 @@ local function next_position(bufnr, row, col, forward)
 end
 
 ---@param bufnr integer
----@param textobject Range4
+---@param range TSTextObjects.Range
 ---@param selection_mode string
----@return Range4
-local function include_surrounding_whitespace(bufnr, textobject, selection_mode)
-  ---@type integer, integer, integer, integer
-  local start_row, start_col, end_row, end_col = unpack(textobject)
+---@return TSTextObjects.Range
+local function include_surrounding_whitespace(bufnr, range, selection_mode)
+  local start_row, start_col, end_row, end_col = unpack(range:range4()) ---@type integer, integer, integer, integer
   local extended = false
   while is_whitespace_after(bufnr, end_row, end_col) do
     extended = true
@@ -145,10 +143,13 @@ local function include_surrounding_whitespace(bufnr, textobject, selection_mode)
   if selection_mode == "linewise" then
     start_row, start_col = next_position(bufnr, start_row, start_col, true)
   end
-  return { start_row, start_col, end_row, end_col }
+  assert(start_row)
+  assert(start_col)
+  range:set_range4 { start_row, start_col, end_row, end_col }
+  return range
 end
 
---- TODO (TheLeoP): remove this
+--- TODO (TheLeoP): remove this?
 ---@param val function|any
 ---@param opts any
 local val_or_return = function(val, opts)
@@ -185,7 +186,7 @@ function M.select_textobject(query_string, query_group, keymap_mode)
     then
       textobject = include_surrounding_whitespace(bufnr, textobject, selection_mode)
     end
-    update_selection(bufnr, textobject, selection_mode)
+    update_selection(textobject, selection_mode)
   end
 end
 

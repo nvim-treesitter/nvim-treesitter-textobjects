@@ -37,7 +37,7 @@ function M.preview_location(location, context)
     range["end"].line = range["end"].line - 1
   end
   if type(context) == "table" then
-  local start_row, _, end_row, _ = unpack(context:range4()) ---@type integer, integer, integer, integer
+    local start_row, _, end_row, _ = unpack(context:range4()) ---@type integer, integer, integer, integer
     range.start.line = math.min(range.start.line, start_row)
     range["end"].line = math.max(range["end"].line, end_row)
   elseif type(context) == "number" then

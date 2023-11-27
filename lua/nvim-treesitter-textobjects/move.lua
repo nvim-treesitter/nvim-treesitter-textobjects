@@ -82,7 +82,7 @@ local function move(opts)
   ---@param match TSTextObjects.Match
   ---@return integer
   local function scoring_function(start_, match)
-    local score, _ ---@type integer, integer
+    local score ---@type integer
     if start_ then
       score = match.range.start_byte
     else

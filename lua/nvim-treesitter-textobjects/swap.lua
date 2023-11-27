@@ -6,20 +6,20 @@ local shared = require "nvim-treesitter-textobjects.shared"
 ---@field line integer
 ---@field character integer
 
----@param node_or_range1 TSTextObjects.Range
----@param node_or_range2 TSTextObjects.Range
+---@param _range1 TSTextObjects.Range
+---@param _range2 TSTextObjects.Range
 ---@param bufnr integer
 ---@param cursor_to_second any
-local function swap_nodes(node_or_range1, node_or_range2, bufnr, cursor_to_second)
-  if not node_or_range1 or not node_or_range2 then
+local function swap_nodes(_range1, _range2, bufnr, cursor_to_second)
+  if not _range1 or not _range2 then
     return
   end
 
-  local range1 = node_or_range1:to_lsp_range()
-  local range2 = node_or_range2:to_lsp_range()
+  local range1 = _range1:to_lsp_range()
+  local range2 = _range2:to_lsp_range()
 
-  local text1 = node_or_range1:get_text()
-  local text2 = node_or_range2:get_text()
+  local text1 = _range1:get_text()
+  local text2 = _range2:get_text()
 
   local edit1 = { range = range1, newText = table.concat(text2, "\n") }
   local edit2 = { range = range2, newText = table.concat(text1, "\n") }

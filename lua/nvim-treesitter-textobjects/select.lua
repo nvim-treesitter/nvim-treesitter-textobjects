@@ -1,5 +1,5 @@
 local api = vim.api
-local _config = require "nvim-treesitter-textobjects.config"
+local global_config = require "nvim-treesitter-textobjects.config"
 local shared = require "nvim-treesitter-textobjects.shared"
 
 ---@param range TSTextObjects.Range
@@ -170,7 +170,7 @@ function M.select_textobject(query_string, query_group, keymap_mode)
   end
 
   query_group = query_group or "textobjects"
-  local config = _config.select
+  local config = global_config.select
   local lookahead = config.lookahead
   local lookbehind = config.lookbehind
   local surrounding_whitespace = config.include_surrounding_whitespace
@@ -207,7 +207,7 @@ function M.detect_selection_mode(query_string, keymap_mode)
   }
   local method = keymap_to_method[keymap_mode]
 
-  local config = _config.select
+  local config = global_config.select
   local selection_modes = val_or_return(config.selection_modes, {
     query_string = query_string,
     method = method,

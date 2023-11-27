@@ -6,23 +6,23 @@ local shared = require "nvim-treesitter-textobjects.shared"
 ---@field line integer
 ---@field character integer
 
----@param _range1 TSTextObjects.Range
----@param _range2 TSTextObjects.Range
+---@param range1 TSTextObjects.Range
+---@param range2 TSTextObjects.Range
 ---@param bufnr integer
 ---@param cursor_to_second any
-local function swap_nodes(_range1, _range2, bufnr, cursor_to_second)
-  if not _range1 or not _range2 then
+local function swap_nodes(range1, range2, bufnr, cursor_to_second)
+  if not range1 or not range2 then
     return
   end
 
-  local range1 = _range1:to_lsp_range()
-  local range2 = _range2:to_lsp_range()
+  local lsp_range1 = range1:to_lsp_range()
+  local lsp_range2 = range2:to_lsp_range()
 
-  local text1 = _range1:get_text()
-  local text2 = _range2:get_text()
+  local text1 = range1:get_text()
+  local text2 = range2:get_text()
 
-  local edit1 = { range = range1, newText = table.concat(text2, "\n") }
-  local edit2 = { range = range2, newText = table.concat(text1, "\n") }
+  local edit1 = { range = lsp_range1, newText = table.concat(text2, "\n") }
+  local edit2 = { range = lsp_range2, newText = table.concat(text1, "\n") }
   vim.lsp.util.apply_text_edits({ edit1, edit2 }, bufnr, "utf-8")
 
   if cursor_to_second then
@@ -31,13 +31,15 @@ local function swap_nodes(_range1, _range2, bufnr, cursor_to_second)
     local char_delta = 0
     local line_delta = 0
     if
-      range1["end"].line < range2.start.line
-      or (range1["end"].line == range2.start.line and range1["end"].character <= range2.start.character)
+      lsp_range1["end"].line < lsp_range2.start.line
+      or (lsp_range1["end"].line == lsp_range2.start.line and lsp_range1["end"].character <= lsp_range2.start.character)
     then
       line_delta = #text2 - #text1
     end
 
-    if range1["end"].line == range2.start.line and range1["end"].character <= range2.start.character then
+    if
+      lsp_range1["end"].line == lsp_range2.start.line and lsp_range1["end"].character <= lsp_range2.start.character
+    then
       if line_delta ~= 0 then
         --- why?
         --correction_after_line_change =  -range2.start.character
@@ -45,11 +47,11 @@ local function swap_nodes(_range1, _range2, bufnr, cursor_to_second)
         --space_between_ranges = range2.start.character - range1["end"].character
         --char_delta = correction_after_line_change + text_now_before_range2 + space_between_ranges
         --- Equivalent to:
-        char_delta = #text2[#text2] - range1["end"].character
+        char_delta = #text2[#text2] - lsp_range1["end"].character
 
         -- add range1.start.character if last line of range1 (now text2) does not start at 0
-        if range1.start.line == range2.start.line + line_delta then
-          char_delta = char_delta + range1.start.character
+        if lsp_range1.start.line == lsp_range2.start.line + line_delta then
+          char_delta = char_delta + lsp_range1.start.character
         end
       else
         char_delta = #text2[#text2] - #text1[#text1]
@@ -58,7 +60,7 @@ local function swap_nodes(_range1, _range2, bufnr, cursor_to_second)
 
     api.nvim_win_set_cursor(
       api.nvim_get_current_win(),
-      { range2.start.line + 1 + line_delta, range2.start.character + char_delta }
+      { lsp_range2.start.line + 1 + line_delta, lsp_range2.start.character + char_delta }
     )
   end
 end

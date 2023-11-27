@@ -3,7 +3,7 @@ local ts = vim.treesitter
 
 local shared = require "nvim-treesitter-textobjects.shared"
 local repeatable_move = require "nvim-treesitter-textobjects.repeatable_move"
-local _config = require "nvim-treesitter-textobjects.config"
+local global_config = require "nvim-treesitter-textobjects.config"
 
 ---@param range TSTextObjects.Range?
 ---@param goto_end boolean
@@ -74,7 +74,7 @@ local function move(opts)
     ts.language.get_lang(vim.bo[bufnr].filetype)
   )
 
-  local config = _config.move
+  local config = global_config.move
 
   -- score is a byte position.
   ---

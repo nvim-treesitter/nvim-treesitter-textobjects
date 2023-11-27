@@ -1,7 +1,7 @@
 local api = vim.api
 
 local shared = require "nvim-treesitter-textobjects.shared"
-local _config = require "nvim-treesitter-textobjects.config"
+local global_config = require "nvim-treesitter-textobjects.config"
 
 local M = {}
 
@@ -44,7 +44,7 @@ function M.preview_location(location, context)
     range["end"].line = math.max(range["end"].line, range.start.line + context)
   end
 
-  local config = _config.lsp_interop
+  local config = global_config.lsp_interop
   local opts = config.floating_preview_opts or {}
 
   if config.border ~= "none" then

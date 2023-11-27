@@ -404,8 +404,8 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
     end
 
     -- Note that outer matches don't perform lookahead
-    local range_outer, _range_outer = best_match_at_point(matches_outer, row, col, {})
-    if range_outer == nil or _range_outer == nil then
+    local range_outer = best_match_at_point(matches_outer, row, col, {})
+    if range_outer == nil then
       -- No @*.outer found
       -- Return the best match from the entire buffer, just like the @*.outer case
       local range = best_match_at_point(matches, row, col, opts)
@@ -414,7 +414,7 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
 
     local matches_within_outer = {}
     for _, match in ipairs(matches) do
-      if _range_outer:contains(match.range) then
+      if range_outer:contains(match.range) then
         table.insert(matches_within_outer, match)
       end
     end

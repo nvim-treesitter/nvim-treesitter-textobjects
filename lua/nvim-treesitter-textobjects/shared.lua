@@ -447,8 +447,8 @@ end
 ---@field end_col integer
 ---@field end_row integer
 ---@field end_byte integer
----@field parent_id integer
----@field id integer
+---@field parent_id any
+---@field id any
 ---@field bufnr integer
 ---@field metadata? {range?: Range4}
 M.Range = {}
@@ -476,7 +476,7 @@ end
 ---@param end_row integer
 ---@param end_byte integer
 ---@param parent_id integer
----@param id integer
+---@param id any
 ---@return TSTextObjects.Range
 function M.Range:new(start_row, start_col, start_byte, end_row, end_col, end_byte, parent_id, id, bufnr)
   local range = {
@@ -498,8 +498,8 @@ end
 ---@return TSTextObjects.Range
 function M.Range:from_node(node, bufnr)
   local start_row, start_col, start_byte, end_row, end_col, end_byte = node:range(true)
-  local id = node:symbol()
-  local parent_id = node:parent():symbol()
+  local id = node:id()
+  local parent_id = node:parent():id()
   return M.Range:new(start_row, start_col, start_byte, end_row, end_col, end_byte, parent_id, id, bufnr)
 end
 
@@ -605,19 +605,16 @@ end
 ---@param bufnr integer
 ---@return TSTextObjects.Range?
 function M.get_adjacent(forward, range, query_string, query_group, bufnr)
-  query_group = query_group or "textobjects"
   local fn = forward and M.next_textobject or M.previous_textobject
   return fn(range, query_string, query_group, bufnr)
 end
 
 ---@param range TSTextObjects.Range
 ---@param query_string string
----@param query_group? string
+---@param query_group string
 ---@param bufnr integer
 ---@return TSTextObjects.Range?
 function M.next_textobject(range, query_string, query_group, bufnr)
-  query_group = query_group or "textobjects"
-
   local node_end = range.end_byte
   local search_start = node_end
 

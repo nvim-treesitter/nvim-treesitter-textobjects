@@ -69,6 +69,12 @@
   arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"
   (#make-range! "call.inner" @_start @_end)))
 
+((new_expression
+  constructor: (identifier) @_cons
+  arguments: (arguments . "(" . (_) @_start (_)? @_end . ")") @_args)
+ (#make-range! "call.outer" @_cons @_args)
+ (#make-range! "call.inner" @_start @_end))
+
 ;; blocks
 (_ (statement_block) @block.inner) @block.outer
 

@@ -71,6 +71,8 @@
 
 ;; calls
 (macro_invocation) @call.outer
+(macro_invocation (token_tree . "(" . (_) @_start (_)? @_end . ")"
+  (#make-range! "call.inner" @_start @_end)))
 (call_expression) @call.outer
 (call_expression
   arguments: (arguments . "(" . (_) @_start (_)? @_end . ")"

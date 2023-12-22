@@ -139,7 +139,7 @@ function M.detect_selection_mode(query_string, keymap_mode)
   -- last set `selection_mode`
   local visual_mode = vim.fn.mode(1)
   visual_mode = visual_mode:sub(#visual_mode)
-  selection_mode = visual_mode == "o" and selection_mode or visual_mode
+  selection_mode = visual_mode == "o" and visual_mode or selection_mode
 
   if selection_mode == "n" then
     selection_mode = "v"

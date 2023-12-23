@@ -57,13 +57,16 @@
 
 ;; loops
 (loop_expression
-  (_)? @loop.inner) @loop.outer
+  body: (block . "{" . (_) @_start [(_)","]? @_end . "}"
+  (#make-range! "loop.inner" @_start @_end))) @loop.outer
 
 (while_expression
-  (_)? @loop.inner) @loop.outer
+  body: (block . "{" . (_) @_start [(_)","]? @_end . "}"
+  (#make-range! "loop.inner" @_start @_end))) @loop.outer
 
 (for_expression
-  body: (block)? @loop.inner) @loop.outer
+  body: (block . "{" . (_) @_start [(_)","]? @_end . "}"
+  (#make-range! "loop.inner" @_start @_end))) @loop.outer
 
 ;; blocks
 (_ (block) @block.inner) @block.outer

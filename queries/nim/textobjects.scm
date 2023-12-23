@@ -31,7 +31,9 @@
 [
   (if)
   (when)
+  (conditional_declaration)
   (case)
+  (variant_declaration)
   (elif_branch)
   (else_branch)
   (of_branch)
@@ -41,12 +43,27 @@
 (if consequence: (statement_list) @conditional.inner)
 (when condition: (_) @conditional.inner)
 (when consequence: (statement_list) @conditional.inner)
+(conditional_declaration condition: (_) @conditional.inner)
+(conditional_declaration consequence: (field_declaration_list) @conditional.inner)
 (elif_branch condition: (_) @conditional.inner)
-(elif_branch consequence: (statement_list) @conditional.inner)
-(else_branch (statement_list) @conditional.inner)
+(elif_branch
+  consequence: [
+    (statement_list)
+    (field_declaration_list)
+  ] @conditional.inner)
+(else_branch
+  consequence: [
+    (statement_list)
+    (field_declaration_list)
+  ] @conditional.inner)
 (case value: (_) @conditional.inner)
+(variant_declaration (variant_discriminator_declaration) @conditional.inner)
 (of_branch values: (expression_list) @conditional.inner)
-(of_branch (statement_list) @conditional.inner)
+(of_branch
+  consequence: [
+    (statement_list)
+    (field_declaration_list)
+  ] @conditional.inner)
 
 ; ==============================================================================
 ; @loop.inner
@@ -371,8 +388,7 @@
 
 (variable_declaration
   (symbol_declaration_list) @_symbols
-  type: (_)? @_type
-  value: "="
+  type: (type_expression)? @_type
   value: (_) @assignment.rhs @assignment.inner
   (#make-range! "assignment.lhs" @_symbols @_type)) @assignment.outer
 
@@ -399,12 +415,11 @@
   left: (_) @assignment.lhs
   right: (_) @assignment.rhs @assignment.inner) @assignment.outer
 
-; object types
-; tuple types
+; object declaration fields
+; tuple declaration fields
 (field_declaration
   (symbol_declaration_list) @_symbols
-  type: (_)? @_type
-  value: "="?
+  type: (type_expression)? @_type
   value: (_)? @assignment.rhs @assignment.inner
   (#make-range! "assignment.lhs" @_symbols @_type)) @assignment.outer
 

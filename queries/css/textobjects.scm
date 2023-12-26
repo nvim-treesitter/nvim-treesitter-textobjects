@@ -3,3 +3,8 @@
   (float_value)
   (color_value)
 ] @number.inner
+
+(declaration
+  (property_name) @assignment.lhs
+  (_) @assignment.inner @assignment.rhs
+) @assignment.outer

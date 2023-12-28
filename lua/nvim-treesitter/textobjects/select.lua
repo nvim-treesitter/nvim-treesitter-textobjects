@@ -138,7 +138,7 @@ function M.detect_selection_mode(query_string, keymap_mode)
   -- then last char is {v,V,<C-v>}, exept for "no", which is "o", in which case we honor
   -- last set `selection_mode`
   local mode = vim.fn.mode(1)
-  local is_normal_or_charwise_v = #mode == 1 and (mode == "n" or mode == "v")
+  local is_normal_or_charwise_v = mode == "n" or mode == "v"
 
   if is_normal_or_charwise_v then
     return mode == "n" and "v" or mode == "v" and selection_mode

@@ -134,11 +134,18 @@ function M.detect_selection_mode(query_string, keymap_mode)
     selection_mode = selection_modes or "v"
   end
 
-  if selection_mode == "n" then
-    selection_mode = "v"
+  -- According to "mode()" mapping, if we are in operator pending mode or visual mode,
+  -- then last char is {v,V,<C-v>}, exept for "no", which is "o", in which case we honor
+  -- last set `selection_mode`
+  local mode = vim.fn.mode(1)
+  local is_normal_or_charwise_v = #mode == 1 and (mode == "n" or mode == "v")
+
+  if is_normal_or_charwise_v then
+    return mode == "n" and "v" or mode == "v" and selection_mode
   end
 
-  return selection_mode
+  local visual_mode = mode:sub(#mode)
+  return visual_mode == "o" and selection_mode or visual_mode
 end
 
 M.keymaps_per_buf = {}

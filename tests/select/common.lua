@@ -9,7 +9,7 @@ function M.run_compare_cmds_test(file, spec, equal)
   -- load reference file
   vim.cmd(string.format("edit %s", file))
 
-  local first_cmd_lines = nil
+  local to_compare_to = nil
   for _, cmd in pairs(spec.cmds) do
     -- set cursor pos
     vim.api.nvim_win_set_cursor(0, { spec.row, spec.col })
@@ -17,21 +17,22 @@ function M.run_compare_cmds_test(file, spec, equal)
     vim.cmd([[normal ]] .. vim.api.nvim_replace_termcodes(cmd, true, true, true))
 
     local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true)
-    if first_cmd_lines == nil then
-      first_cmd_lines = lines
-    end
 
     -- clear any changes (avoid no write since last change)
     -- call before assert
     vim.cmd "edit!"
 
-    local assert_statement = equal and assert.are.same or assert.are.Not.same
-    local message = equal and "different" or "same"
-    assert_statement(
-      first_cmd_lines,
-      lines,
-      string.format("Commands %s and %s produces %s results", spec.cmds[1], cmd, message)
-    )
+    if to_compare_to == nil then
+      to_compare_to = lines
+    else
+      local assert_statement = equal and assert.are.same or assert.are.Not.same
+      local message = equal and "different" or "same"
+      assert_statement(
+        to_compare_to,
+        lines,
+        string.format("Commands %s and %s produces %s results", spec.cmds[1], cmd, message)
+      )
+    end
   end
 end
 

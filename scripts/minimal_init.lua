@@ -66,7 +66,7 @@ require("nvim-treesitter.configs").setup {
         ["as"] = "@statement.outer",
         ["is"] = "@statement.outer",
       },
-      {
+      selection_modes = {
         ["@function.outer"] = "V", -- linewise
       },
       -- You can choose the select mode (default is charwise 'v')

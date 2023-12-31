@@ -24,5 +24,5 @@ describe("command equality Python:", function()
   -- select using move
   run:compare_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "d]a", "v]ad", "c]a" } })
   run:compare_cmds("selection_mode.py", { row = 2, col = 4, cmds = { "dam", "dVam", "vamd", "Vamd" } })
-  run:compare_cmds("selection_mode.py", { row = 5, col = 8, cmds = { "dVao", "dao" } }, false)
+  run:compare_cmds("selection_mode.py", { row = 5, col = 8, cmds = { "dVao", "dao" } }, nil, false)
 end)

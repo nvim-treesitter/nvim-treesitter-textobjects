@@ -3,7 +3,7 @@ local M = {}
 local assert = require "luassert"
 local Path = require "plenary.path"
 
-function M.run_equal_cmds_test(file, spec)
+function M.run_compare_cmds_test(file, spec, equal)
   assert.are.same(1, vim.fn.filereadable(file), string.format('File "%s" not readable', file))
 
   -- load reference file
@@ -25,10 +25,12 @@ function M.run_equal_cmds_test(file, spec)
     -- call before assert
     vim.cmd "edit!"
 
-    assert.are.same(
+    local assert_statement = equal and assert.are.same or assert.are.Not.same
+    local message = equal and "different" or "same"
+    assert_statement(
       first_cmd_lines,
       lines,
-      string.format("Commands %s and %s produces different results", spec.cmds[1], cmd)
+      string.format("Commands %s and %s produces %s results", spec.cmds[1], cmd, message)
     )
   end
 end
@@ -48,11 +50,11 @@ function Runner:new(it, base_dir, buf_opts)
   return setmetatable(runner, self)
 end
 
-function Runner:equal_cmds(file, spec, title)
+function Runner:compare_cmds(file, spec, title, equal)
   title = title and title or string.format("%s,%s", spec.row, spec.col)
   self.it(string.format("%s[%s]", file, title), function()
     local path = self.base_dir / file
-    M.run_equal_cmds_test(path.filename, spec)
+    M.run_compare_cmds_test(path.filename, spec, equal == nil and true or equal)
   end)
 end
 

@@ -8,9 +8,9 @@ local run = Runner:new(it, "tests/select/python", {
 })
 
 describe("command equality Python:", function()
-  run:equal_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "daa", "vaad", "caa" } })
-  run:equal_cmds("aligned_indent.py", { row = 1, col = 10, cmds = { "dia", "viad", "cia" } })
-  run:equal_cmds("aligned_indent.py", {
+  run:compare_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "daa", "vaad", "caa" } })
+  run:compare_cmds("aligned_indent.py", { row = 1, col = 10, cmds = { "dia", "viad", "cia" } })
+  run:compare_cmds("aligned_indent.py", {
     row = 1,
     col = 0,
     cmds = {
@@ -20,7 +20,9 @@ describe("command equality Python:", function()
     },
   })
   -- select using built-in finds (f, F, t, T)
-  run:equal_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "dfi", "vfid", "cfi" } })
+  run:compare_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "dfi", "vfid", "cfi" } })
   -- select using move
-  run:equal_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "d]a", "v]ad", "c]a" } })
+  run:compare_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "d]a", "v]ad", "c]a" } })
+  run:compare_cmds("selection_mode.py", { row = 2, col = 4, cmds = { "dam", "dVam", "vamd", "Vamd" } })
+  run:compare_cmds("selection_mode.py", { row = 5, col = 8, cmds = { "dVao", "dao" } }, nil, false)
 end)

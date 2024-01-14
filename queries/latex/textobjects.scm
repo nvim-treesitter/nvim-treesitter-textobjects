@@ -16,7 +16,28 @@
 
 [
   (generic_command)
-] @statement.outer
+  (text_mode)
+] @call.outer
+
+(text_mode
+  (curly_group
+    "{"
+    .
+    (_) @_start
+    (_)? @_end
+    .
+    "}")
+  (#make-range! "call.inner" @_start @_end))
+
+(generic_command
+  (curly_group
+    "{"
+    .
+    (_) @_start
+    (_)? @_end
+    .
+    "}")
+  (#make-range! "call.inner" @_start @_end))
 
 [
   (chapter)

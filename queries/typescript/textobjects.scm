@@ -3,7 +3,7 @@
 (interface_declaration) @class.outer
 
 (interface_declaration
-  body: (object_type . "{" . (_) @_start @_end _? @_end . "}"
+  body: (interface_body . "{" . (_) @_start @_end _? @_end . "}"
  (#make-range! "class.inner" @_start @_end)))
 
 (type_alias_declaration) @class.outer

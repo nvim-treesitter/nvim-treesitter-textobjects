@@ -24,3 +24,6 @@
 (variable_assignment) @assignment.outer
 (variable_assignment name: (_) @assignment.inner @assignment.lhs)
 (variable_assignment value: (_) @assignment.inner @assignment.rhs)
+
+(command
+  argument: (word) @parameter.inner)

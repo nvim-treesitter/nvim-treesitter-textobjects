@@ -3,18 +3,18 @@
 -- luacheck: push ignore 631
 
 ---@class (exact) TSTextObjects.Config.Select
----@field lookahead boolean
----@field lookbehind boolean
----@field selection_modes table<string, TSTextObjects.SelectionMode>|fun(opts: {query_string: string, method: TSTextObjects.Method}): TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>
----@field include_surrounding_whitespace boolean|fun(): boolean
+---@field lookahead? boolean
+---@field lookbehind? boolean
+---@field selection_modes? table<string, TSTextObjects.SelectionMode>|fun(opts: {query_string: string, method: TSTextObjects.Method}): TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>
+---@field include_surrounding_whitespace? boolean|fun(): boolean
 
 -- luacheck: pop
 
 ---@class (exact) TSTextObjects.Config.Move
----@field set_jumps boolean
+---@field set_jumps? boolean
 
 ---@class (exact) TSTextObjects.Config.LspInterop
----@field floating_preview_opts table
+---@field floating_preview_opts? table
 
 ---@class (exact) TSTextObjects.Config
 ---@field select TSTextObjects.Config.Select
@@ -22,9 +22,9 @@
 ---@field lsp_interop TSTextObjects.Config.LspInterop
 
 ---@class (exact) TSTextObjects.UserConfig : TSTextObjects.Config
----@field select TSTextObjects.Config.Select?
----@field move TSTextObjects.Config.Move?
----@field lsp_interop TSTextObjects.Config.LspInterop?
+---@field select? TSTextObjects.Config.Select
+---@field move? TSTextObjects.Config.Move
+---@field lsp_interop? TSTextObjects.Config.LspInterop
 
 ---@type TSTextObjects.Config
 local default_config = {

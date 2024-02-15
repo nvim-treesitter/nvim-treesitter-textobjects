@@ -39,11 +39,11 @@ end
 local M = {}
 
 ---@class TSTextObjects.MoveOpts
----@field query_strings_regex string
----@field query_group string
+---@field query_strings_regex string[]|string
+---@field query_group? string
 ---@field forward boolean
 ---@field start? boolean If true, choose the start of the node, and false is for the end.
----@field winid integer
+---@field winid? integer
 
 ---@param opts TSTextObjects.MoveOpts
 local function move(opts)
@@ -150,8 +150,11 @@ local function move(opts)
   end
 end
 
+---@type fun(opts: TSTextObjects.MoveOpts)
 local move_repeatable = repeatable_move.make_repeatable_move(move)
 
+---@param query_strings_regex string|string[]
+---@param query_group? string
 M.goto_next_start = function(query_strings_regex, query_group)
   move_repeatable {
     forward = true,
@@ -160,6 +163,8 @@ M.goto_next_start = function(query_strings_regex, query_group)
     query_group = query_group,
   }
 end
+---@param query_strings_regex string|string[]
+---@param query_group? string
 M.goto_next_end = function(query_strings_regex, query_group)
   move_repeatable {
     forward = true,
@@ -168,6 +173,8 @@ M.goto_next_end = function(query_strings_regex, query_group)
     query_group = query_group,
   }
 end
+---@param query_strings_regex string|string[]
+---@param query_group? string
 M.goto_previous_start = function(query_strings_regex, query_group)
   move_repeatable {
     forward = false,
@@ -176,6 +183,8 @@ M.goto_previous_start = function(query_strings_regex, query_group)
     query_group = query_group,
   }
 end
+---@param query_strings_regex string|string[]
+---@param query_group? string
 M.goto_previous_end = function(query_strings_regex, query_group)
   move_repeatable {
     forward = false,
@@ -185,6 +194,8 @@ M.goto_previous_end = function(query_strings_regex, query_group)
   }
 end
 
+---@param query_strings_regex string|string[]
+---@param query_group? string
 M.goto_next = function(query_strings_regex, query_group)
   move_repeatable {
     forward = true,
@@ -192,6 +203,8 @@ M.goto_next = function(query_strings_regex, query_group)
     query_group = query_group,
   }
 end
+---@param query_strings_regex string|string[]
+---@param query_group? string
 M.goto_previous = function(query_strings_regex, query_group)
   move_repeatable {
     forward = false,

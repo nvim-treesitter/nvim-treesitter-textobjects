@@ -12,21 +12,18 @@ You can install nvim-treesitter-textobjects with your favorite package manager, 
 
 ### Using a package manager
 
-If you are using [vim-plug](https://github.com/junegunn/vim-plug), put this in your init.vim file:
+If you are using [vim-plug](https://github.com/junegunn/vim-plug), put this in your `init.vim` file:
 
 ```vim
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 ```
 
-If you are using [Packer](https://github.com/wbthomason/packer.nvim), put it in your init.lua file:
+If you are using [lazy.nvim](https://github.com/folke/lazy.nvim), add this to your `init.lua` or `plugins.lua`.
 
 ```lua
-use({
+{
   "nvim-treesitter/nvim-treesitter-textobjects",
-  after = "nvim-treesitter",
-  requires = "nvim-treesitter/nvim-treesitter",
-})
+}
 ```
 
 ## Text objects: select
@@ -35,52 +32,58 @@ Define your own text objects mappings
 similar to `ip` (inner paragraph) and `ap` (a paragraph).
 
 ```lua
-lua <<EOF
-require'nvim-treesitter.configs'.setup {
-  textobjects = {
-    select = {
-      enable = true,
-
-      -- Automatically jump forward to textobj, similar to targets.vim
-      lookahead = true,
-
-      keymaps = {
-        -- You can use the capture groups defined in textobjects.scm
-        ["af"] = "@function.outer",
-        ["if"] = "@function.inner",
-        ["ac"] = "@class.outer",
-        -- You can optionally set descriptions to the mappings (used in the desc parameter of
-        -- nvim_buf_set_keymap) which plugins like which-key display
-        ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
-        -- You can also use captures from other query groups like `locals.scm`
-        ["as"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
-      },
-      -- You can choose the select mode (default is charwise 'v')
-      --
-      -- Can also be a function which gets passed a table with the keys
-      -- * query_string: eg '@function.inner'
-      -- * method: eg 'v' or 'o'
-      -- and should return the mode ('v', 'V', or '<c-v>') or a table
-      -- mapping query_strings to modes.
-      selection_modes = {
-        ['@parameter.outer'] = 'v', -- charwise
-        ['@function.outer'] = 'V', -- linewise
-        ['@class.outer'] = '<c-v>', -- blockwise
-      },
-      -- If you set this to `true` (default is `false`) then any textobject is
-      -- extended to include preceding or succeeding whitespace. Succeeding
-      -- whitespace has priority in order to act similarly to eg the built-in
-      -- `ap`.
-      --
-      -- Can also be a function which gets passed a table with the keys
-      -- * query_string: eg '@function.inner'
-      -- * selection_mode: eg 'v'
-      -- and should return true of false
-      include_surrounding_whitespace = true,
+-- configuration
+require("nvim-treesitter-textobjects").setup {
+  select = {
+    -- Automatically jump forward to textobj, similar to targets.vim
+    lookahead = true,
+    -- You can choose the select mode (default is charwise 'v')
+    --
+    -- Can also be a function which gets passed a table with the keys
+    -- * query_string: eg '@function.inner'
+    -- * method: eg 'v' or 'o'
+    -- and should return the mode ('v', 'V', or '<c-v>') or a table
+    -- mapping query_strings to modes.
+    selection_modes = {
+      ['@parameter.outer'] = 'v', -- charwise
+      ['@function.outer'] = 'V', -- linewise
+      ['@class.outer'] = '<c-v>', -- blockwise
     },
   },
+    -- If you set this to `true` (default is `false`) then any textobject is
+    -- extended to include preceding or succeeding whitespace. Succeeding
+    -- whitespace has priority in order to act similarly to eg the built-in
+    -- `ap`.
+    --
+    -- Can also be a function which gets passed a table with the keys
+    -- * query_string: eg '@function.inner'
+    -- * selection_mode: eg 'v'
+    -- and should return true of false
+    include_surrounding_whitespace = false,
+  },
 }
-EOF
+
+-- keymaps
+local select = require "nvim-treesitter-textobjects.select"
+for _, mode in ipairs { "x", "o" } do
+  -- You can use the capture groups defined in `textobjects.scm`
+  vim.keymap.set(mode, "af", function()
+    select.select_textobject("@function.outer", "textobjects", mode)
+  end)
+  vim.keymap.set(mode, "if", function()
+    select.select_textobject("@function.inner", "textobjects", mode)
+  end)
+  vim.keymap.set(mode, "ac", function()
+    select.select_textobject("@class.outer", "textobjects", mode)
+  end)
+  vim.keymap.set(mode, "ic", function()
+    select.select_textobject("@class.inner", "textobjects", mode)
+  end)
+  -- You can also use captures from other query groups like `locals.scm`
+  vim.keymap.set(mode, "as", function()
+    select.select_textobject("@local.scope", "locals", mode)
+  end)
+end
 ```
 
 ## Text objects: swap
@@ -89,21 +92,10 @@ Define your own mappings to swap the node under the cursor with the next or prev
 like function parameters or arguments.
 
 ```lua
-lua <<EOF
-require'nvim-treesitter.configs'.setup {
-  textobjects = {
-    swap = {
-      enable = true,
-      swap_next = {
-        ["<leader>a"] = "@parameter.inner",
-      },
-      swap_previous = {
-        ["<leader>A"] = "@parameter.inner",
-      },
-    },
-  },
-}
-EOF
+-- keymaps
+local swap = require("nvim-treesitter-textobjects.swap")
+vim.keymap.set("n", "<leader>a", swap.swap_next("@parameter.inner"))
+vim.keymap.set("n", "<leader>A", swap.swap_next("@parameter.outer"))
 ```
 
 ## Text objects: move
@@ -113,56 +105,75 @@ This is similar to `]m`, `[m`, `]M`, `[M` Neovim's mappings to jump to the next
 or previous function.
 
 ```lua
-lua <<EOF
-require'nvim-treesitter.configs'.setup {
-  textobjects = {
-    move = {
-      enable = true,
-      set_jumps = true, -- whether to set jumps in the jumplist
-      goto_next_start = {
-        ["]m"] = "@function.outer",
-        ["]]"] = { query = "@class.outer", desc = "Next class start" },
-        --
-        -- You can use regex matching (i.e. lua pattern) and/or pass a list in a "query" key to group multiple queires.
-        ["]o"] = "@loop.*",
-        -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
-        --
-        -- You can pass a query group to use query from `queries/<lang>/<query_group>.scm file in your runtime path.
-        -- Below example nvim-treesitter's `locals.scm` and `folds.scm`. They also provide highlights.scm and indent.scm.
-        ["]s"] = { query = "@scope", query_group = "locals", desc = "Next scope" },
-        ["]z"] = { query = "@fold", query_group = "folds", desc = "Next fold" },
-      },
-      goto_next_end = {
-        ["]M"] = "@function.outer",
-        ["]["] = "@class.outer",
-      },
-      goto_previous_start = {
-        ["[m"] = "@function.outer",
-        ["[["] = "@class.outer",
-      },
-      goto_previous_end = {
-        ["[M"] = "@function.outer",
-        ["[]"] = "@class.outer",
-      },
-      -- Below will go to either the start or the end, whichever is closer.
-      -- Use if you want more granular movements
-      -- Make it even more gradual by adding multiple queries and regex.
-      goto_next = {
-        ["]d"] = "@conditional.outer",
-      },
-      goto_previous = {
-        ["[d"] = "@conditional.outer",
-      }
-    },
+-- configuration
+require("nvim-treesitter-textobjects").setup {
+  move = {
+    -- whether to set jumps in the jumplist
+    set_jumps = true,
   },
 }
-EOF
+
+-- keymaps
+local move = require("nvim-treesitter-textobjects.move")
+-- You can use the capture groups defined in `textobjects.scm`
+vim.keymap.set({ "n", "x", "o" }, "]m", function()
+  move.goto_next_start("@function.outer", "textobjects")
+end)
+vim.keymap.set({ "n", "x", "o" }, "]]", function()
+  move.goto_next_start("@class.outer", "textobjects")
+end)
+-- You can use lua patterns to group multiple queries.
+vim.keymap.set({ "n", "x", "o" }, "]o", function()
+  move.goto_next_start("@loop.*", "textobjects")
+end)
+-- You can also pass a list to group multiple queries.
+-- vim.keymap.set({ "n", "x", "o" }, "]o", function()
+--   move.goto_next_start({"@loop.inner", "@loop.outer"}, "textobjects")
+-- end)
+-- You can also use captures from other query groups like `locals.scm` or `folds.scm`
+vim.keymap.set({ "n", "x", "o" }, "]s", function()
+  move.goto_next_start("@local.scope", "locals")
+end)
+vim.keymap.set({ "n", "x", "o" }, "]z", function()
+  move.goto_next_start("@fold", "folds")
+end)
+
+vim.keymap.set({ "n", "x", "o" }, "]M", function()
+  move.goto_next_end("@funciton.outer", "textobjects")
+end)
+vim.keymap.set({ "n", "x", "o" }, "][", function()
+  move.goto_next_end("@class.outer", "textobjects")
+end)
+
+vim.keymap.set({ "n", "x", "o" }, "[m", function()
+  move.goto_previous_start("@function.outer", "textobjects")
+end)
+vim.keymap.set({ "n", "x", "o" }, "[[", function()
+  move.goto_previous_start("@class.outer", "textobjects")
+end)
+
+vim.keymap.set({ "n", "x", "o" }, "[M", function()
+  move.goto_previous_end("@function.outer", "textobjects")
+end)
+vim.keymap.set({ "n", "x", "o" }, "[]", function()
+  move.goto_previous_end("@class.outer", "textobjects")
+end)
+
+-- Go to either the start or the end, whichever is closer.
+-- Use if you want more granular movements
+-- Make it even more gradual by adding multiple queries and regex.
+vim.keymap.set({ "n", "x", "o" }, "]d", function()
+  move.goto_end("@conditional.outer", "textobjects")
+end)
+vim.keymap.set({ "n", "x", "o" }, "[d", function()
+  move.goto_end("@conditional.outer", "textobjects")
+end)
 ```
 
 You can make the movements repeatable like `;` and `,`.
 
 ```lua
-local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
+local ts_repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
 
 -- Repeat movement with ; and ,
 -- ensure ; goes forward and , goes backward regardless of the last direction
@@ -209,30 +220,28 @@ vim.keymap.set({ "n", "x", "o" }, "]h", next_hunk_repeat)
 vim.keymap.set({ "n", "x", "o" }, "[h", prev_hunk_repeat)
 ```
 
-Alternative way is to use a repeatable movement managing plugin such as [nvim-next](https://github.com/ghostbuster91/nvim-next).
+Alternatively, you could use a repeatable movement managing plugin such as [nvim-next](https://github.com/ghostbuster91/nvim-next).
 
 ## Textobjects: LSP interop
 
-- peek_definition_code: show textobject surrounding definition as determined
+- `peek_definition_code`: show textobject surrounding definition as determined
   using Neovim's built-in LSP in a floating window. Press the shortcut twice
   to enter the floating window.
 
 ```lua
-lua <<EOF
-require'nvim-treesitter.configs'.setup {
-  textobjects = {
+-- configuration
+require("nvim-treesitter-textobjects").setup {
     lsp_interop = {
-      enable = true,
       border = 'none',
       floating_preview_opts = {},
-      peek_definition_code = {
-        ["<leader>df"] = "@function.outer",
-        ["<leader>dF"] = "@class.outer",
-      },
     },
-  },
 }
-EOF
+
+-- keymaps
+local peek_definition_code = require "nvim-treesitter-textobjects.lsp_interop".peek_definition_code
+-- You can use the capture groups defined in `textobjects.scm`
+vim.keymap.set({"n", "x"}, "<leader>df", peek_definition_code("@function.outer", "textobjects"))
+vim.keymap.set({"n", "x"}, "<leader>dF", peek_definition_code("@class.outer", "textobjects"))
 ```
 
 # Overriding or extending textobjects
@@ -243,44 +252,36 @@ You can extend or override those files by following the instructions at
 You can also use a custom capture for your own textobjects,
 and use it in any of the textobject modules, for example:
 
-```scm
--- after/queries/python/textobjects.scm
-; extends
+```scheme
+; queries/python/textobjects.scm
+;; extends
 (function_definition) @custom_capture
 ```
 
 ```lua
-lua <<EOF
-require'nvim-treesitter.configs'.setup {
-  textobjects = {
-    select = {
-      enable = true,
-      keymaps = {
-        -- Your custom capture.
-        ["aF"] = "@custom_capture",
-
-        -- Built-in captures.
-        ["af"] = "@function.outer",
-        ["if"] = "@function.inner",
-      },
-    },
-  },
-}
-EOF
+for _, mode in ipairs { "x", "o" } do
+  vim.keymap.set(mode, "aF", function()
+    select.select_textobject("@custom_capture", "textobjects", mode)
+  end)
+end
 ```
 
-Here are some rules about the query names that should be noted.  
+Here are some rules about the query names that should be noted.
 
-1. Avoid using special characters in the query name, because in `move` module the names are read as regex (lua) patterns.
-  - `@custom-capture.inner` (X)
-  - `@custom_capture.inner` (O)
+1. Avoid using special characters in the query name, because in `move` module the names are read as lua patterns.
+
+- `@custom-capture.inner` (X)
+- `@custom_capture.inner` (O)
+
 2. In `select` module, it will be preferred to select within the `@*.outer` matches. For example,
-  - `@assignment.inner`, `@assignment.lhs`, and even `@assignment` will be selected within the `@assignment.outer` range if available. This means it will sometimes look behind.
-  - You can write something like `@function.name` or `@call.name` and make sure `@function.outer` and `@call.outer` covers the range.
+
+- `@assignment.inner`, `@assignment.lhs`, and even `@assignment` will be selected within the `@assignment.outer` range if available. This means it will sometimes look behind.
+- You can write something like `@function.name` or `@call.name` and make sure `@function.outer` and `@call.outer` covers the range.
 
 ## Built-in Textobjects
 
 <!--textobjectinfo-->
+
 1. @assignment.inner
 2. @assignment.lhs
 3. @assignment.outer
@@ -392,11 +393,11 @@ Here are some rules about the query names that should be noted.
 <tr>
 <td>ql</td><td><span title="@assignment.inner">⬜</span></td> <td><span title="@assignment.lhs">⬜</span></td> <td><span title="@assignment.outer">⬜</span></td> <td><span title="@assignment.rhs">⬜</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">⬜</span></td> <td><span title="@block.outer">⬜</span></td> <td><span title="@call.inner">⬜</span></td> <td><span title="@call.outer">⬜</span></td> <td><span title="@class.inner">🟩</span></td> <td><span title="@class.outer">🟩</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">⬜</span></td> <td><span title="@conditional.inner">⬜</span></td> <td><span title="@conditional.outer">⬜</span></td> <td><span title="@frame.inner">⬜</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">🟩</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">⬜</span></td> <td><span title="@loop.outer">⬜</span></td> <td><span title="@number.inner">⬜</span></td> <td><span title="@parameter.inner">⬜</span></td> <td><span title="@parameter.outer">⬜</span></td> <td><span title="@regex.inner">⬜</span></td> <td><span title="@regex.outer">⬜</span></td> <td><span title="@return.inner">⬜</span></td> <td><span title="@return.outer">⬜</span></td> <td><span title="@scopename.inner">🟩</span></td> <td><span title="@statement.outer">⬜</span></td> </tr>
 <tr>
-<td>r</td><td><span title="@assignment.inner">🟩</span></td> <td><span title="@assignment.lhs">🟩</span></td> <td><span title="@assignment.outer">🟩</span></td> <td><span title="@assignment.rhs">🟩</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">⬜</span></td> <td><span title="@block.outer">⬜</span></td> <td><span title="@call.inner">🟩</span></td> <td><span title="@call.outer">🟩</span></td> <td><span title="@class.inner">⬜</span></td> <td><span title="@class.outer">⬜</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">🟩</span></td> <td><span title="@conditional.inner">🟩</span></td> <td><span title="@conditional.outer">🟩</span></td> <td><span title="@frame.inner">⬜</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">🟩</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">🟩</span></td> <td><span title="@loop.outer">🟩</span></td> <td><span title="@number.inner">🟩</span></td> <td><span title="@parameter.inner">🟩</span></td> <td><span title="@parameter.outer">🟩</span></td> <td><span title="@regex.inner">⬜</span></td> <td><span title="@regex.outer">⬜</span></td> <td><span title="@return.inner">⬜</span></td> <td><span title="@return.outer">⬜</span></td> <td><span title="@scopename.inner">⬜</span></td> <td><span title="@statement.outer">🟩</span></td> </tr>
+<td>r</td><td><span title="@assignment.inner">🟩</span></td> <td><span title="@assignment.lhs">🟩</span></td> <td><span title="@assignment.outer">����</span></td> <td><span title="@assignment.rhs">🟩</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">⬜</span></td> <td><span title="@block.outer">⬜</span></td> <td><span title="@call.inner">��</span></td> <td><span title="@call.outer">🟩</span></td> <td><span title="@class.inner">��</span></td> <td><span title="@class.outer">��</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">🟩</span></td> <td><span title="@conditional.inner">🟩</span></td> <td><span title="@conditional.outer">🟩</span></td> <td><span title="@frame.inner">⬜</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">🟩</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">🟩</span></td> <td><span title="@loop.outer">🟩</span></td> <td><span title="@number.inner">🟩</span></td> <td><span title="@parameter.inner">🟩</span></td> <td><span title="@parameter.outer">🟩</span></td> <td><span title="@regex.inner">⬜</span></td> <td><span title="@regex.outer">⬜</span></td> <td><span title="@return.inner">⬜</span></td> <td><span title="@return.outer">⬜</span></td> <td><span title="@scopename.inner">⬜</span></td> <td><span title="@statement.outer">🟩</span></td> </tr>
 <tr>
 <td>rst</td><td><span title="@assignment.inner">⬜</span></td> <td><span title="@assignment.lhs">⬜</span></td> <td><span title="@assignment.outer">⬜</span></td> <td><span title="@assignment.rhs">⬜</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">🟩</span></td> <td><span title="@block.outer">🟩</span></td> <td><span title="@call.inner">⬜</span></td> <td><span title="@call.outer">⬜</span></td> <td><span title="@class.inner">🟩</span></td> <td><span title="@class.outer">🟩</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">🟩</span></td> <td><span title="@conditional.inner">⬜</span></td> <td><span title="@conditional.outer">⬜</span></td> <td><span title="@frame.inner">⬜</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">🟩</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">⬜</span></td> <td><span title="@loop.outer">⬜</span></td> <td><span title="@number.inner">⬜</span></td> <td><span title="@parameter.inner">⬜</span></td> <td><span title="@parameter.outer">⬜</span></td> <td><span title="@regex.inner">⬜</span></td> <td><span title="@regex.outer">⬜</span></td> <td><span title="@return.inner">⬜</span></td> <td><span title="@return.outer">⬜</span></td> <td><span title="@scopename.inner">⬜</span></td> <td><span title="@statement.outer">⬜</span></td> </tr>
 <tr>
-<td>ruby</td><td><span title="@assignment.inner">⬜</span></td> <td><span title="@assignment.lhs">⬜</span></td> <td><span title="@assignment.outer">⬜</span></td> <td><span title="@assignment.rhs">⬜</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">🟩</span></td> <td><span title="@block.outer">🟩</span></td> <td><span title="@call.inner">⬜</span></td> <td><span title="@call.outer">⬜</span></td> <td><span title="@class.inner">🟩</span></td> <td><span title="@class.outer">🟩</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">🟩</span></td> <td><span title="@conditional.inner">⬜</span></td> <td><span title="@conditional.outer">⬜</span></td> <td><span title="@frame.inner">⬜</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">🟩</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">⬜</span></td> <td><span title="@loop.outer">⬜</span></td> <td><span title="@number.inner">⬜</span></td> <td><span title="@parameter.inner">🟩</span></td> <td><span title="@parameter.outer">🟩</span></td> <td><span title="@regex.inner">🟩</span></td> <td><span title="@regex.outer">🟩</span></td> <td><span title="@return.inner">⬜</span></td> <td><span title="@return.outer">⬜</span></td> <td><span title="@scopename.inner">⬜</span></td> <td><span title="@statement.outer">⬜</span></td> </tr>
+<td>ruby</td><td><span title="@assignment.inner">⬜</span></td> <td><span title="@assignment.lhs">⬜</span></td> <td><span title="@assignment.outer">⬜</span></td> <td><span title="@assignment.rhs">⬜</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">🟩</span></td> <td><span title="@block.outer">🟩</span></td> <td><span title="@call.inner">⬜</span></td> <td><span title="@call.outer">⬜</span></td> <td><span title="@class.inner">����</span></td> <td><span title="@class.outer">🟩</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">🟩</span></td> <td><span title="@conditional.inner">⬜</span></td> <td><span title="@conditional.outer">⬜</span></td> <td><span title="@frame.inner">���</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">����</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">���</span></td> <td><span title="@loop.outer">⬜</span></td> <td><span title="@number.inner">⬜</span></td> <td><span title="@parameter.inner">🟩</span></td> <td><span title="@parameter.outer">🟩</span></td> <td><span title="@regex.inner">🟩</span></td> <td><span title="@regex.outer">🟩</span></td> <td><span title="@return.inner">⬜</span></td> <td><span title="@return.outer">⬜</span></td> <td><span title="@scopename.inner">⬜</span></td> <td><span title="@statement.outer">⬜</span></td> </tr>
 <tr>
 <td>rust</td><td><span title="@assignment.inner">🟩</span></td> <td><span title="@assignment.lhs">🟩</span></td> <td><span title="@assignment.outer">🟩</span></td> <td><span title="@assignment.rhs">🟩</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">🟩</span></td> <td><span title="@block.outer">🟩</span></td> <td><span title="@call.inner">🟩</span></td> <td><span title="@call.outer">🟩</span></td> <td><span title="@class.inner">🟩</span></td> <td><span title="@class.outer">🟩</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">🟩</span></td> <td><span title="@conditional.inner">🟩</span></td> <td><span title="@conditional.outer">🟩</span></td> <td><span title="@frame.inner">⬜</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">🟩</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">🟩</span></td> <td><span title="@loop.outer">🟩</span></td> <td><span title="@number.inner">🟩</span></td> <td><span title="@parameter.inner">🟩</span></td> <td><span title="@parameter.outer">🟩</span></td> <td><span title="@regex.inner">⬜</span></td> <td><span title="@regex.outer">⬜</span></td> <td><span title="@return.inner">🟩</span></td> <td><span title="@return.outer">🟩</span></td> <td><span title="@scopename.inner">⬜</span></td> <td><span title="@statement.outer">🟩</span></td> </tr>
 <tr>

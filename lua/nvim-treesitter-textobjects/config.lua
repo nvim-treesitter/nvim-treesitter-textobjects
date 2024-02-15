@@ -14,7 +14,6 @@
 ---@field set_jumps boolean
 
 ---@class (exact) TSTextObjects.Config.LspInterop
----@field border string|string[]
 ---@field floating_preview_opts table
 
 ---@class (exact) TSTextObjects.Config
@@ -39,7 +38,6 @@ local default_config = {
     set_jumps = true,
   },
   lsp_interop = {
-    border = "none",
     floating_preview_opts = {},
   },
 }

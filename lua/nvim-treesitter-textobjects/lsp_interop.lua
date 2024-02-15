@@ -47,9 +47,6 @@ function M.preview_location(location, context)
   local config = global_config.lsp_interop
   local opts = config.floating_preview_opts or {}
 
-  if config.border ~= "none" then
-    opts.border = config.border
-  end
   local contents = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 1, false)
   local filetype = vim.bo[bufnr].filetype
   local preview_buf, preview_win = vim.lsp.util.open_floating_preview(contents, filetype, opts)

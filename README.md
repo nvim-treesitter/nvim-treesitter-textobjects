@@ -60,7 +60,6 @@ require("nvim-treesitter-textobjects").setup {
     -- * selection_mode: eg 'v'
     -- and should return true of false
     include_surrounding_whitespace = false,
-  },
 }
 
 -- keymaps
@@ -232,7 +231,6 @@ Alternatively, you could use a repeatable movement managing plugin such as [nvim
 -- configuration
 require("nvim-treesitter-textobjects").setup {
     lsp_interop = {
-      border = 'none',
       floating_preview_opts = {},
     },
 }
@@ -240,8 +238,12 @@ require("nvim-treesitter-textobjects").setup {
 -- keymaps
 local peek_definition_code = require "nvim-treesitter-textobjects.lsp_interop".peek_definition_code
 -- You can use the capture groups defined in `textobjects.scm`
-vim.keymap.set({"n", "x"}, "<leader>df", peek_definition_code("@function.outer", "textobjects"))
-vim.keymap.set({"n", "x"}, "<leader>dF", peek_definition_code("@class.outer", "textobjects"))
+vim.keymap.set({"n", "x"}, "<leader>df", function()
+  peek_definition_code("@function.outer", "textobjects")
+end)
+vim.keymap.set({"n", "x"}, "<leader>dF", function()
+  peek_definition_code("@class.outer", "textobjects")
+end)
 ```
 
 # Overriding or extending textobjects
@@ -249,6 +251,7 @@ vim.keymap.set({"n", "x"}, "<leader>dF", peek_definition_code("@class.outer", "t
 Textobjects are defined in the `textobjects.scm` files.
 You can extend or override those files by following the instructions at
 <https://github.com/nvim-treesitter/nvim-treesitter#adding-queries>.
+
 You can also use a custom capture for your own textobjects,
 and use it in any of the textobject modules, for example:
 
@@ -397,7 +400,7 @@ Here are some rules about the query names that should be noted.
 <tr>
 <td>rst</td><td><span title="@assignment.inner">⬜</span></td> <td><span title="@assignment.lhs">⬜</span></td> <td><span title="@assignment.outer">⬜</span></td> <td><span title="@assignment.rhs">⬜</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">🟩</span></td> <td><span title="@block.outer">🟩</span></td> <td><span title="@call.inner">⬜</span></td> <td><span title="@call.outer">⬜</span></td> <td><span title="@class.inner">🟩</span></td> <td><span title="@class.outer">🟩</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">🟩</span></td> <td><span title="@conditional.inner">⬜</span></td> <td><span title="@conditional.outer">⬜</span></td> <td><span title="@frame.inner">⬜</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">🟩</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">⬜</span></td> <td><span title="@loop.outer">⬜</span></td> <td><span title="@number.inner">⬜</span></td> <td><span title="@parameter.inner">⬜</span></td> <td><span title="@parameter.outer">⬜</span></td> <td><span title="@regex.inner">⬜</span></td> <td><span title="@regex.outer">⬜</span></td> <td><span title="@return.inner">⬜</span></td> <td><span title="@return.outer">⬜</span></td> <td><span title="@scopename.inner">⬜</span></td> <td><span title="@statement.outer">⬜</span></td> </tr>
 <tr>
-<td>ruby</td><td><span title="@assignment.inner">⬜</span></td> <td><span title="@assignment.lhs">⬜</span></td> <td><span title="@assignment.outer">⬜</span></td> <td><span title="@assignment.rhs">⬜</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">🟩</span></td> <td><span title="@block.outer">🟩</span></td> <td><span title="@call.inner">⬜</span></td> <td><span title="@call.outer">⬜</span></td> <td><span title="@class.inner">����</span></td> <td><span title="@class.outer">🟩</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">🟩</span></td> <td><span title="@conditional.inner">⬜</span></td> <td><span title="@conditional.outer">⬜</span></td> <td><span title="@frame.inner">���</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">����</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">���</span></td> <td><span title="@loop.outer">⬜</span></td> <td><span title="@number.inner">⬜</span></td> <td><span title="@parameter.inner">🟩</span></td> <td><span title="@parameter.outer">🟩</span></td> <td><span title="@regex.inner">🟩</span></td> <td><span title="@regex.outer">🟩</span></td> <td><span title="@return.inner">⬜</span></td> <td><span title="@return.outer">⬜</span></td> <td><span title="@scopename.inner">⬜</span></td> <td><span title="@statement.outer">⬜</span></td> </tr>
+<td>ruby</td><td><span title="@assignment.inner">⬜</span></td> <td><span title="@assignment.lhs">⬜</span></td> <td><span title="@assignment.outer">⬜</span></td> <td><span title="@assignment.rhs">⬜</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">🟩</span></td> <td><span title="@block.outer">🟩</span></td> <td><span title="@call.inner">⬜</span></td> <td><span title="@call.outer">�������</span></td> <td><span title="@class.inner">����</span></td> <td><span title="@class.outer">🟩</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">🟩</span></td> <td><span title="@conditional.inner">⬜</span></td> <td><span title="@conditional.outer">⬜</span></td> <td><span title="@frame.inner">���</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">����</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">���</span></td> <td><span title="@loop.outer">⬜</span></td> <td><span title="@number.inner">⬜</span></td> <td><span title="@parameter.inner">🟩</span></td> <td><span title="@parameter.outer">🟩</span></td> <td><span title="@regex.inner">🟩</span></td> <td><span title="@regex.outer">🟩</span></td> <td><span title="@return.inner">⬜</span></td> <td><span title="@return.outer">⬜</span></td> <td><span title="@scopename.inner">⬜</span></td> <td><span title="@statement.outer">⬜</span></td> </tr>
 <tr>
 <td>rust</td><td><span title="@assignment.inner">🟩</span></td> <td><span title="@assignment.lhs">🟩</span></td> <td><span title="@assignment.outer">🟩</span></td> <td><span title="@assignment.rhs">🟩</span></td> <td><span title="@attribute.inner">⬜</span></td> <td><span title="@attribute.outer">⬜</span></td> <td><span title="@block.inner">🟩</span></td> <td><span title="@block.outer">🟩</span></td> <td><span title="@call.inner">🟩</span></td> <td><span title="@call.outer">🟩</span></td> <td><span title="@class.inner">🟩</span></td> <td><span title="@class.outer">🟩</span></td> <td><span title="@comment.inner">⬜</span></td> <td><span title="@comment.outer">🟩</span></td> <td><span title="@conditional.inner">🟩</span></td> <td><span title="@conditional.outer">🟩</span></td> <td><span title="@frame.inner">⬜</span></td> <td><span title="@frame.outer">⬜</span></td> <td><span title="@function.inner">🟩</span></td> <td><span title="@function.outer">🟩</span></td> <td><span title="@loop.inner">🟩</span></td> <td><span title="@loop.outer">🟩</span></td> <td><span title="@number.inner">🟩</span></td> <td><span title="@parameter.inner">🟩</span></td> <td><span title="@parameter.outer">🟩</span></td> <td><span title="@regex.inner">⬜</span></td> <td><span title="@regex.outer">⬜</span></td> <td><span title="@return.inner">🟩</span></td> <td><span title="@return.outer">🟩</span></td> <td><span title="@scopename.inner">⬜</span></td> <td><span title="@statement.outer">🟩</span></td> </tr>
 <tr>

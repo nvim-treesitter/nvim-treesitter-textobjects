@@ -113,11 +113,6 @@ local function include_surrounding_whitespace(bufnr, range, selection_mode)
   while is_whitespace_after(bufnr, end_row, end_col) do
     extended = true
     end_row, end_col = next_position(bufnr, end_row, end_col, true)
-
-    -- TODO (TheLeoP): this is only to prevent warnings from lsp
-    if not end_row or not end_col then
-      break
-    end
   end
   if extended then
     -- don't extend in both directions
@@ -161,15 +156,23 @@ local val_or_return = function(val, opts)
 end
 
 ---@param query_string string
----@param query_group string?
+---@param query_group? string
 ---@param keymap_mode TSTextObjects.KeymapMode
 function M.select_textobject(query_string, query_group, keymap_mode)
-  if not shared.check_support(api.nvim_get_current_buf(), "textobjects", { query_string }) then
-    vim.notify("This filetype is not supported by nvim-treesitter-textobjects", vim.log.levels.WARN)
+  query_group = query_group or "textobjects"
+
+  if not shared.check_support(api.nvim_get_current_buf(), query_group, { query_string }) then
+    vim.notify(
+      ("The filetype `%s` does not support the textobject `%s` for the query file `%s`"):format(
+        vim.bo.filetype,
+        query_string,
+        query_group
+      ),
+      vim.log.levels.WARN
+    )
     return
   end
 
-  query_group = query_group or "textobjects"
   local config = global_config.select
   local lookahead = config.lookahead
   local lookbehind = config.lookbehind

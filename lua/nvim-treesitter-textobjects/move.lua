@@ -47,13 +47,29 @@ local M = {}
 
 ---@param opts TSTextObjects.MoveOpts
 local function move(opts)
-  if not shared.check_support(api.nvim_get_current_buf()) then
-    vim.notify("This filetype is not supported by nvim-treesitter-textobjects", vim.log.levels.WARN)
+  local query_group = opts.query_group or "textobjects"
+
+  local query_strings_pattern = shared.make_query_strings_table(opts.query_strings_regex)
+  local winid = opts.winid or vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(winid)
+  local query_strings = shared.get_query_strings_from_pattern(
+    query_strings_pattern,
+    query_group,
+    ts.language.get_lang(vim.bo[bufnr].filetype)
+  )
+
+  if not shared.check_support(api.nvim_get_current_buf(), query_group, query_strings) then
+    vim.notify(
+      ("The filetype `%s` does not support the textobjects `%s` for the query file `%s`"):format(
+        vim.bo.filetype,
+        vim.inspect(query_strings),
+        query_group
+      ),
+      vim.log.levels.WARN
+    )
     return
   end
 
-  local query_strings_pattern = shared.make_query_strings_table(opts.query_strings_regex)
-  local query_group = opts.query_group or "textobjects"
   local forward = opts.forward
   local starts ---@type {[1]: boolean, [2]: boolean}
   if opts.start == nil then
@@ -65,14 +81,6 @@ local function move(opts)
       starts = { false }
     end
   end
-  local winid = opts.winid or vim.api.nvim_get_current_win()
-
-  local bufnr = vim.api.nvim_win_get_buf(winid)
-  local query_strings = shared.get_query_strings_from_pattern(
-    query_strings_pattern,
-    query_group,
-    ts.language.get_lang(vim.bo[bufnr].filetype)
-  )
 
   local config = global_config.move
 

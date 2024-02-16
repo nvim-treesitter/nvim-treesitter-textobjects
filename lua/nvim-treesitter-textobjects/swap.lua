@@ -74,15 +74,17 @@ local function swap_textobject(query_strings_regex, query_group, direction)
   query_strings_regex = shared.make_query_strings_table(query_strings_regex)
   query_group = query_group or "textobjects"
 
-  if not shared.check_support(api.nvim_get_current_buf()) then
-    vim.notify("This filetype is not supported by nvim-treesitter-textobjects", vim.log.levels.WARN)
-    return
-  end
-
   local query_strings = shared.get_query_strings_from_pattern(query_strings_regex, query_group)
 
   if not shared.check_support(api.nvim_get_current_buf(), "textobjects", query_strings) then
-    vim.notify("This filetype is not supported by nvim-treesitter-textobjects", vim.log.levels.WARN)
+    vim.notify(
+      ("The filetype `%s` does not support the textobjects `%s` for the query file `%s`"):format(
+        vim.bo.filetype,
+        vim.inspect(query_strings),
+        query_group
+      ),
+      vim.log.levels.WARN
+    )
     return
   end
 

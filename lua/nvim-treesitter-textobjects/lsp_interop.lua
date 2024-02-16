@@ -110,12 +110,20 @@ end
 ---@param lsp_request? string
 ---@param context? integer|TSTextObjects.Range
 function M.peek_definition_code(query_string, query_group, lsp_request, context)
-  if not shared.check_support(api.nvim_get_current_buf()) then
-    vim.notify("This filetype is not supported by nvim-treesitter-textobjects", vim.log.levels.WARN)
+  query_group = query_group or "textobjects"
+
+  if not shared.check_support(api.nvim_get_current_buf(), "textobjects", { query_string }) then
+    vim.notify(
+      ("The filetype `%s` does not support the textobjects `%s` for the query file `%s`"):format(
+        vim.bo.filetype,
+        query_strings,
+        query_group
+      ),
+      vim.log.levels.WARN
+    )
     return
   end
 
-  query_group = query_group or "textobjects"
   lsp_request = lsp_request or "textDocument/definition"
   if vim.tbl_contains(vim.api.nvim_list_wins(), floating_win) then
     assert(floating_win, "The floaing window for peeking is not open")

@@ -215,7 +215,7 @@ function M.make_query_strings_table(query_strings)
   end
 end
 
---- Get query strings from regex
+--- Get query strings from pattern
 ---@param query_patterns string[]
 ---@param query_group? string
 ---@param lang? string
@@ -245,6 +245,7 @@ function M.available_textobjects(lang, query_group)
     error(string.format("There ist no languare resgitered for filetype %s", vim.bo.filetype))
   end
   query_group = query_group or "textobjects"
+  -- TODO (TheLeoP): should be cached?
   local parsed_queries = ts.query.get(lang, query_group)
   if not parsed_queries then
     return {}
@@ -693,12 +694,17 @@ function M.check_support(bufnr, query_group, queries)
   if not parser then
     return false
   end
+  -- TODO (TheLeoP): should be cached?
   local ok, _queries = pcall(ts.query.get, buf_lang, query_group)
   if not ok or not _queries then
     return false
   end
 
   if queries then
+    if vim.tbl_isempty(queries) then
+      return false
+    end
+
     local available_textobjects = M.available_textobjects(buf_lang, query_group)
     for _, query in ipairs(queries) do
       if not vim.list_contains(available_textobjects, query:sub(2)) then
@@ -709,6 +715,40 @@ function M.check_support(bufnr, query_group, queries)
   end
 
   return true
+end
+
+---Memoize a function using hash_fn to hash the arguments.
+---@generic F: function
+---@param fn F
+---@param hash_fn fun(...): any
+---@return F
+function M.memoize(fn, hash_fn)
+  local cache = setmetatable({}, { __mode = "kv" }) ---@type table<any,any>
+
+  return function(...)
+    local key = hash_fn(...)
+    if cache[key] == nil then
+      local v = { fn(...) } ---@type any
+
+      for k, value in pairs(v) do
+        if value == nil then
+          value[k] = vim.NIL
+        end
+      end
+
+      cache[key] = v
+    end
+
+    local v = cache[key]
+
+    for k, value in pairs(v) do
+      if value == vim.NIL then
+        value[k] = nil
+      end
+    end
+
+    return unpack(v)
+  end
 end
 
 return M

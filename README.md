@@ -63,24 +63,23 @@ require("nvim-treesitter-textobjects").setup {
 }
 
 -- keymaps
-local select = require "nvim-treesitter-textobjects.select"
 for _, mode in ipairs { "x", "o" } do
   -- You can use the capture groups defined in `textobjects.scm`
   vim.keymap.set(mode, "af", function()
-    select.select_textobject("@function.outer", "textobjects", mode)
+    require "nvim-treesitter-textobjects.select".select_textobject("@function.outer", "textobjects", mode)
   end)
   vim.keymap.set(mode, "if", function()
-    select.select_textobject("@function.inner", "textobjects", mode)
+    require "nvim-treesitter-textobjects.select".select_textobject("@function.inner", "textobjects", mode)
   end)
   vim.keymap.set(mode, "ac", function()
-    select.select_textobject("@class.outer", "textobjects", mode)
+    require "nvim-treesitter-textobjects.select".select_textobject("@class.outer", "textobjects", mode)
   end)
   vim.keymap.set(mode, "ic", function()
-    select.select_textobject("@class.inner", "textobjects", mode)
+    require "nvim-treesitter-textobjects.select".select_textobject("@class.inner", "textobjects", mode)
   end)
   -- You can also use captures from other query groups like `locals.scm`
   vim.keymap.set(mode, "as", function()
-    select.select_textobject("@local.scope", "locals", mode)
+    require "nvim-treesitter-textobjects.select".select_textobject("@local.scope", "locals", mode)
   end)
 end
 ```
@@ -113,17 +112,16 @@ require("nvim-treesitter-textobjects").setup {
 }
 
 -- keymaps
-local move = require("nvim-treesitter-textobjects.move")
 -- You can use the capture groups defined in `textobjects.scm`
 vim.keymap.set({ "n", "x", "o" }, "]m", function()
-  move.goto_next_start("@function.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_next_start("@function.outer", "textobjects")
 end)
 vim.keymap.set({ "n", "x", "o" }, "]]", function()
-  move.goto_next_start("@class.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_next_start("@class.outer", "textobjects")
 end)
 -- You can use lua patterns to group multiple queries.
 vim.keymap.set({ "n", "x", "o" }, "]o", function()
-  move.goto_next_start("@loop.*", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_next_start("@loop.*", "textobjects")
 end)
 -- You can also pass a list to group multiple queries.
 -- vim.keymap.set({ "n", "x", "o" }, "]o", function()
@@ -131,41 +129,41 @@ end)
 -- end)
 -- You can also use captures from other query groups like `locals.scm` or `folds.scm`
 vim.keymap.set({ "n", "x", "o" }, "]s", function()
-  move.goto_next_start("@local.scope", "locals")
+  require("nvim-treesitter-textobjects.move").goto_next_start("@local.scope", "locals")
 end)
 vim.keymap.set({ "n", "x", "o" }, "]z", function()
-  move.goto_next_start("@fold", "folds")
+  require("nvim-treesitter-textobjects.move").goto_next_start("@fold", "folds")
 end)
 
 vim.keymap.set({ "n", "x", "o" }, "]M", function()
-  move.goto_next_end("@funciton.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_next_end("@funciton.outer", "textobjects")
 end)
 vim.keymap.set({ "n", "x", "o" }, "][", function()
-  move.goto_next_end("@class.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_next_end("@class.outer", "textobjects")
 end)
 
 vim.keymap.set({ "n", "x", "o" }, "[m", function()
-  move.goto_previous_start("@function.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_previous_start("@function.outer", "textobjects")
 end)
 vim.keymap.set({ "n", "x", "o" }, "[[", function()
-  move.goto_previous_start("@class.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_previous_start("@class.outer", "textobjects")
 end)
 
 vim.keymap.set({ "n", "x", "o" }, "[M", function()
-  move.goto_previous_end("@function.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_previous_end("@function.outer", "textobjects")
 end)
 vim.keymap.set({ "n", "x", "o" }, "[]", function()
-  move.goto_previous_end("@class.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_previous_end("@class.outer", "textobjects")
 end)
 
 -- Go to either the start or the end, whichever is closer.
 -- Use if you want more granular movements
 -- Make it even more gradual by adding multiple queries and regex.
 vim.keymap.set({ "n", "x", "o" }, "]d", function()
-  move.goto_end("@conditional.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_end("@conditional.outer", "textobjects")
 end)
 vim.keymap.set({ "n", "x", "o" }, "[d", function()
-  move.goto_end("@conditional.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_end("@conditional.outer", "textobjects")
 end)
 ```
 
@@ -236,13 +234,12 @@ require("nvim-treesitter-textobjects").setup {
 }
 
 -- keymaps
-local peek_definition_code = require "nvim-treesitter-textobjects.lsp_interop".peek_definition_code
 -- You can use the capture groups defined in `textobjects.scm`
 vim.keymap.set({"n", "x"}, "<leader>df", function()
-  peek_definition_code("@function.outer", "textobjects")
+  require "nvim-treesitter-textobjects.lsp_interop".peek_definition_code("@function.outer", "textobjects")
 end)
 vim.keymap.set({"n", "x"}, "<leader>dF", function()
-  peek_definition_code("@class.outer", "textobjects")
+  require "nvim-treesitter-textobjects.lsp_interop".peek_definition_code("@class.outer", "textobjects")
 end)
 ```
 

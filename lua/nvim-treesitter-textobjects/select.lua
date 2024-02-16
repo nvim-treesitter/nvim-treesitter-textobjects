@@ -157,8 +157,7 @@ end
 
 ---@param query_string string
 ---@param query_group? string
----@param keymap_mode TSTextObjects.KeymapMode
-function M.select_textobject(query_string, query_group, keymap_mode)
+function M.select_textobject(query_string, query_group)
   query_group = query_group or "textobjects"
 
   if not shared.check_support(api.nvim_get_current_buf(), query_group, { query_string }) then
@@ -180,7 +179,7 @@ function M.select_textobject(query_string, query_group, keymap_mode)
   local bufnr, textobject =
     shared.textobject_at_point(query_string, query_group, nil, nil, { lookahead = lookahead, lookbehind = lookbehind })
   if textobject then
-    local selection_mode = M.detect_selection_mode(query_string, keymap_mode)
+    local selection_mode = M.detect_selection_mode(query_string)
     if
       val_or_return(surrounding_whitespace, {
         query_string = query_string,
@@ -194,21 +193,22 @@ function M.select_textobject(query_string, query_group, keymap_mode)
 end
 
 ---@alias TSTextObjects.Method "operator-pending" | "visual"
----@alias TSTextObjects.KeymapMode "o" | "s" | "v" | "x"
+---@alias TSTextObjects.Mode "nov" | "noV" | "no\22" | "v" | "V" | "\22"
 
 ---@param query_string string
----@param keymap_mode TSTextObjects.KeymapMode
 ---@return TSTextObjects.SelectionMode
-function M.detect_selection_mode(query_string, keymap_mode)
+function M.detect_selection_mode(query_string)
   -- Update selection mode with different methods based on keymapping mode
-  ---@type table<TSTextObjects.KeymapMode, TSTextObjects.Method>
+  ---@type table<TSTextObjects.Mode, TSTextObjects.Method>
   local keymap_to_method = {
-    o = "operator-pending",
-    s = "visual",
+    nov = "operator-pending",
+    noV = "operator-pending",
+    ["no\22"] = "operator-pending", -- \22 is the scape sequence of <c-v>
+    V = "visual",
     v = "visual",
-    x = "visual",
+    ["\22"] = "visual", -- \22 is the scape sequence of <c-v>
   }
-  local method = keymap_to_method[keymap_mode]
+  local method = keymap_to_method[api.nvim_get_mode().mode]
 
   local config = global_config.select
   local selection_modes = val_or_return(config.selection_modes, {

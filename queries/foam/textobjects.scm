@@ -12,6 +12,7 @@
   (_)* @class.inner) @class.outer
 
 ((comment) @_start
-  (comment)+ @_end(#make-range! "comment.outer" @_start @_end))
+  (comment)+ @_end
+  (#make-range! "comment.outer" @_start @_end))
 
 (comment) @comment.inner

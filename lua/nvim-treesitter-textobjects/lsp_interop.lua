@@ -116,7 +116,7 @@ function M.peek_definition_code(query_string, query_group, lsp_request, context)
     vim.notify(
       ("The filetype `%s` does not support the textobjects `%s` for the query file `%s`"):format(
         vim.bo.filetype,
-        query_strings,
+        query_string,
         query_group
       ),
       vim.log.levels.WARN

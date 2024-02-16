@@ -56,5 +56,7 @@
   .
   ((method_name)
     (function_call
-      (_))) @parameter.inner.","? @_end)
+      (_))) @parameter.inner
+  .
+  ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))

@@ -144,10 +144,11 @@ local function include_surrounding_whitespace(bufnr, range, selection_mode)
   return range
 end
 
---- TODO (TheLeoP): rename this?
----@param val function|any
----@param opts any
-local val_or_return = function(val, opts)
+---@generic T
+---@param val `T`|fun(opts: table):`T`
+---@param opts table
+---@return T
+local function_or_value_to_value = function(val, opts)
   if type(val) == "function" then
     return val(opts)
   else
@@ -186,7 +187,7 @@ function M.select_textobject(query_string, query_group)
   if textobject then
     local selection_mode = M.detect_selection_mode(query_string)
     if
-      val_or_return(surrounding_whitespace, {
+      function_or_value_to_value(surrounding_whitespace, {
         query_string = query_string,
         selection_mode = selection_mode,
       })
@@ -216,7 +217,7 @@ function M.detect_selection_mode(query_string)
   local method = keymap_to_method[api.nvim_get_mode().mode]
 
   local config = global_config.select
-  local selection_modes = val_or_return(config.selection_modes, {
+  local selection_modes = function_or_value_to_value(config.selection_modes, {
     query_string = query_string,
     method = method,
   }) --[[@as TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>]]

@@ -19,7 +19,7 @@ jobs:
 
       - name: Prepare
         env:
-          NVIM_TAG: ${{ matrix.nvim_tag }}
+          NVIM_TAG: nightly
         run: |
           sudo apt-get update && sudo apt-get install libfuse2
           sudo add-apt-repository universe

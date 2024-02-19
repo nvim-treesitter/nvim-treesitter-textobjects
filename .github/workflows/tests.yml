@@ -19,7 +19,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         cc: [gcc]
-        nvim_tag: [stable, nightly]
+        nvim_tag: [nightly]
 
     name: Run tests
     runs-on: ${{ matrix.os }}

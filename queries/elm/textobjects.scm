@@ -1,32 +1,26 @@
-;; Functions
+; Functions
 ; top level function with type annotation and doc comment
-(
-  (module_declaration)
+((module_declaration)
   (block_comment) @function.outer.start
   .
   (type_annotation)
   .
   (value_declaration
-    body: (_)? @function.inner) @function.outer
-)
+    body: (_)? @function.inner) @function.outer)
 
 ; top level function with type annotation
-(
-  (module_declaration)
+((module_declaration)
   (type_annotation) @function.outer.start
   .
   (value_declaration
-    body: (_)? @function.inner) @function.outer
-)
+    body: (_)? @function.inner) @function.outer)
 
 ; top level function without type annotation
-(
-  (module_declaration)
+((module_declaration)
   (value_declaration
-    body: (_)? @function.inner) @function.outer
-)
+    body: (_)? @function.inner) @function.outer)
 
-;; Comments
+; Comments
 [
   (block_comment)
   (line_comment)
@@ -34,51 +28,51 @@
 
 ; Conditionals
 (if_else_expr
-    exprList: (_)
-    exprList: (_) @conditional.inner) @conditional.outer
+  exprList: (_)
+  exprList: (_) @conditional.inner) @conditional.outer
 
 (case_of_expr
-    branch: (case_of_branch) @conditional.inner) @conditional.outer
+  branch: (case_of_branch) @conditional.inner) @conditional.outer
 
-;; Parameters
+; Parameters
 ; type annotations
 ((type_expression
-    (arrow) @_start .
-    (type_ref) @parameter.inner
-  )
+  (arrow) @_start
+  .
+  (type_ref) @parameter.inner)
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ((type_expression
-    .
-    (type_ref) @parameter.inner
-    . (arrow)? @_end
-  )
+  .
+  (type_ref) @parameter.inner
+  .
+  (arrow)? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ; list items
 ((list_expr
-    "," @_start .
-    exprList: (_) @parameter.inner
-  )
+  "," @_start
+  .
+  exprList: (_) @parameter.inner)
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ((list_expr
-    .
-    exprList: (_) @parameter.inner
-    . ","? @_end
-  )
+  .
+  exprList: (_) @parameter.inner
+  .
+  ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ; tuple items
 ((tuple_expr
-    "," @_start .
-    expr: (_) @parameter.inner
-  )
+  "," @_start
+  .
+  expr: (_) @parameter.inner)
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ((tuple_expr
-    .
-    expr: (_) @parameter.inner
-    . ","? @_end
-  )
+  .
+  expr: (_) @parameter.inner
+  .
+  ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))

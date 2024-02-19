@@ -19,7 +19,7 @@ jobs:
 
       - name: Prepare
         env:
-          NVIM_TAG: stable
+          NVIM_TAG: nightly
         run: |
           sudo apt-get update && sudo apt-get install libfuse2
           sudo add-apt-repository universe
@@ -29,7 +29,7 @@ jobs:
           ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/start
           cd ~/.local/share/nvim/site/pack/nvim-treesitter/start
-          git clone https://github.com/nvim-treesitter/nvim-treesitter.git
+          git clone -b main https://github.com/nvim-treesitter/nvim-treesitter.git
 
       - name: Compile parsers
         run: ./nvim.appimage --headless -c "TSInstallSync all" -c "q"

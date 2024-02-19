@@ -1,7 +1,8 @@
 (directive
   body: (body) @function.inner) @function.outer
 
-(section (title) @class.inner) @class.outer
+(section
+  (title) @class.inner) @class.outer
 
 (transition) @class.outer
 
@@ -10,7 +11,6 @@
   (enumerated_list)
   (definition_list)
   (field_list)
-
   (literal_block)
   (line_block)
   (block_quote)

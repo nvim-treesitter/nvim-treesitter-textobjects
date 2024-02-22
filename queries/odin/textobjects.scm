@@ -21,13 +21,13 @@
 
 ; classes
 (struct_declaration . (identifier) . (tag)* 
-  . "{" . (_) @_first @_last (_)?  "," @_last . "}" (#make-range! "class.inner" @_first @_last)) 
+  . "{" . (_) @_first @_last (_)?  "," @_last . "}" (#make-range! "class.inner" @_first @_last)) @class.outer
 
 (union_declaration . (identifier) . (tag)* 
-  . "{" . (_) @_first @_last (_)?  "," @_last . "}" (#make-range! "class.inner" @_first @_last)) 
+  . "{" . (_) @_first @_last (_)?  "," @_last . "}" (#make-range! "class.inner" @_first @_last)) @class.outer
 
 (enum_declaration . (identifier) . (tag)* 
-  . "{" . (_) @_first @_last (_)?  "," @_last . "}" (#make-range! "class.inner" @_first @_last)) 
+  . "{" . (_) @_first @_last (_)?  "," @_last . "}" (#make-range! "class.inner" @_first @_last)) @class.outer
 
 ; comments
 (comment) @comment.outer

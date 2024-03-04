@@ -30,6 +30,21 @@
 
 (if_statement) @conditional.outer
 
+(if_statement
+  condition: (_) @conditional.inner
+  (#offset! @conditional.inner 0 1 0 -1))
+
+(while_statement
+  condition: (_) @conditional.inner
+  (#offset! @conditional.inner 0 1 0 -1))
+
+(do_statement
+  condition: (_) @conditional.inner
+  (#offset! @conditional.inner 0 1 0 -1))
+
+(for_statement
+  condition: (_) @conditional.inner)
+
 ; loops
 (while_statement) @loop.outer
 (while_statement

@@ -331,8 +331,11 @@ function M.next_textobject(node, query_string, query_group, same_parent, overlap
   end
 
   local next_node = queries.find_best_match(bufnr, query_string, query_group, filter_function, scoring_function)
+  if not previous_node then
+    return
+  end
 
-  return next_node and next_node.node, next_node and next_node.metadata
+  return next_node.node, next_node.metadata
 end
 
 function M.previous_textobject(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
@@ -366,8 +369,11 @@ function M.previous_textobject(node, query_string, query_group, same_parent, ove
   end
 
   local previous_node = queries.find_best_match(bufnr, query_string, query_group, filter_function, scoring_function)
-
-  return previous_node and previous_node.node, previous_node.metadata
+  if not previous_node then
+    return
+  end
+  
+  return previous_node.node, previous_node.metadata
 end
 
 return M

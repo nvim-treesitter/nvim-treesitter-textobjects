@@ -332,7 +332,7 @@ function M.next_textobject(node, query_string, query_group, same_parent, overlap
 
   local next_node = queries.find_best_match(bufnr, query_string, query_group, filter_function, scoring_function)
 
-  return next_node and next_node.node, next_node.metadata
+  return next_node and next_node.node, next_node and next_node.metadata
 end
 
 function M.previous_textobject(node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)

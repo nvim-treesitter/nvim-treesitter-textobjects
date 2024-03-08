@@ -27,9 +27,9 @@ local function swap_textobject(query_strings_regex, query_group, direction)
   local same_parent = true
   for _ = 1, math.abs(direction), step do
     local forward = direction > 0
-    local adjacent =
+    local adjacent, metadata =
       shared.get_adjacent(forward, node, query_string, query_group, same_parent, overlapping_range_ok, bufnr)
-    ts_utils.swap_nodes(textobject_range, adjacent, bufnr, "yes, set cursor!")
+    ts_utils.swap_nodes(textobject_range, metadata and metadata.range or adjacent, bufnr, "yes, set cursor!")
   end
 end
 

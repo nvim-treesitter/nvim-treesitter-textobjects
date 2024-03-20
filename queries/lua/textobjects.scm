@@ -76,9 +76,13 @@
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 (table_constructor
-  (field) @parameter.inner
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  . (field) @parameter.inner . ","? @_outer_end
+  (#make-range! "parameter.outer" @parameter.inner @_outer_end))
+
+(table_constructor
+  . (_) @_start . (_)* @_inner_end . ","? @_outer_end
+  (#make-range! "parameter.inner" @_start @_inner_end)
+  (#make-range! "parameter.outer" @_start @_outer_end))
 
 (arguments
   "," @_start
@@ -89,6 +93,15 @@
   "," @_start
   . (_) @parameter.inner
  (#make-range! "parameter.outer" @_start @parameter.inner))
+
+(table_constructor
+  "," @_outer_start . (field) @parameter.inner . ","?
+  (#make-range! "parameter.outer" @_outer_start @parameter.inner))
+
+(table_constructor
+  "," @_outer_start . (_) @_inner_start . (_)* @_end . ","?
+  (#make-range! "parameter.inner" @_inner_start @_end)
+  (#make-range! "parameter.outer" @_outer_start @_end))
 
 ; number
 (number) @number.inner

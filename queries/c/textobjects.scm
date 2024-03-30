@@ -116,3 +116,8 @@
 (declaration
   type: (primitive_type)
   declarator: (_) @assignment.inner)
+
+(expression_statement
+  (assignment_expression
+    left: (_) @assignment.lhs
+    right: (_) @assignment.rhs) @assignment.inner) @assignment.outer

@@ -107,3 +107,17 @@
  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 (number_literal) @number.inner
+
+(declaration
+  declarator: (init_declarator
+    declarator: (_) @assignment.lhs
+    value: (_) @assignment.rhs) @assignment.inner) @assignment.outer
+
+(declaration
+  type: (primitive_type)
+  declarator: (_) @assignment.inner)
+
+(expression_statement
+  (assignment_expression
+    left: (_) @assignment.lhs
+    right: (_) @assignment.rhs) @assignment.inner) @assignment.outer

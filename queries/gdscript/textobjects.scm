@@ -11,7 +11,8 @@
   body: (_) @conditional.inner) @conditional.outer
 
 (if_statement
-  alternative: (_ (_) @conditional.inner)?) @conditional.outer
+  alternative: (_
+    (_) @conditional.inner)?) @conditional.outer
 
 (if_statement
   condition: (_) @conditional.inner)
@@ -21,38 +22,49 @@
   (while_statement)
 ] @loop.outer
 
-(while_statement body: (_) @loop.inner)
+(while_statement
+  body: (_) @loop.inner)
 
-(for_statement body: (_) @loop.inner)
+(for_statement
+  body: (_) @loop.inner)
 
 (comment) @comment.outer
 
 (parameters
-  "," @_start .
+  "," @_start
+  .
   (_) @parameter.inner
- (#make-range! "parameter.outer" @_start @parameter.inner))
+  (#make-range! "parameter.outer" @_start @parameter.inner))
 
 (parameters
-  . (_) @parameter.inner
-  . ","? @_end
- (#make-range! "parameter.outer" @parameter.inner @_end))
+  .
+  (_) @parameter.inner
+  .
+  ","? @_end
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 (arguments
-  "," @_start .
+  "," @_start
+  .
   (_) @parameter.inner
- (#make-range! "parameter.outer" @_start @parameter.inner))
+  (#make-range! "parameter.outer" @_start @parameter.inner))
 
 (arguments
-  . (_) @parameter.inner
-  . ","? @_end
- (#make-range! "parameter.outer" @parameter.inner @_end))
-
-(array
-  "," @_start .
+  .
   (_) @parameter.inner
- (#make-range! "parameter.outer" @_start @parameter.inner))
+  .
+  ","? @_end
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 (array
-  . (_) @parameter.inner
-  . ","? @_end
- (#make-range! "parameter.outer" @parameter.inner @_end))
+  "," @_start
+  .
+  (_) @parameter.inner
+  (#make-range! "parameter.outer" @_start @parameter.inner))
+
+(array
+  .
+  (_) @parameter.inner
+  .
+  ","? @_end
+  (#make-range! "parameter.outer" @parameter.inner @_end))

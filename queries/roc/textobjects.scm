@@ -20,8 +20,7 @@
 
 (function_call_expr
   .
-  (_)
-  ((_) @parameter.inner) @parameter.outer)
+  (_) @parameter.inner @parameter.outer)
 
 [
   (annotation_type_def)
@@ -31,6 +30,10 @@
 
 (apply_type_arg) @parameter.inner
 
+((#offset! line_comment 0 1 0 -1)) @comment.inner
+
 (line_comment) @comment.outer
+
+((#offset! doc_comment 0 1 0 -2)) @comment.inner
 
 (doc_comment) @comment.outer

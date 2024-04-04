@@ -4,14 +4,28 @@
 (method_declaration) @function.outer
 
 (method_declaration
-  body: (block . "{" . (_) @_start @_end (_)? @_end . "}"
- (#make-range! "function.inner" @_start @_end)))
+  body: (block
+    .
+    "{"
+    .
+    (_) @_start @_end
+    (_)? @_end
+    .
+    "}"
+    (#make-range! "function.inner" @_start @_end)))
 
 (constructor_declaration) @function.outer
 
 (constructor_declaration
-  body: (constructor_body . "{" . (_) @_start @_end (_)? @_end . "}"
- (#make-range! "function.inner" @_start @_end)))
+  body: (constructor_body
+    .
+    "{"
+    .
+    (_) @_start @_end
+    (_)? @_end
+    .
+    "}"
+    (#make-range! "function.inner" @_start @_end)))
 
 (for_statement
   body: (_)? @loop.inner) @loop.outer
@@ -26,43 +40,58 @@
   body: (_)? @loop.inner) @loop.outer
 
 (if_statement
-  condition: (_ (parenthesized_expression) @conditional.inner)  @conditional.outer)
+  condition: (_
+    (parenthesized_expression) @conditional.inner) @conditional.outer)
 
 (if_statement
   consequence: (_)? @conditional.inner
-  alternative: (_)? @conditional.inner
-  ) @conditional.outer
+  alternative: (_)? @conditional.inner) @conditional.outer
 
 (switch_expression
   body: (_)? @conditional.inner) @conditional.outer
 
-;; blocks
+; blocks
 (block) @block.outer
 
-
 (method_invocation) @call.outer
+
 (method_invocation
-  arguments: (argument_list . "(" . (_) @_start (_)? @_end . ")"
-  (#make-range! "call.inner" @_start @_end)))
+  arguments: (argument_list
+    .
+    "("
+    .
+    (_) @_start
+    (_)? @_end
+    .
+    ")"
+    (#make-range! "call.inner" @_start @_end)))
 
-;; parameters
+; parameters
 (formal_parameters
-  "," @_start .
+  "," @_start
+  .
   (formal_parameter) @parameter.inner
- (#make-range! "parameter.outer" @_start @parameter.inner))
+  (#make-range! "parameter.outer" @_start @parameter.inner))
+
 (formal_parameters
-  . (formal_parameter) @parameter.inner
-  . ","? @_end
- (#make-range! "parameter.outer" @parameter.inner @_end))
+  .
+  (formal_parameter) @parameter.inner
+  .
+  ","? @_end
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 (argument_list
-  "," @_start .
+  "," @_start
+  .
   (_) @parameter.inner
- (#make-range! "parameter.outer" @_start @parameter.inner))
+  (#make-range! "parameter.outer" @_start @parameter.inner))
+
 (argument_list
-  . (_) @parameter.inner
-  . ","? @_end
- (#make-range! "parameter.outer" @parameter.inner @_end))
+  .
+  (_) @parameter.inner
+  .
+  ","? @_end
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 [
   (line_comment)

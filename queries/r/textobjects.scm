@@ -1,22 +1,18 @@
 ; block
-
 ; call
+(call) @call.outer
 
-(call) @call.outer (arguments) @call.inner
+(arguments) @call.inner
 
 ; class
-
 ; comment
-
 (comment) @comment.outer
 
 ; conditional
-
 (if
   condition: (_)? @conditional.inner) @conditional.outer
 
 ; function
-
 [
   (function_definition)
   (lambda_function)
@@ -34,52 +30,56 @@
     (call)
     (binary)
     (brace_list)
-  ] @function.inner
-) @function.outer
+  ] @function.inner) @function.outer
 
 ; loop
-
 [
   (while)
   (repeat)
   (for)
 ] @loop.outer
 
-(while body: (_) @loop.inner)
+(while
+  body: (_) @loop.inner)
 
-(repeat body: (_) @loop.inner)
+(repeat
+  body: (_) @loop.inner)
 
-(for body: (_) @loop.inner)
+(for
+  body: (_) @loop.inner)
 
 ; statement
-(brace_list (_) @statement.outer)
-(program (_) @statement.outer)
+(brace_list
+  (_) @statement.outer)
 
+(program
+  (_) @statement.outer)
 
 ; parameter
-
 ((formal_parameters
-  "," @_start .
-  (_) @parameter.inner
-  )
+  "," @_start
+  .
+  (_) @parameter.inner)
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ((formal_parameters
-  . (_) @parameter.inner
-  . ","? @_end
-  )
+  .
+  (_) @parameter.inner
+  .
+  ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((arguments
-  "," @_start .
-  (_) @parameter.inner
-  )
+  "," @_start
+  .
+  (_) @parameter.inner)
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ((arguments
-  . (_) @parameter.inner
-  . ","? @_end
-  )
+  .
+  (_) @parameter.inner
+  .
+  ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ; number

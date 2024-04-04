@@ -6,11 +6,15 @@
 
 (declaration
   (property_name) @assignment.lhs
-  . ":" . (_) @_start (_)? @_end . ";"
+  .
+  ":"
+  .
+  (_) @_start
+  (_)? @_end
+  .
+  ";"
   (#make-range! "assignment.inner" @_start @_end)
-  (#make-range! "assignment.rhs" @_start @_end)
-) @assignment.outer
+  (#make-range! "assignment.rhs" @_start @_end)) @assignment.outer
 
 (declaration
-  (property_name) @assignment.inner
-)
+  (property_name) @assignment.inner)

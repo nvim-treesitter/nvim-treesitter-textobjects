@@ -24,10 +24,10 @@
   ((_) @parameter.inner) @parameter.outer)
 
 [
-  (annotation_type_def) @class.inner
-  (alias_type_def) @class.inner
-  (opaque_type_def) @class.inner
-] @class.outer
+  (annotation_type_def)
+  (alias_type_def)
+  (opaque_type_def)
+] @class.inner @class.outer
 
 (apply_type_arg) @parameter.inner
 

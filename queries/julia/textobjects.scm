@@ -84,8 +84,7 @@
 
 ; Function definitions
 ((function_definition
-  name: (_)
-  parameters: (_)
+  (signature)
   .
   (_)? @_start
   (_) @_end
@@ -93,22 +92,20 @@
   "end")
   (#make-range! "function.inner" @_start @_end)) @function.outer
 
-(short_function_definition
-  name: (_)
-  parameters: (_)
+(assignment
+  (call_expression)
   (_) @function.inner) @function.outer
 
 (function_expression
   [
     (identifier)
-    (parameter_list)
+    (argument_list)
   ]
   "->"
   (_) @function.inner) @function.outer
 
 ((macro_definition
-  name: (_)
-  parameters: (_)
+  (signature)
   .
   (_)? @_start
   (_) @_end
@@ -144,18 +141,6 @@
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ((argument_list
-  (_) @parameter.inner
-  .
-  "," @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
-
-((parameter_list
-  "," @_start
-  .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
-
-((parameter_list
   (_) @parameter.inner
   .
   "," @_end)

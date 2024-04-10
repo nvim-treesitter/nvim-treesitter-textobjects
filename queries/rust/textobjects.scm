@@ -216,6 +216,19 @@
 ((parameters
   "," @_start
   .
+  (self_parameter) @parameter.inner)
+  (#make-range! "parameter.outer" @_start @parameter.inner))
+
+((parameters
+  .
+  (self_parameter) @parameter.inner
+  .
+  ","? @_end)
+  (#make-range! "parameter.outer" @parameter.inner @_end))
+
+((parameters
+  "," @_start
+  .
   (parameter) @parameter.inner)
   (#make-range! "parameter.outer" @_start @parameter.inner))
 

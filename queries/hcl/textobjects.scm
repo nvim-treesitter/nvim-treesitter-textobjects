@@ -18,19 +18,17 @@
 (comment) @comment.outer
 
 (conditional
-  (expression) @conditional.condition
-  (expression) @conditional.lhs
-  (expression) @conditional.inner @conditional.rhs) @conditional.outer
+  (expression) @conditional.inner) @conditional.outer
 
-(conditional
-  (expression) @conditional.inner)
+(for_cond
+  (expression) @conditional.inner) @conditional.outer
 
 (for_expr
   (for_object_expr
-    (for_intro) @loop.control
-    (expression) @loop.lhs
-    (expression) @loop.rhs
-    (for_cond)? @loop.condition @loop.inner)) @loop.outer
+    (for_intro) @loop.inner
+    (expression) @loop.inner
+    (expression) @loop.inner
+    (for_cond)? @loop.inner)) @loop.outer
 
 (for_expr
   (for_object_expr
@@ -42,9 +40,9 @@
 
 (for_expr
   (for_tuple_expr
-    (for_intro) @loop.control
-    (expression) @loop.lhs @loop.rhs
-    (for_cond)? @loop.condition @loop.inner)) @loop.outer
+    (for_intro) @loop.inner
+    (expression) @loop.inner
+    (for_cond)? @loop.inner)) @loop.outer
 
 (for_expr
   (for_tuple_expr

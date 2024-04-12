@@ -27,7 +27,7 @@
     (#make-range! "function.inner" @_start @_end)))
 
 (export_statement
-  (function_declaration) @function.outer) @function.outer.start
+  (function_declaration)) @function.outer
 
 (arrow_function
   body: (_) @function.inner) @function.outer
@@ -61,7 +61,7 @@
   body: (class_body) @class.inner) @class.outer
 
 (export_statement
-  (class_declaration) @class.outer) @class.outer.start
+  (class_declaration)) @class.outer
 
 (for_in_statement
   body: (statement_block

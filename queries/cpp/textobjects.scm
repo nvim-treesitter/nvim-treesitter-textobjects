@@ -21,13 +21,13 @@
     (#make-range! "loop.inner" @_start @_end)))
 
 (template_declaration
-  (function_definition) @function.outer) @function.outer.start
+  (function_definition)) @function.outer
 
 (template_declaration
-  (struct_specifier) @class.outer) @class.outer.start
+  (struct_specifier)) @class.outer
 
 (template_declaration
-  (class_specifier) @class.outer) @class.outer.start
+  (class_specifier)) @class.outer
 
 ((lambda_capture_specifier
   "," @_start

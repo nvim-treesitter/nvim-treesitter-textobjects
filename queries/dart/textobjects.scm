@@ -1,5 +1,5 @@
 ; class
-(((annotation)? @class.outer.start
+(((annotation)? @class.outer
   .
   (class_definition
     body: (class_body) @_end @class.inner) @_start)
@@ -15,7 +15,7 @@
   body: (extension_body) @class.inner) @class.outer
 
 ; function/method
-(((annotation)? @function.outer.start
+(((annotation)? @function.outer
   .
   [
     (method_signature)

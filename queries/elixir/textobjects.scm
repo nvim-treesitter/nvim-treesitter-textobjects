@@ -51,19 +51,19 @@
     right: (body) @function.inner)) @function.outer
 
 (call
+  [
+    (arguments
+      (_) @parameter.inner
+      .
+      "," @_delimiter
+      (#make-range! "parameter.outer" @parameter.inner @_delimiter))
+    (arguments
+      ((_) @parameter.inner) @parameter.outer .)
+  ])
+
+(call
   target: ((identifier) @_identifier
     (#any-of? @_identifier "def" "defmacro" "defmacrop" "defn" "defnp" "defp"))
-  (arguments
-    (call
-      [
-        (arguments
-          (_) @parameter.inner
-          .
-          "," @_delimiter)
-        (arguments
-          ((_) @parameter.inner) @_delimiter .)
-      ]
-      (#make-range! "parameter.outer" @parameter.inner @_delimiter)))
   [
     (do_block
       "do"
@@ -85,16 +85,7 @@
   target: ((identifier) @_identifier
     (#any-of? @_identifier "def" "defmacro" "defmacrop" "defn" "defnp" "defp"))
   (arguments
-    (call
-      [
-        (arguments
-          (_) @parameter.inner
-          .
-          "," @_delimiter)
-        (arguments
-          ((_) @parameter.inner) @_delimiter .)
-      ]
-      (#make-range! "parameter.outer" @parameter.inner @_delimiter))
+    (call)
     (keywords
       (pair
         value: (_) @function.inner)))) @function.outer

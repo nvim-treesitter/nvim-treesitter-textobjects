@@ -3,7 +3,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"
@@ -14,7 +14,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"
@@ -25,7 +25,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"
@@ -34,7 +34,7 @@
 (lambda_literal
   ("{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"

@@ -9,7 +9,7 @@ languages[0] = nil
 vim.fn.mkdir(vim.fn.stdpath "cache", "p")
 
 local done = false
-require("nvim-treesitter.install").install(languages, {}, function()
+require("nvim-treesitter.install").install(languages, { force = true }, function()
   done = true
 end)
 

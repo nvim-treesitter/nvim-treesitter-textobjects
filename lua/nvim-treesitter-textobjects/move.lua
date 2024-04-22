@@ -87,14 +87,14 @@ local function move(opts)
   -- score is a byte position.
   ---
   ---@param start_ boolean
-  ---@param match TSTextObjects.Match
+  ---@param range TSTextObjects.Range
   ---@return integer
-  local function scoring_function(start_, match)
+  local function scoring_function(start_, range)
     local score ---@type integer
     if start_ then
-      score = match.range.start_byte
+      score = range.start_byte
     else
-      score = match.range.end_byte
+      score = range.end_byte
     end
     if forward then
       return -score
@@ -104,57 +104,57 @@ local function move(opts)
   end
 
   ---@param start_ boolean
-  ---@param match TSTextObjects.Match
+  ---@param range TSTextObjects.Range
   ---@return boolean
-  local function filter_function(start_, match)
-    local range = match.range:range4()
+  local function filter_function(start_, range)
+    local range4 = range:range4()
     local row, col = unpack(vim.api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
     row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
 
     if not start_ then
-      if range[4] == 0 then
-        range[1] = range[3] - 1
-        range[2] = range[4]
+      if range4[4] == 0 then
+        range4[1] = range4[3] - 1
+        range4[2] = range4[4]
       else
-        range[1] = range[3]
-        range[2] = range[4] - 1
+        range4[1] = range4[3]
+        range4[2] = range4[4] - 1
       end
     end
     if forward then
-      return range[1] > row or (range[1] == row and range[2] > col)
+      return range4[1] > row or (range4[1] == row and range4[2] > col)
     else
-      return range[1] < row or (range[1] == row and range[2] < col)
+      return range4[1] < row or (range4[1] == row and range4[2] < col)
     end
   end
 
   for _ = 1, vim.v.count1 do
-    local best_match ---@type TSTextObjects.Match
+    local best_range ---@type TSTextObjects.Range
     local best_score ---@type integer
     local best_start ---@type boolean
     for _, query_string in ipairs(query_strings) do
       for _, start_ in ipairs(starts) do
-        local current_match = shared.find_best_match(bufnr, query_string, query_group, function(match)
-          return filter_function(start_, match)
-        end, function(match)
-          return scoring_function(start_, match)
+        local current_range = shared.find_best_range(bufnr, query_string, query_group, function(range)
+          return filter_function(start_, range)
+        end, function(range)
+          return scoring_function(start_, range)
         end)
 
-        if current_match then
-          local score = scoring_function(start_, current_match)
-          if not best_match then
-            best_match = current_match
+        if current_range then
+          local score = scoring_function(start_, current_range)
+          if not best_range then
+            best_range = current_range
             best_score = score
             best_start = start_
           end
           if score > best_score then
-            best_match = current_match
+            best_range = current_range
             best_score = score
             best_start = start_
           end
         end
       end
     end
-    goto_node(best_match and best_match.range, not best_start, not config.set_jumps)
+    goto_node(best_range and best_range.range, not best_start, not config.set_jumps)
   end
 end
 

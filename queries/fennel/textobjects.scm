@@ -61,20 +61,18 @@
     (_)? @_end
     .
     close: _ .)
-] @function.outer
+]
   (#make-range! "function.inner" @_start @_end))
+
+[
+  (fn_form)
+  (lambda_form)
+  (macro_form)
+] @function.outer
 
 ; function arguments
 (sequence_arguments
-  .
-  item: (_) @parameter.inner @parameter.outer
-  (#offset! @parameter.outer 0 0 0 1))
-
-(sequence_arguments
-  .
-  item: (_)
-  item: (_) @parameter.inner @parameter.outer
-  (#offset! @parameter.outer 0 0 0 -1))
+  item: (_) @parameter.inner) @parameter.outer
 
 ; call
 (list
@@ -112,14 +110,13 @@
     lhs: (_) @assignment.lhs
     rhs: (_) @assignment.rhs) @assignment.inner) @assignment.outer
 
-(case_pair
-  lhs: (_) @assignment.lhs
-  rhs: (_) @assignment.rhs) @assignment.outer
-
 ; conditionals
 (if_form
   (if_pair
     expression: (_) @conditional.inner)) @conditional.outer
+
+(if_form
+  else: (_) @conditional.inner) @conditional.outer
 
 (list
   call: (symbol) @_cond
@@ -128,88 +125,91 @@
   item: (_)* @conditional.inner
   (#eq? @_cond "when")) @conditional.outer
 
-[
-  (case_form
-    (case_pair
-      rhs: (_) @conditional.inner))
-  (match_form
-    (case_pair
-      rhs: (_) @conditional.inner))
-  (case_try_form
-    (case_pair
-      rhs: (_) @conditional.inner))
-  (match_try_form
-    (case_pair
-      rhs: (_) @conditional.inner))
-] @conditional.outer
-
 ; loops
 (each_form
-  (iter_body)
+  iter_body: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
   close: _
-  (#make-range! "loop.inner" @_start @_end)) @loop.outer
+  (#make-range! "loop.inner" @_start @_end))
+
+(each_form) @loop.outer
 
 (collect_form
-  (iter_body)
+  iter_body: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
   close: _
-  (#make-range! "loop.inner" @_start @_end)) @loop.outer
+  (#make-range! "loop.inner" @_start @_end))
+
+(collect_form) @loop.outer
 
 (icollect_form
-  (iter_body)
+  iter_body: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
   close: _
-  (#make-range! "loop.inner" @_start @_end)) @loop.outer
+  (#make-range! "loop.inner" @_start @_end))
+
+(icollect_form) @loop.outer
 
 (accumulate_form
-  (iter_body)
+  iter_body: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
   close: _
-  (#make-range! "loop.inner" @_start @_end)) @loop.outer
+  (#make-range! "loop.inner" @_start @_end))
+
+(accumulate_form) @loop.outer
 
 (for_form
-  (for_iter_body)
+  iter_body: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
   close: _
-  (#make-range! "loop.inner" @_start @_end)) @loop.outer
+  (#make-range! "loop.inner" @_start @_end))
+
+(for_form) @loop.outer
 
 (fcollect_form
-  (for_iter_body)
+  iter_body: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
   close: _
-  (#make-range! "loop.inner" @_start @_end)) @loop.outer
+  (#make-range! "loop.inner" @_start @_end))
+
+(fcollect_form) @loop.outer
 
 (faccumulate_form
-  (for_iter_body)
+  iter_body: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
   close: _
-  (#make-range! "loop.inner" @_start @_end)) @loop.outer
+  (#make-range! "loop.inner" @_start @_end))
+
+(faccumulate_form) @loop.outer
 
 (list
   call: (symbol) @_sym
   .
   item: (_)
   item: (_)* @loop.inner
-  (#any-of? @_sym "while")) @loop.outer
+  (#any-of? @_sym "while"))
+
+(list
+  call: (symbol) @_sym
+  (#eq? @_sym "while")) @loop.outer

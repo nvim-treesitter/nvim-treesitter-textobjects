@@ -3,7 +3,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"
@@ -14,7 +14,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"
@@ -25,7 +25,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"
@@ -34,7 +34,7 @@
 (method_declaration
   body: (arrow_expression_clause
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     (#make-range! "function.inner" @_start @_end))) @function.outer
 
@@ -43,7 +43,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"
@@ -54,7 +54,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"

@@ -320,20 +320,50 @@
 
 ; parameter.inner & outer
 ; -----------------------
+; second and following
 (parameter_list
-  ((_) @parameter.inner
-    .
-    ","? @parameter.outer) @parameter.outer)
+  "," @_start
+  .
+  (_) @parameter.inner
+  (#make-range! "parameter.outer" @_start @parameter.inner))
 
+; first
+(parameter_list
+  .
+  (_) @parameter.inner
+  .
+  ","? @_end
+  (#make-range! "parameter.outer" @parameter.inner @_end))
+
+; second and following
 (argument_list
-  ((_) @parameter.inner
-    .
-    ","? @parameter.outer) @parameter.outer)
+  "," @_start
+  .
+  (_) @parameter.inner
+  (#make-range! "parameter.outer" @_start @parameter.inner))
 
+; first
+(argument_list
+  .
+  (_) @parameter.inner
+  .
+  ","? @_end
+  (#make-range! "parameter.outer" @parameter.inner @_end))
+
+; second and following
 (instance_argument_list
-  ((_) @parameter.inner
-    .
-    ","? @parameter.outer) @parameter.outer)
+  "," @_start
+  .
+  (_) @parameter.inner
+  (#make-range! "parameter.outer" @_start @parameter.inner))
+
+; first
+(instance_argument_list
+  .
+  (_) @parameter.inner
+  .
+  ","? @_end
+  (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ; assignment.inner & outer w/ lhs & rhs
 ; -------------------------------------

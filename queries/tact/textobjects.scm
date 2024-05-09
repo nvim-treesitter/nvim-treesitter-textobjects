@@ -365,6 +365,16 @@
   ","? @_end
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+; single parameter
+(receive_function
+  parameter: (_) @parameter.inner @parameter.outer)
+
+(bounced_function
+  parameter: (_) @parameter.inner @parameter.outer)
+
+(external_function
+  parameter: (_) @parameter.inner @parameter.outer)
+
 ; assignment.inner & outer w/ lhs & rhs
 ; -------------------------------------
 (let_statement

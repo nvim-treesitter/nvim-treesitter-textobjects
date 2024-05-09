@@ -21,7 +21,7 @@ local function extract_captures()
 end
 
 local function do_check()
-  local parsers = require("nvim-treesitter.parsers").get_available()
+  local parsers = require("nvim-treesitter.config").get_available()
   local query_types = { "textobjects" }
 
   local captures = extract_captures()

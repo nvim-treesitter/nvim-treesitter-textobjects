@@ -28,7 +28,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}")
@@ -52,7 +52,7 @@
 (struct_declaration
   ("{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"
@@ -78,7 +78,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"
@@ -90,7 +90,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"
@@ -104,7 +104,7 @@
     .
     "{"
     .
-    (_) @_start @_end
+    (_) @_start
     (_)? @_end
     .
     "}"

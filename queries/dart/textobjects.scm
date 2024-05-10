@@ -1,9 +1,8 @@
 ; class
-(((annotation)? @class.outer
+((annotation)? @class.outer
   .
   (class_definition
-    body: (class_body) @_end @class.inner) @_start)
-  (#make-range! "class.outer" @_start @_end))
+    body: (class_body) @class.inner) @class.outer)
 
 (mixin_declaration
   (class_body) @class.inner) @class.outer
@@ -15,26 +14,21 @@
   body: (extension_body) @class.inner) @class.outer
 
 ; function/method
-(((annotation)? @function.outer
+((annotation)? @function.outer
   .
   [
     (method_signature)
     (function_signature)
-  ] @_start
+  ] @function.outer
   .
-  (function_body) @_end)
-  (#make-range! "function.outer" @_start @_end))
+  (function_body) @function.outer)
 
 (function_body
   (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (type_alias
   (function_type)? @function.inner) @function.outer
@@ -46,44 +40,39 @@
   (type_parameter)
 ] @parameter.inner
 
-("," @_start
+("," @parameter.outer
   .
   [
     (formal_parameter)
     (normal_parameter_type)
     (type_parameter)
-  ] @_par
-  (#make-range! "parameter.outer" @_start @_par))
+  ] @parameter.outer)
 
 ([
   (formal_parameter)
   (normal_parameter_type)
   (type_parameter)
-] @_par
+] @parameter.outer
   .
-  "," @_end
-  (#make-range! "parameter.outer" @_par @_end))
+  "," @parameter.outer)
 
 ; TODO: (_)* not supported yet -> for now this works correctly only with simple arguments
-((arguments
+(arguments
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((arguments
-  "," @_start
+(arguments
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
 ; call
-((identifier) @_start
+((identifier) @call.outer
   .
   (selector
-    (argument_part) @_end)
-  (#make-range! "call.outer" @_start @_end))
+    (argument_part) @call.outer))
 
 ((identifier)
   .
@@ -92,12 +81,8 @@
       (arguments
         .
         "("
-        .
-        (_) @_start
-        (_)? @_end
-        .
-        ")"
-        (#make-range! "call.inner" @_start @_end)))))
+        _+ @call.inner
+        ")"))))
 
 ; block
 (block) @block.outer

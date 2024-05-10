@@ -1,4 +1,5 @@
 local ts = vim.treesitter
+local add_bytes = require("vim.treesitter._range").add_bytes
 
 -- luacheck: push ignore 631
 ---@alias TSTextObjects.Metadata {range: {[1]: number, [2]: number, [3]: number, [4]: number, [5]: number, [6]: number, [7]: string}}
@@ -82,29 +83,19 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
       -- Extract capture names from each match
       for id, nodes in pairs(match) do
         local query_name = query.captures[id] -- name of the capture in the query
-        if type(nodes) ~= "table" then
-          nodes = { nodes }
-        end
         if query_name ~= nil then
           local path = vim.split(query_name, "%.")
-          for _, node in ipairs(nodes) do
-            local range = { node:range(true) }
-            ---@cast range Range6
-
-            -- Range could be changed by directives
-            local node_data = metadata[id]
-            if node_data and node_data.range then
-              range = {
-                node_data.range[1],
-                node_data.range[2],
-                range[3],
-                node_data.range[3],
-                node_data.range[4],
-                range[6],
-              }
+          if metadata[id] and metadata[id].range then
+            insert_to_path(prepared_match, path, add_bytes(bufnr, metadata[id].range))
+          else
+            local srow, scol, sbyte, erow, ecol, ebyte = nodes[1]:range(true)
+            if #nodes > 1 then
+              local _, _, _, e_erow, e_ecol, e_ebyte = nodes[#nodes]:range(true)
+              erow = e_erow
+              ecol = e_ecol
+              ebyte = e_ebyte
             end
-
-            insert_to_path(prepared_match, path, range)
+            insert_to_path(prepared_match, path, { srow, scol, sbyte, erow, ecol, ebyte })
           end
         end
       end
@@ -436,16 +427,7 @@ M.available_textobjects = memoize(function(lang, query_group)
     return {}
   end
 
-  local found_textobjects = parsed_queries.captures or {}
-  for _, pattern in pairs(parsed_queries.info.patterns) do
-    for _, q in ipairs(pattern) do
-      local query, arg1 = unpack(q) --[=[@as string, string[]]=]
-      if query == "make-range!" and not vim.tbl_contains(found_textobjects, arg1) then
-        table.insert(found_textobjects, arg1)
-      end
-    end
-  end
-  return found_textobjects
+  return parsed_queries.captures or {}
 end, function(lang, query_group)
   return string.format("%s-%s", lang, query_group)
 end)

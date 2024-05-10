@@ -1,13 +1,7 @@
-((apply
+(apply
   .
   function: (_)
-  .
-  (_) @_start
-  .
-  (_)*
-  .
-  (_)? @_end .)
-  (#make-range! "call.inner" @_start @_end)) @call.outer
+  _+ @call.inner) @call.outer
 
 (infix
   (_)
@@ -22,23 +16,18 @@
 
 (decl/function
   patterns: (_)
-  .
-  match: (_) @_start
-  match: (_)? @_end
-  .
-  (#make-range! "function.inner" @_start @_end))
+  match: _+ @function.inner)
 
 ; also treat function signature as @function.outer
 (signature) @function.outer
 
 ; treat signature with function as @function.outer
 (((decl/signature
-  name: (_) @_sig_name) @_start
+  name: (_) @_sig_name) @function.outer
   .
   (decl/function
-    name: (_) @_func_name) @_end)
-  (#eq? @_sig_name @_func_name)
-  (#make-range! "function.outer" @_start @_end))
+    name: (_) @_func_name) @function.outer)
+  (#eq? @_sig_name @_func_name))
 
 (class) @class.outer
 

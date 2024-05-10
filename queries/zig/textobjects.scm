@@ -6,12 +6,8 @@
   (struct_declaration
     "struct"
     "{"
-    .
-    _ @_start @_end
-    _? @_end
-    .
-    "}")
-  (#make-range! "class.inner" @_start @_end))
+    _+ @class.inner
+    "}"))
 
 ; functions
 (function_declaration) @function.outer
@@ -20,12 +16,8 @@
   body: (block
     .
     "{"
-    .
-    _ @_start @_end
-    _? @_end
-    .
-    "}")
-  (#make-range! "function.inner" @_start @_end))
+    _+ @function.inner
+    "}"))
 
 ; loops
 (for_statement) @loop.outer
@@ -43,49 +35,41 @@
 
 (block
   "{"
-  .
-  _ @_start @_end
-  _? @_end
-  .
-  "}"
-  (#make-range! "block.inner" @_start @_end))
+  _+ @block.inner
+  "}")
 
 ; statements
 (statement) @statement.outer
 
 ; parameters
 (parameters
-  "," @_start
+  "," @parameter.outer
   .
-  (parameter) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (parameter) @parameter.inner @parameter.outer)
 
 (parameters
   .
-  (parameter) @parameter.inner
+  (parameter) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 ; arguments
 (call_expression
   function: (_)
   "("
-  "," @_start
+  "," @parameter.outer
   .
-  (_) @parameter.inner
-  ")"
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer
+  ")")
 
 (call_expression
   function: (_)
   "("
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  ")"
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer
+  ")")
 
 ; comments
 (comment) @comment.outer
@@ -108,12 +92,8 @@
 
 (switch_expression
   "{"
-  .
-  _ @_start
-  _? @_end
-  .
-  "}"
-  (#make-range! "conditional.inner" @_start @_end))
+  _+ @conditional.inner
+  "}")
 
 (while_statement
   condition: (_) @conditional.inner)
@@ -123,9 +103,5 @@
 
 (call_expression
   "("
-  .
-  _ @_start
-  _? @_end
-  .
-  ")"
-  (#make-range! "call.inner" @_start @_end))
+  _+ @call.inner
+  ")")

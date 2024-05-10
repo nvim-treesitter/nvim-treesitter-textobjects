@@ -4,25 +4,19 @@
   body: (compound_statement
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
-((parameter_list
-  "," @_start
+(parameter_list
+  "," @parameter.outer
   .
-  (parameter) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (parameter) @parameter.inner @parameter.outer)
 
-((parameter_list
+(parameter_list
   .
-  (parameter) @parameter.inner
+  (parameter) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 (compound_statement) @block.outer
 
@@ -36,14 +30,10 @@
 (while_statement
   (_)? @loop.inner) @loop.outer
 
-((struct_declaration
+(struct_declaration
   "{"
-  .
-  _ @_start
-  _ @_end
-  .
+  _+ @class.inner
   "}") @class.outer
-  (#make-range! "class.inner" @_start @_end))
 
 ; conditional
 (if_statement
@@ -53,15 +43,13 @@
 (if_statement
   condition: (_) @conditional.inner)
 
-((argument_list_expression
-  "," @_start
+(argument_list_expression
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((argument_list_expression
+(argument_list_expression
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)

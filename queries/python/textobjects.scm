@@ -46,19 +46,15 @@
   arguments: (argument_list
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    _+ @call.inner
+    ")"))
 
 (return_statement
   (_)? @return.inner) @return.outer
 
 ; Parameters
-((parameters
-  "," @_start
+(parameters
+  "," @parameter.outer
   .
   [
     (identifier)
@@ -68,10 +64,9 @@
     (typed_default_parameter)
     (dictionary_splat_pattern)
     (list_splat_pattern)
-  ] @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  ] @parameter.inner @parameter.outer)
 
-((parameters
+(parameters
   .
   [
     (identifier)
@@ -81,13 +76,12 @@
     (typed_default_parameter)
     (dictionary_splat_pattern)
     (list_splat_pattern)
-  ] @parameter.inner
+  ] @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((lambda_parameters
-  "," @_start
+(lambda_parameters
+  "," @parameter.outer
   .
   [
     (identifier)
@@ -97,10 +91,9 @@
     (typed_default_parameter)
     (dictionary_splat_pattern)
     (list_splat_pattern)
-  ] @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  ] @parameter.inner @parameter.outer)
 
-((lambda_parameters
+(lambda_parameters
   .
   [
     (identifier)
@@ -110,104 +103,89 @@
     (typed_default_parameter)
     (dictionary_splat_pattern)
     (list_splat_pattern)
-  ] @parameter.inner
+  ] @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((tuple
-  "," @_start
+(tuple
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((tuple
+(tuple
   "("
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((list
-  "," @_start
+(list
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((list
+(list
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((dictionary
+(dictionary
   .
-  (pair) @parameter.inner
+  (pair) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((dictionary
-  "," @_start
+(dictionary
+  "," @parameter.outer
   .
-  (pair) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (pair) @parameter.inner @parameter.outer)
 
-((argument_list
+(argument_list
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((argument_list
-  "," @_start
+(argument_list
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((subscript
+(subscript
   "["
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((subscript
-  "," @_start
+(subscript
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((import_statement
+(import_statement
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((import_statement
-  "," @_start
+(import_statement
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((import_from_statement
-  "," @_start
+(import_from_statement
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((import_from_statement
+(import_from_statement
   "import"
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 [
   (integer)

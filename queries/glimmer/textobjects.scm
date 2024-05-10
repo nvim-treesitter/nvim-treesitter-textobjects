@@ -30,23 +30,15 @@
   .
   (block_statement_end))
 
-((element_node
+(element_node
   (element_node_start)
-  .
-  (_) @_start
-  (_) @_end
-  .
+  _+ @function.inner
   (element_node_end))
-  (#make-range! "function.inner" @_start @_end))
 
-((block_statement
+(block_statement
   (block_statement_start)
-  .
-  (_) @_start
-  (_) @_end
-  .
+  _+ @function.inner
   (block_statement_end))
-  (#make-range! "function.inner" @_start @_end))
 
 (mustache_statement
   .

@@ -11,11 +11,7 @@
 
 (attribute) @attribute.outer
 
-((tag
+(tag
   (start_tag)
-  .
-  (_) @_start
-  (_) @_end
-  .
+  _+ @function.inner
   (end_tag))
-  (#make-range! "function.inner" @_start @_end))

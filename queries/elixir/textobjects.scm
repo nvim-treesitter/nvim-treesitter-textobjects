@@ -2,19 +2,15 @@
 ([
   (do_block
     "do"
-    .
-    (_) @_do
-    (_) @_end
-    .
+    _+ @block.inner
     "end")
   (do_block
     "do"
     .
-    ((_) @_do) @_end
+    ((_) @block.inner) @block.inner
     .
     "end")
-]
-  (#make-range! "block.inner" @_do @_end)) @block.outer
+]) @block.outer
 
 ; Class Objects (Modules, Protocols)
 ; multiple children
@@ -25,12 +21,8 @@
     (alias))
   (do_block
     "do"
-    .
-    (_) @_do
-    (_) @_end
-    .
-    "end")
-  (#make-range! "class.inner" @_do @_end)) @class.outer
+    _+ @class.inner
+    "end")) @class.outer
 
 ; single child match
 (call
@@ -58,41 +50,35 @@
       (call
         [
           (arguments
-            (_) @parameter.inner
+            (_) @parameter.inner @parameter.outer
             .
-            "," @_delimiter)
+            "," @parameter.outer)
           (arguments
-            ((_) @parameter.inner) @_delimiter .)
-        ]
-        (#make-range! "parameter.outer" @parameter.inner @_delimiter))
+            ((_) @parameter.inner @parameter.outer) @parameter.outer .)
+        ])
       (binary_operator
         left: (call
           [
             (arguments
-              (_) @parameter.inner
+              (_) @parameter.inner @parameter.outer
               .
-              "," @_delimiter)
+              "," @parameter.outer)
             (arguments
-              ((_) @parameter.inner) @_delimiter .)
-          ]
-          (#make-range! "parameter.outer" @parameter.inner @_delimiter)))
+              ((_) @parameter.inner @parameter.outer) @parameter.outer .)
+          ]))
     ])
   [
     (do_block
       "do"
-      .
-      (_) @_do
-      (_) @_end
-      .
+      _+ @function.inner
       "end")
     (do_block
       "do"
       .
-      ((_) @_do) @_end
+      ((_) @function.inner) @function.inner
       .
       "end")
-  ]
-  (#make-range! "function.inner" @_do @_end)) @function.outer
+  ]) @function.outer
 
 (call
   target: ((identifier) @_identifier
@@ -106,19 +92,15 @@
   [
     (do_block
       "do"
-      .
-      (_) @_do
-      (_) @_end
-      .
+      _+ @function.inner
       "end")
     (do_block
       "do"
       .
-      ((_) @_do) @_end
+      ((_) @function.inner) @function.inner
       .
       "end")
-  ]
-  (#make-range! "function.inner" @_do @_end)) @function.outer
+  ]) @function.outer
 
 (call
   target: ((identifier) @_identifier
@@ -128,24 +110,22 @@
       (call
         [
           (arguments
-            (_) @parameter.inner
+            (_) @parameter.inner @parameter.outer
             .
-            "," @_delimiter)
+            "," @parameter.outer)
           (arguments
-            ((_) @parameter.inner) @_delimiter .)
-        ]
-        (#make-range! "parameter.outer" @parameter.inner @_delimiter))
+            ((_) @parameter.inner @parameter.outer) @parameter.outer .)
+        ])
       (binary_operator
         left: (call
           [
             (arguments
-              (_) @parameter.inner
+              (_) @parameter.inner @parameter.outer
               .
-              "," @_delimiter)
+              "," @parameter.outer)
             (arguments
-              ((_) @parameter.inner) @_delimiter .)
-          ]
-          (#make-range! "parameter.outer" @parameter.inner @_delimiter)))
+              ((_) @parameter.inner @parameter.outer) @parameter.outer .)
+          ]))
     ]
     (keywords
       (pair

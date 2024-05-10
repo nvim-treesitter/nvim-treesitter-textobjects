@@ -6,12 +6,8 @@
   body: (interface_body
     .
     "{"
-    .
-    (_) @_start
-    _? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 (type_alias_declaration) @class.outer
 
@@ -19,12 +15,8 @@
   value: (object_type
     .
     "{"
-    .
-    (_) @_start
-    _? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 (enum_declaration) @class.outer
 
@@ -32,9 +24,5 @@
   body: (enum_body
     .
     "{"
-    .
-    (_) @_start
-    _? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))

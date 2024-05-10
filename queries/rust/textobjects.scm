@@ -7,12 +7,8 @@
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 ; quantifies as class(es)
 (struct_item) @class.outer
@@ -21,15 +17,8 @@
   body: (field_declaration_list
     .
     "{"
-    .
-    (_) @_start
-    [
-      (_)
-      ","
-    ]? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 (enum_item) @class.outer
 
@@ -37,15 +26,8 @@
   body: (enum_variant_list
     .
     "{"
-    .
-    (_) @_start
-    [
-      (_)
-      ","
-    ]? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 (union_item) @class.outer
 
@@ -53,15 +35,8 @@
   body: (field_declaration_list
     .
     "{"
-    .
-    (_) @_start
-    [
-      (_)
-      ","
-    ]? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 (trait_item) @class.outer
 
@@ -69,12 +44,8 @@
   body: (declaration_list
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 (impl_item) @class.outer
 
@@ -82,12 +53,8 @@
   body: (declaration_list
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 (mod_item) @class.outer
 
@@ -95,12 +62,8 @@
   body: (declaration_list
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 ; conditionals
 (if_expression
@@ -127,43 +90,22 @@
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    [
-      (_)
-      ","
-    ]? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (while_expression
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    [
-      (_)
-      ","
-    ]? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (for_expression
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    [
-      (_)
-      ","
-    ]? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 ; blocks
 (_
@@ -179,12 +121,8 @@
   (token_tree
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    _+ @call.inner
+    ")"))
 
 (call_expression) @call.outer
 
@@ -192,12 +130,8 @@
   arguments: (arguments
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    _+ @call.inner
+    ")"))
 
 ; returns
 (return_expression
@@ -213,206 +147,176 @@
 (block_comment) @comment.outer
 
 ; parameter
-((parameters
-  "," @_start
+(parameters
+  "," @parameter.outer
   .
-  (self_parameter) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (self_parameter) @parameter.inner @parameter.outer)
 
-((parameters
+(parameters
   .
-  (self_parameter) @parameter.inner
+  (self_parameter) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((parameters
-  "," @_start
+(parameters
+  "," @parameter.outer
   .
-  (parameter) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (parameter) @parameter.inner @parameter.outer)
 
-((parameters
+(parameters
   .
-  (parameter) @parameter.inner
+  (parameter) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((parameters
-  "," @_start
+(parameters
+  "," @parameter.outer
   .
-  (type_identifier) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (type_identifier) @parameter.inner @parameter.outer)
 
-((parameters
+(parameters
   .
-  (type_identifier) @parameter.inner
+  (type_identifier) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((type_parameters
-  "," @_start
+(type_parameters
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((type_parameters
+(type_parameters
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((tuple_pattern
-  "," @_start
+(tuple_pattern
+  "," @parameter.outer
   .
-  (identifier) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (identifier) @parameter.inner @parameter.outer)
 
-((tuple_pattern
+(tuple_pattern
   .
-  (identifier) @parameter.inner
+  (identifier) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((tuple_struct_pattern
-  "," @_start
+(tuple_struct_pattern
+  "," @parameter.outer
   .
-  (identifier) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (identifier) @parameter.inner @parameter.outer)
 
-((tuple_struct_pattern
+(tuple_struct_pattern
   .
-  (identifier) @parameter.inner
+  (identifier) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 (tuple_expression
-  "," @_start
+  "," @parameter.outer
   .
-  (_) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
 (tuple_expression
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((tuple_type
-  "," @_start
+(tuple_type
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((tuple_type
+(tuple_type
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 (struct_item
   body: (field_declaration_list
-    "," @_start
+    "," @parameter.outer
     .
-    (_) @parameter.inner
-    (#make-range! "parameter.outer" @_start @parameter.inner)))
+    (_) @parameter.inner @parameter.outer))
 
 (struct_item
   body: (field_declaration_list
     .
-    (_) @parameter.inner
+    (_) @parameter.inner @parameter.outer
     .
-    ","? @_end
-    (#make-range! "parameter.outer" @parameter.inner @_end)))
+    ","? @parameter.outer))
 
 (struct_expression
   body: (field_initializer_list
-    "," @_start
+    "," @parameter.outer
     .
-    (_) @parameter.inner
-    (#make-range! "parameter.outer" @_start @parameter.inner)))
+    (_) @parameter.inner @parameter.outer))
 
 (struct_expression
   body: (field_initializer_list
     .
-    (_) @parameter.inner
+    (_) @parameter.inner @parameter.outer
     .
-    ","? @_end
-    (#make-range! "parameter.outer" @parameter.inner @_end)))
+    ","? @parameter.outer))
 
-((closure_parameters
-  "," @_start
+(closure_parameters
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((closure_parameters
+(closure_parameters
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((arguments
-  "," @_start
+(arguments
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((arguments
+(arguments
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((type_arguments
-  "," @_start
+(type_arguments
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((type_arguments
+(type_arguments
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((token_tree
-  "," @_start
+(token_tree
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((token_tree
+(token_tree
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 (scoped_use_list
   list: (use_list
-    "," @_start
+    "," @parameter.outer
     .
-    (_) @parameter.inner
-    (#make-range! "parameter.outer" @_start @parameter.inner)))
+    (_) @parameter.inner @parameter.outer))
 
 (scoped_use_list
   list: (use_list
     .
-    (_) @parameter.inner
+    (_) @parameter.inner @parameter.outer
     .
-    ","? @_end
-    (#make-range! "parameter.outer" @parameter.inner @_end)))
+    ","? @parameter.outer))
 
 [
   (integer_literal)

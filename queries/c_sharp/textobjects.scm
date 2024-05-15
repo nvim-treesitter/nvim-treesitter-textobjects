@@ -64,7 +64,7 @@
 (for_statement
   body: (_) @loop.inner) @loop.outer
 
-(for_each_statement
+(foreach_statement
   body: (_) @loop.inner) @loop.outer
 
 (do_statement

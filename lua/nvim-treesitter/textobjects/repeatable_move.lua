@@ -249,27 +249,35 @@ end
 M.commands = {
   TSTextobjectRepeatLastMove = {
     run = M.repeat_last_move,
+    args = {},
   },
   TSTextobjectRepeatLastMoveOpposite = {
     run = M.repeat_last_move_opposite,
+    args = {},
   },
   TSTextobjectRepeatLastMoveNext = {
     run = M.repeat_last_move_next,
+    args = {},
   },
   TSTextobjectRepeatLastMovePrevious = {
     run = M.repeat_last_move_previous,
+    args = {},
   },
   TSTextobjectBuiltinf = {
     run = M.builtin_f,
+    args = {},
   },
   TSTextobjectBuiltinF = {
     run = M.builtin_F,
+    args = {},
   },
   TSTextobjectBuiltint = {
     run = M.builtin_t,
+    args = {},
   },
   TSTextobjectBuiltinT = {
     run = M.builtin_T,
+    args = {},
   },
 }
 

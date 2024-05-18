@@ -6,6 +6,9 @@ local M = {}
 
 local floating_win
 
+-- NOTE: This can be replaced with `vim.islist` once Neovim 0.9 support is dropped
+local islist = vim.fn.has "nvim-0.10" == 1 and vim.islist or vim.tbl_islist
+
 -- peeking is not interruptive so it is okay to use in visual mode.
 -- in fact, visual mode peeking is very helpful because you may not want
 -- to jump to the definition.
@@ -69,7 +72,7 @@ function M.make_preview_location_callback(query_string, query_group, context)
       return
     end
 
-    if vim.tbl_islist(result) then
+    if islist(result) then
       result = result[1]
     end
     local uri = result.uri or result.targetUri

@@ -104,7 +104,21 @@ M.repeat_last_move = function(opts_extend)
       opts = M.last_move.opts
     end
 
-    M.last_move.func(opts, unpack(M.last_move.additional_args))
+    if M.last_move.func == "f" or M.last_move.func == "t" then
+      if opts.forward then
+        vim.cmd [[normal! ;]]
+      else
+        vim.cmd [[normal! ,]]
+      end
+    elseif M.last_move.func == "F" or M.last_move.func == "T" then
+      if opts.forward then
+        vim.cmd [[normal! ,]]
+      else
+        vim.cmd [[normal! ;]]
+      end
+    else
+      M.last_move.func(opts, unpack(M.last_move.additional_args))
+    end
     return true
   end
   return false
@@ -122,128 +136,45 @@ M.repeat_last_move_previous = function()
   return M.repeat_last_move { forward = false }
 end
 
--- implements naive f, F, t, T with repeat support
-local function builtin_find(opts)
-  -- opts include forward, inclusive, char, repeating, winid
-  -- forward = true -> f, t
-  -- inclusive = false -> t, T
-  -- if repeating with till (t or T, inclusive = false) then search from the next character
-  -- returns nil if cancelled or char
-  local forward = opts.forward
-  local inclusive = opts.inclusive
-  local char = opts.char or vim.fn.nr2char(vim.fn.getchar())
-  local repeating = opts.repeating or false
-  local winid = opts.winid or vim.api.nvim_get_current_win()
-
-  if char == vim.fn.nr2char(27) then
-    -- escape
-    return nil
-  end
-
-  local line = vim.api.nvim_get_current_line()
-  local cursor = vim.api.nvim_win_get_cursor(winid)
-
-  -- count works like this with builtin vim motions.
-  -- weird, but we're matching the behaviour
-  local count
-  if not inclusive and repeating then
-    count = math.max(vim.v.count1 - 1, 1)
-  else
-    count = vim.v.count1
-  end
-
-  -- find the count-th occurrence of the char in the line
-  local found
-  for _ = 1, count do
-    if forward then
-      if not inclusive and repeating then
-        cursor[2] = cursor[2] + 1
-      end
-      found = line:find(char, cursor[2] + 2, true)
-    else
-      -- reverse find from the cursor position
-      if not inclusive and repeating then
-        cursor[2] = cursor[2] - 1
-      end
-
-      found = line:reverse():find(char, #line - cursor[2] + 1, true)
-      if found then
-        found = #line - found + 1
-      end
-    end
-
-    if not found then
-      return char
-    end
-
-    if forward then
-      if not inclusive then
-        found = found - 1
-      end
-    else
-      if not inclusive then
-        found = found + 1
-      end
-    end
-
-    cursor[2] = found - 1
-    repeating = true -- after the first iteration, search from the next character if not inclusive.
-  end
-
-  -- Enter visual mode if we are in operator-pending mode
-  -- If we don't do this, it will miss the last character.
-  local mode = vim.api.nvim_get_mode()
-  if mode.mode == "no" then
-    vim.cmd "normal! v"
-  end
-
-  -- move to the found position
-  vim.api.nvim_win_set_cursor(winid, { cursor[1], cursor[2] })
-  return char
-end
-
--- We are not using M.make_repeatable_move and instead registering at M.last_move manually
--- because we don't want to behave the same way as the first movement.
--- For example, we want to repeat the search character given to f, F, t, T.
--- Also, we want to be able to to find the next occurence when using t, T with repeat, excluding the current position.
+-- NOTE: map builtin_f, builtin_F, builtin_t, builtin_T with { expr = true }.
+--
+-- We are not using M.make_repeatable_move or M.set_last_move and instead registering at M.last_move manually
+-- because move_fn is not a function (but string f, F, t, T).
+-- We don't want to execute a move function, but instead return an expression (f, F, t, T).
 M.builtin_f = function()
-  local opts = { forward = true, inclusive = true }
-  local char = builtin_find(opts)
-  if char ~= nil then
-    opts.char = char
-    opts.repeating = true
-    M.set_last_move(builtin_find, opts)
-  end
+  M.last_move = {
+    func = "f",
+    opts = { forward = true },
+    additional_args = {},
+  }
+  return "f"
 end
 
 M.builtin_F = function()
-  local opts = { forward = false, inclusive = true }
-  local char = builtin_find(opts)
-  if char ~= nil then
-    opts.char = char
-    opts.repeating = true
-    M.set_last_move(builtin_find, opts)
-  end
+  M.last_move = {
+    func = "F",
+    opts = { forward = false },
+    additional_args = {},
+  }
+  return "F"
 end
 
 M.builtin_t = function()
-  local opts = { forward = true, inclusive = false }
-  local char = builtin_find(opts)
-  if char ~= nil then
-    opts.char = char
-    opts.repeating = true
-    M.set_last_move(builtin_find, opts)
-  end
+  M.last_move = {
+    func = "t",
+    opts = { forward = true },
+    additional_args = {},
+  }
+  return "t"
 end
 
 M.builtin_T = function()
-  local opts = { forward = false, inclusive = false }
-  local char = builtin_find(opts)
-  if char ~= nil then
-    opts.char = char
-    opts.repeating = true
-    M.set_last_move(builtin_find, opts)
-  end
+  M.last_move = {
+    func = "T",
+    opts = { forward = false },
+    additional_args = {},
+  }
+  return "T"
 end
 
 M.commands = {

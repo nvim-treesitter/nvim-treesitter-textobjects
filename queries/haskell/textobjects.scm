@@ -1,6 +1,6 @@
 ((apply
   .
-  (name)
+  function: (_)
   .
   (_) @_start
   .
@@ -11,7 +11,11 @@
 
 (infix
   (_)
-  (variable)
+  [
+    (infix_id
+      (variable)) ; x `plus` y
+    (operator) ; x + y
+  ]
   (_)) @call.outer
 
 (decl/function) @function.outer
@@ -27,6 +31,15 @@
 ; also treat function signature as @function.outer
 (signature) @function.outer
 
+; treat signature with function as @function.outer
+(((decl/signature
+  name: (_) @_sig_name) @_start
+  .
+  (decl/function
+    name: (_) @_func_name) @_end)
+  (#eq? @_sig_name @_func_name)
+  (#make-range! "function.outer" @_start @_end))
+
 (class) @class.outer
 
 (class
@@ -39,6 +52,8 @@
   _ @class.inner) @class.outer
 
 (comment) @comment.outer
+
+(haddock) @comment.outer
 
 (expression/conditional) @conditional.outer
 

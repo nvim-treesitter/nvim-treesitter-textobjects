@@ -5,7 +5,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     branches:
-      - 'master'
+      - "master"
 
 # Cancel any in-progress CI runs for a PR if it is updated
 concurrency:
@@ -19,7 +19,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         cc: [gcc]
-        nvim_tag: [stable, nightly]
+        nvim_tag: [nightly]
 
     name: Run tests
     runs-on: ${{ matrix.os }}
@@ -37,7 +37,7 @@ jobs:
           mkdir -p ~/.local/share/nvim/site/pack/ci/opt
           cd ~/.local/share/nvim/site/pack/ci/opt
           git clone https://github.com/nvim-lua/plenary.nvim
-          git clone https://github.com/nvim-treesitter/nvim-treesitter
+          git clone -b main https://github.com/nvim-treesitter/nvim-treesitter.git
       - name: Install and prepare Neovim
         env:
           NVIM_TAG: ${{ matrix.nvim_tag }}
@@ -55,6 +55,6 @@ jobs:
       - name: Compile parsers Unix like
         if: ${{ matrix.os != 'windows-latest' && steps.parsers-cache.outputs.cache-hit != 'true' }}
         run: |
-          nvim --headless -c "TSInstallSync all" -c "q"
+          run: ./nvim.appimage -l scripts/install_parsers.lua all
       - name: Tests
         run: PATH=/usr/local/bin:$PATH ./scripts/run_tests.sh

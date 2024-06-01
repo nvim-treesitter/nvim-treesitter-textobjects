@@ -1,20 +1,12 @@
-local attach = require "nvim-treesitter.textobjects.attach"
-local shared = require "nvim-treesitter.textobjects.shared"
-local configs = require "nvim-treesitter.configs"
+local api = vim.api
+
+local shared = require "nvim-treesitter-textobjects.shared"
+local global_config = require "nvim-treesitter-textobjects.config"
 
 local M = {}
 
+--- @type integer|nil
 local floating_win
-
--- NOTE: This can be replaced with `vim.islist` once Neovim 0.9 support is dropped
-local islist = vim.fn.has "nvim-0.10" == 1 and vim.islist or vim.tbl_islist
-
--- peeking is not interruptive so it is okay to use in visual mode.
--- in fact, visual mode peeking is very helpful because you may not want
--- to jump to the definition.
-local nx_mode_functions = {
-  "peek_definition_code",
-}
 
 local function is_new_signature_handler()
   if debug.getinfo(vim.lsp.handlers.signature_help).nparams == 4 then
@@ -24,6 +16,10 @@ local function is_new_signature_handler()
   end
 end
 
+---@param location table<string, any>
+---@param context integer|TSTextObjects.Range
+---@return integer? preview_bufnr
+---@return integer? preview_winnr
 function M.preview_location(location, context)
   -- location may be LocationLink or Location (more useful for the former)
   local uri = location.targetUri or location.uri
@@ -35,31 +31,33 @@ function M.preview_location(location, context)
     vim.fn.bufload(bufnr)
   end
 
-  local range = location.targetRange or location.range
+  local range = location.targetRange or location.range --[[@as lsp.Range]]
   -- don't include a exclusive 0 character line
   if range["end"].character == 0 then
     range["end"].line = range["end"].line - 1
   end
   if type(context) == "table" then
-    range.start.line = math.min(range.start.line, context[1])
-    range["end"].line = math.max(range["end"].line, context[3])
+    local start_row, _, end_row, _ = unpack(context:range4()) ---@type integer, integer, integer, integer
+    range.start.line = math.min(range.start.line, start_row)
+    range["end"].line = math.max(range["end"].line, end_row)
   elseif type(context) == "number" then
     range["end"].line = math.max(range["end"].line, range.start.line + context)
   end
 
-  local config = configs.get_module "textobjects.lsp_interop"
+  local config = global_config.lsp_interop
   local opts = config.floating_preview_opts or {}
 
-  if config.border ~= "none" then
-    opts.border = config.border
-  end
   local contents = vim.api.nvim_buf_get_lines(bufnr, range.start.line, range["end"].line + 1, false)
-  local filetype = vim.api.nvim_buf_get_option(bufnr, "filetype")
+  local filetype = vim.bo[bufnr].filetype
   local preview_buf, preview_win = vim.lsp.util.open_floating_preview(contents, filetype, opts)
-  vim.api.nvim_buf_set_option(preview_buf, "filetype", filetype)
+  vim.bo[preview_buf].filetype = filetype
   return preview_buf, preview_win
 end
 
+---@param query_string string
+---@param query_group string
+---@param context? integer|TSTextObjects.Range
+---@return fun(err?: table, method: string, result: table<string, any>|table<string, any>[])
 function M.make_preview_location_callback(query_string, query_group, context)
   query_group = query_group or "textobjects"
   context = context or 0
@@ -72,11 +70,13 @@ function M.make_preview_location_callback(query_string, query_group, context)
       return
     end
 
-    if islist(result) then
+    if vim.islist(result) then
+      ---@cast result table<string, any>[]
       result = result[1]
+      ---@cast result table<string, any>
     end
     local uri = result.uri or result.targetUri
-    local range = result.range or result.targetRange
+    local range = result.range or result.targetRange --[[@as lsp.Range]]
     if not uri or not range then
       return
     end
@@ -105,10 +105,28 @@ function M.make_preview_location_callback(query_string, query_group, context)
   return vim.schedule_wrap(signature_handler)
 end
 
+---@param query_string string
+---@param query_group? string
+---@param lsp_request? string
+---@param context? integer|TSTextObjects.Range
 function M.peek_definition_code(query_string, query_group, lsp_request, context)
   query_group = query_group or "textobjects"
+
+  if not shared.check_support(api.nvim_get_current_buf(), "textobjects", { query_string }) then
+    vim.notify(
+      ("The filetype `%s` does not support the textobjects `%s` for the query file `%s`"):format(
+        vim.bo.filetype,
+        query_string,
+        query_group
+      ),
+      vim.log.levels.WARN
+    )
+    return
+  end
+
   lsp_request = lsp_request or "textDocument/definition"
   if vim.tbl_contains(vim.api.nvim_list_wins(), floating_win) then
+    assert(floating_win, "The floaing window for peeking is not open")
     vim.api.nvim_set_current_win(floating_win)
   else
     local params = vim.lsp.util.make_position_params()
@@ -120,17 +138,5 @@ function M.peek_definition_code(query_string, query_group, lsp_request, context)
     )
   end
 end
-
-M.attach = attach.make_attach(nx_mode_functions, "lsp_interop", { "n", "x" })
-M.detach = attach.make_detach "lsp_interop"
-M.commands = {
-  TSTextobjectPeekDefinitionCode = {
-    run = M.peek_definition_code,
-    args = {
-      "-nargs=+",
-      "-complete=custom,nvim_treesitter_textobjects#available_textobjects",
-    },
-  },
-}
 
 return M

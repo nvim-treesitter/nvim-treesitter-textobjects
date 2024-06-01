@@ -14,18 +14,29 @@
 
 local M = {}
 
-M.last_move = nil
+---@class TSTextObjects.RepeatableMove
+---@field func function
+---@field opts table
+---@field additional_args table
+
+---@type TSTextObjects.RepeatableMove
 -- { func = move, opts = { ... }, additional_args = {} }
 -- { func = "f", opts = { ... }, additional_args = {} }
 -- register any other function, but make sure the the first args is an opts table with a `forward` boolean.
 -- prefer to set using M.set_last_move
+M.last_move = nil
 
 M.clear_last_move = function()
   M.last_move = nil
 end
 
--- move_fn's first argument must be a table of options, and it should include a `forward` boolean
--- indicating whether to move forward (true) or backward (false)
+--- move_fn's first argument must be a table of options, and it should include a `forward` boolean
+--- indicating whether to move forward (true) or backward (false)
+---
+---@param move_fn function
+---@param opts table
+---@param ... any
+---@return boolean
 M.set_last_move = function(move_fn, opts, ...)
   if type(move_fn) ~= "function" then
     vim.notify(
@@ -53,8 +64,11 @@ M.set_last_move = function(move_fn, opts, ...)
   return true
 end
 
--- Pass a function that takes a table of options (should include `forward` boolean)
--- and it returns the same function that is magically repeatable
+--- Pass a function that takes a table of options (should include `forward` boolean)
+--- and it returns the same function that is magically repeatable
+---
+---@param move_fn function
+---@return fun(opts: table, ...: any)
 M.make_repeatable_move = function(move_fn)
   return function(opts, ...)
     M.set_last_move(move_fn, opts, ...)
@@ -65,6 +79,10 @@ end
 -- Alternative:
 -- Get a movement function pair (forward, backward) and turn them into two repeatable movement functions
 -- They don't need to have the first argument as a table of options
+---@param forward_move_fn function
+---@param backward_move_fn function
+---@return fun(...: any) repeatable_forward_move_fn
+---@return fun(...: any) repeatable_backward_move_fn
 M.make_repeatable_move_pair = function(forward_move_fn, backward_move_fn)
   local general_repeatable_move_fn = function(opts, ...)
     if opts.forward then
@@ -87,9 +105,11 @@ M.make_repeatable_move_pair = function(forward_move_fn, backward_move_fn)
   return repeatable_forward_move_fn, repeatable_backward_move_fn
 end
 
+---@param opts_extend table
+---@return boolean
 M.repeat_last_move = function(opts_extend)
   if M.last_move then
-    local opts
+    local opts ---@type table
     if opts_extend ~= nil then
       if type(opts_extend) ~= "table" then
         vim.notify(
@@ -177,14 +197,18 @@ M.builtin_T_expr = function()
   return "T"
 end
 
+---@class TSTextObjects.BuiltinFindOpts
+---@field forward boolean forward = true -> f, t
+---@field inclusive boolean inclusive = false -> t, T
+---@field char? string
+---@field repeating? boolean if repeating with till (t or T, inclusive = false) then search from the next character
+---@field winid? integer
+
 -- implements naive f, F, t, T with repeat support
 ---@deprecated
+---@param opts TSTextObjects.BuiltinFindOpts
+---@return string? char
 local function builtin_find(opts)
-  -- opts include forward, inclusive, char, repeating, winid
-  -- forward = true -> f, t
-  -- inclusive = false -> t, T
-  -- if repeating with till (t or T, inclusive = false) then search from the next character
-  -- returns nil if cancelled or char
   local forward = opts.forward
   local inclusive = opts.inclusive
   local char = opts.char or vim.fn.nr2char(vim.fn.getchar())
@@ -201,7 +225,7 @@ local function builtin_find(opts)
 
   -- count works like this with builtin vim motions.
   -- weird, but we're matching the behaviour
-  local count
+  local count ---@type integer
   if not inclusive and repeating then
     count = math.max(vim.v.count1 - 1, 1)
   else
@@ -209,7 +233,7 @@ local function builtin_find(opts)
   end
 
   -- find the count-th occurrence of the char in the line
-  local found
+  local found ---@type integer?
   for _ = 1, count do
     if forward then
       if not inclusive and repeating then
@@ -309,32 +333,5 @@ M.builtin_T = function()
     M.set_last_move(builtin_find, opts)
   end
 end
-
-M.commands = {
-  TSTextobjectRepeatLastMove = {
-    run = M.repeat_last_move,
-  },
-  TSTextobjectRepeatLastMoveOpposite = {
-    run = M.repeat_last_move_opposite,
-  },
-  TSTextobjectRepeatLastMoveNext = {
-    run = M.repeat_last_move_next,
-  },
-  TSTextobjectRepeatLastMovePrevious = {
-    run = M.repeat_last_move_previous,
-  },
-  TSTextobjectBuiltinf = {
-    run = M.builtin_f,
-  },
-  TSTextobjectBuiltinF = {
-    run = M.builtin_F,
-  },
-  TSTextobjectBuiltint = {
-    run = M.builtin_t,
-  },
-  TSTextobjectBuiltinT = {
-    run = M.builtin_T,
-  },
-}
 
 return M

@@ -16,7 +16,7 @@ local M = {}
 
 M.last_move = nil
 -- { func = move, opts = { ... }, additional_args = {} }
--- { func = builtin_find, opts = { ... }, additional_args = {} }
+-- { func = "f", opts = { ... }, additional_args = {} }
 -- register any other function, but make sure the the first args is an opts table with a `forward` boolean.
 -- prefer to set using M.set_last_move
 
@@ -104,7 +104,21 @@ M.repeat_last_move = function(opts_extend)
       opts = M.last_move.opts
     end
 
-    M.last_move.func(opts, unpack(M.last_move.additional_args))
+    if M.last_move.func == "f" or M.last_move.func == "t" then
+      if opts.forward then
+        vim.cmd([[normal! ]] .. vim.v.count1 .. ";")
+      else
+        vim.cmd([[normal! ]] .. vim.v.count1 .. ",")
+      end
+    elseif M.last_move.func == "F" or M.last_move.func == "T" then
+      if opts.forward then
+        vim.cmd([[normal! ]] .. vim.v.count1 .. ",")
+      else
+        vim.cmd([[normal! ]] .. vim.v.count1 .. ";")
+      end
+    else
+      M.last_move.func(opts, unpack(M.last_move.additional_args))
+    end
     return true
   end
   return false
@@ -122,7 +136,49 @@ M.repeat_last_move_previous = function()
   return M.repeat_last_move { forward = false }
 end
 
+-- NOTE: map builtin_f_expr, builtin_F_expr, builtin_t_expr, builtin_T_expr with { expr = true }.
+--
+-- We are not using M.make_repeatable_move or M.set_last_move and instead registering at M.last_move manually
+-- because move_fn is not a function (but string f, F, t, T).
+-- We don't want to execute a move function, but instead return an expression (f, F, t, T).
+M.builtin_f_expr = function()
+  M.last_move = {
+    func = "f",
+    opts = { forward = true },
+    additional_args = {},
+  }
+  return "f"
+end
+
+M.builtin_F_expr = function()
+  M.last_move = {
+    func = "F",
+    opts = { forward = false },
+    additional_args = {},
+  }
+  return "F"
+end
+
+M.builtin_t_expr = function()
+  M.last_move = {
+    func = "t",
+    opts = { forward = true },
+    additional_args = {},
+  }
+  return "t"
+end
+
+M.builtin_T_expr = function()
+  M.last_move = {
+    func = "T",
+    opts = { forward = false },
+    additional_args = {},
+  }
+  return "T"
+end
+
 -- implements naive f, F, t, T with repeat support
+---@deprecated
 local function builtin_find(opts)
   -- opts include forward, inclusive, char, repeating, winid
   -- forward = true -> f, t
@@ -206,7 +262,9 @@ end
 -- because we don't want to behave the same way as the first movement.
 -- For example, we want to repeat the search character given to f, F, t, T.
 -- Also, we want to be able to to find the next occurence when using t, T with repeat, excluding the current position.
+---@deprecated
 M.builtin_f = function()
+  vim.notify_once("nvim-treesitter-textobjects: map `builtin_f_expr` with `{expr=true}` instead.", vim.log.levels.WARN)
   local opts = { forward = true, inclusive = true }
   local char = builtin_find(opts)
   if char ~= nil then
@@ -216,7 +274,9 @@ M.builtin_f = function()
   end
 end
 
+---@deprecated
 M.builtin_F = function()
+  vim.notify_once("nvim-treesitter-textobjects: map `builtin_F_expr` with `{expr=true}` instead.", vim.log.levels.WARN)
   local opts = { forward = false, inclusive = true }
   local char = builtin_find(opts)
   if char ~= nil then
@@ -226,7 +286,9 @@ M.builtin_F = function()
   end
 end
 
+---@deprecated
 M.builtin_t = function()
+  vim.notify_once("nvim-treesitter-textobjects: map `builtin_t_expr` with `{expr=true}` instead.", vim.log.levels.WARN)
   local opts = { forward = true, inclusive = false }
   local char = builtin_find(opts)
   if char ~= nil then
@@ -236,7 +298,9 @@ M.builtin_t = function()
   end
 end
 
+---@deprecated
 M.builtin_T = function()
+  vim.notify_once("nvim-treesitter-textobjects: map `builtin_T_expr` with `{expr=true}` instead.", vim.log.levels.WARN)
   local opts = { forward = false, inclusive = false }
   local char = builtin_find(opts)
   if char ~= nil then

@@ -22,7 +22,7 @@
 ; plain call
 ((_
   (call_expression) @call.outer) @_parent
-  (#not-has-type? @_parent "member_expression"))
+  (#not-kind-eq? @_parent "member_expression"))
 
 ; call arguments
 ((call_expression

@@ -2,54 +2,34 @@
   body: (class_body
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end))) @class.outer
+    _+ @class.inner
+    "}")) @class.outer
 
 (class_declaration
   body: (enum_class_body
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end))) @class.outer
+    _+ @class.inner
+    "}")) @class.outer
 
 (function_declaration
   body: (function_body
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end))) @function.outer
+    _+ @function.inner
+    "}")) @function.outer
 
 (lambda_literal
   ("{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end))) @function.outer
+    _+ @function.inner
+    "}")) @function.outer
 
 (call_suffix
   (value_arguments
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end))) @call.outer
+    _+ @call.inner
+    ")")) @call.outer
 
 (value_argument
   value: (_) @parameter.inner) @parameter.outer

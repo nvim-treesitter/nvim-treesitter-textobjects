@@ -38,7 +38,7 @@ end
 ---@param end_row integer
 ---@return fun():table<string, any|table<string, any>>?
 local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
-  local matches = query:iter_matches(qnode, bufnr, start_row, end_row)
+  local matches = query:iter_matches(qnode, bufnr, start_row, end_row, { all = true })
 
   local function iterator()
     local pattern, match, metadata = matches()
@@ -49,12 +49,18 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
     local prepared_match = {}
 
     -- Extract capture names from each match
-    for id, node in pairs(match) do
+    for id, nodes in pairs(match) do
       local query_name = query.captures[id] -- name of the capture in the query
       if query_name ~= nil then
         local path = vim.split(query_name, "%.")
-        local range = M.Range:from_node(node, bufnr)
+        local range = M.Range:from_node(nodes[1], bufnr)
         range.metadata = metadata[id]
+        if #nodes > 1 then
+          local end_range = M.Range:from_node(nodes[#nodes], bufnr)
+          range.end_row = end_range.end_row
+          range.end_col = end_range.end_col
+          range.end_byte = end_range.end_byte
+        end
         insert_to_path(prepared_match, path, range)
       end
     end
@@ -238,7 +244,7 @@ end
 function M.available_textobjects(lang, query_group)
   lang = lang or ts.language.get_lang(vim.bo.filetype)
   if not lang then
-    error(string.format("There ist no languare resgitered for filetype %s", vim.bo.filetype))
+    error(string.format("There is no language registered for filetype %s", vim.bo.filetype))
   end
   query_group = query_group or "textobjects"
   -- TODO (TheLeoP): should be cached?
@@ -246,24 +252,7 @@ function M.available_textobjects(lang, query_group)
   if not parsed_queries then
     return {}
   end
-  local found_textobjects = parsed_queries.captures or {}
-  for _, pattern in pairs(parsed_queries.info.patterns) do
-    for _, q in ipairs(pattern) do
-      local query, arg1 = unpack(q) --[=[@as string, string[]]=]
-      if query == "make-range!" and not vim.tbl_contains(found_textobjects, arg1) then
-        table.insert(found_textobjects, arg1)
-      end
-    end
-  end
-  return found_textobjects
-  --patterns = {
-  --[2] = { { "make-range!", "function.inner", 2, 3 } },
-  --[4] = { { "make-range!", "function.inner", 2, 3 } },
-  --[11] = { { "make-range!", "parameter.outer", 2, 12 } },
-  --[12] = { { "make-range!", "parameter.outer", 12, 3 } },
-  --[13] = { { "make-range!", "parameter.outer", 2, 12 } },
-  --[14] = { { "make-range!", "parameter.outer", 12, 3 } }
-  --}
+  return parsed_queries.captures or {}
 end
 
 --- Get the best `TSTextObjects.Range` at a given point

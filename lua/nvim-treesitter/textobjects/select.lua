@@ -94,10 +94,18 @@ local val_or_return = function(val, opts)
   end
 end
 
-function M.select_textobject(query_string, query_group, keymap_mode)
+function M.select_textobject(query_string, query_group, keymap_mode, local_lookahead, local_lookbehind)
   query_group = query_group or "textobjects"
-  local lookahead = configs.get_module("textobjects.select").lookahead
-  local lookbehind = configs.get_module("textobjects.select").lookbehind
+  if local_lookahead == "nil" then
+    local_lookahead = nil
+  end
+  if local_lookbehind == "nil" then
+    local_lookbehind = nil
+  end
+  local global_lookahead = configs.get_module("textobjects.select").lookahead
+  local global_lookbehind = configs.get_module("textobjects.select").lookbehind
+  local lookahead = (global_lookahead and not local_lookbehind) or local_lookahead
+  local lookbehind = (global_lookbehind and not local_lookahead) or local_lookbehind
   local surrounding_whitespace = configs.get_module("textobjects.select").include_surrounding_whitespace
   local bufnr, textobject =
     shared.textobject_at_point(query_string, query_group, nil, nil, { lookahead = lookahead, lookbehind = lookbehind })
@@ -157,11 +165,13 @@ function M.attach(bufnr, lang)
   lang = lang or parsers.get_buf_lang(bufnr)
 
   for mapping, query in pairs(config.keymaps) do
-    local desc, query_string, query_group
+    local desc, query_string, query_group, lookbehind, lookahead
     if type(query) == "table" then
       desc = query.desc
       query_string = query.query
       query_group = query.query_group or "textobjects"
+      lookbehind = query.lookbehind
+      lookahead = query.lookahead
     else
       query_string = query
       query_group = "textobjects"
@@ -190,10 +200,12 @@ function M.attach(bufnr, lang)
           { keymap_mode },
           mapping,
           string.format(
-            "<cmd>lua require'nvim-treesitter.textobjects.select'.select_textobject('%s','%s','%s')<cr>",
+            "<cmd>lua require'nvim-treesitter.textobjects.select'.select_textobject('%s','%s','%s','%s','%s')<cr>",
             query_string,
             query_group,
-            keymap_mode
+            keymap_mode,
+            lookahead,
+            lookbehind
           ),
           { buffer = bufnr, silent = true, remap = false, desc = desc }
         )

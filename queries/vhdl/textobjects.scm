@@ -4,9 +4,7 @@
   (case_statement)
 ] @conditional.outer
 
-[
-  (comment)
-] @comment.outer
+(comment) @comment.outer
 
 [
   (function_body)
@@ -29,9 +27,7 @@
   (component_instantiation)
 ] @class.outer
 
-[
-  (signal_declaration)
-] @parameter.outer
+(signal_declaration) @parameter.outer
 
 ;  TODO: Use :InspectTree to find the best categorization for these
 ;  @assignment.inner

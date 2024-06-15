@@ -98,6 +98,7 @@ function M.select_textobject(query_string, query_group, keymap_mode)
   query_group = query_group or "textobjects"
   local lookahead = configs.get_module("textobjects.select").lookahead
   local lookbehind = configs.get_module("textobjects.select").lookbehind
+  local on_not_selected = configs.get_module("textobjects.select").on_not_selected
   local surrounding_whitespace = configs.get_module("textobjects.select").include_surrounding_whitespace
   local bufnr, textobject =
     shared.textobject_at_point(query_string, query_group, nil, nil, { lookahead = lookahead, lookbehind = lookbehind })
@@ -112,6 +113,10 @@ function M.select_textobject(query_string, query_group, keymap_mode)
       textobject = include_surrounding_whitespace(bufnr, textobject, selection_mode)
     end
     ts_utils.update_selection(bufnr, textobject, selection_mode)
+    else
+        if on_not_selected then
+            on_not_selected(query_string, query_group, keymap_mode)
+        end
   end
 end
 

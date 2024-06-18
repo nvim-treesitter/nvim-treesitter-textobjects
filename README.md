@@ -49,7 +49,6 @@ require("nvim-treesitter-textobjects").setup {
       ['@function.outer'] = 'V', -- linewise
       ['@class.outer'] = '<c-v>', -- blockwise
     },
-  },
     -- If you set this to `true` (default is `false`) then any textobject is
     -- extended to include preceding or succeeding whitespace. Succeeding
     -- whitespace has priority in order to act similarly to eg the built-in
@@ -60,6 +59,7 @@ require("nvim-treesitter-textobjects").setup {
     -- * selection_mode: eg 'v'
     -- and should return true of false
     include_surrounding_whitespace = false,
+  },
 }
 
 -- keymaps

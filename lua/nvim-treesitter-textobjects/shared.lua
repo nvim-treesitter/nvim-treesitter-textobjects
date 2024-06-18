@@ -513,10 +513,10 @@ function M.Range:set_range4(range4)
   if self.metadata and self.metadata.range then
     self.metadata.range = range4
   end
-  self.start_col = range4[1]
-  self.start_row = range4[2]
-  self.end_col = range4[3]
-  self.end_row = range4[4]
+  self.start_row = range4[1]
+  self.start_col = range4[2]
+  self.end_row = range4[3]
+  self.end_col = range4[4]
 end
 
 ---@return lsp.Range

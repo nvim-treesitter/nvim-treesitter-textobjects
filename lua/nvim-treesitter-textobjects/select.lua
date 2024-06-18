@@ -116,7 +116,8 @@ local function include_surrounding_whitespace(bufnr, range, selection_mode)
   end
   if extended then
     -- don't extend in both directions
-    return { start_row, start_col, end_row, end_col }
+    range:set_range4 { start_row, start_col, end_row, end_col }
+    return range
   end
   local next_row, next_col = next_position(bufnr, start_row, start_col, false)
 

@@ -172,8 +172,7 @@
 
 (simple_concurrent_signal_assignment
   target: (simple_name) @assignment.lhs
-  (waveforms) @assignment.rhs @assignment.inner
-  ) @assignment.outer
+  (waveforms) @assignment.rhs @assignment.inner) @assignment.outer
 
 ; Numbers
 [

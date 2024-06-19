@@ -14,8 +14,7 @@
     .
     "{"
     .
-    "}"
-    )) @class.outer
+    "}")) @class.outer
 
 (struct_declaration
   body: (declaration_list
@@ -33,8 +32,7 @@
     .
     "{"
     .
-    "}"
-    )) @class.outer
+    "}")) @class.outer
 
 (record_declaration
   body: (declaration_list
@@ -52,8 +50,7 @@
     .
     "{"
     .
-    "}"
-    )?) @class.outer
+    "}")?) @class.outer
 
 (interface_declaration
   body: (declaration_list
@@ -71,8 +68,7 @@
     .
     "{"
     .
-    "}"
-    )) @class.outer
+    "}")) @class.outer
 
 (enum_declaration
   body: (enum_member_declaration_list
@@ -90,8 +86,7 @@
     .
     "{"
     .
-    "}"
-    )) @class.outer
+    "}")) @class.outer
 
 (method_declaration
   body: (block

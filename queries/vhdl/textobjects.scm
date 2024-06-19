@@ -215,10 +215,22 @@
   (#make-range! "parameter.inner" @_start @_end)) @parameter.outer
 
 (generic_map_aspect
-  (association_list) @parameter.inner) @parameter.outer
+  "("
+  .
+  (_)? @_start
+  (_) @_end
+  .
+  ")"
+  (#make-range! "parameter.inner" @_start @_end)) @parameter.outer
 
 (port_map_aspect
-  (association_list) @parameter.inner) @parameter.outer
+  "("
+  .
+  (_)? @_start
+  (_) @_end
+  .
+  ")"
+  (#make-range! "parameter.inner" @_start @_end)) @parameter.outer
 
 ; Scope names
 (library_clause

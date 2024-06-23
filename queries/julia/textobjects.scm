@@ -142,6 +142,18 @@
     ")"
     (#make-range! "call.inner" @_start @_end)))
 
+(macrocall_expression) @call.outer
+(macrocall_expression
+  (argument_list
+    .
+    "("
+    .
+    (_) @_start
+    (_)? @_end
+    .
+    ")"
+    (#make-range! "call.inner" @_start @_end)))
+
 ; Parameters
 ((argument_list
   ["," ";"] @_start

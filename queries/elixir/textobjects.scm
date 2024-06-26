@@ -54,16 +54,29 @@
   target: ((identifier) @_identifier
     (#any-of? @_identifier "def" "defmacro" "defmacrop" "defn" "defnp" "defp"))
   (arguments
-    (call
-      [
-        (arguments
-          (_) @parameter.inner
-          .
-          "," @_delimiter)
-        (arguments
-          ((_) @parameter.inner) @_delimiter .)
-      ]
-      (#make-range! "parameter.outer" @parameter.inner @_delimiter)))
+    [
+      (call
+        [
+          (arguments
+            (_) @parameter.inner
+            .
+            "," @_delimiter)
+          (arguments
+            ((_) @parameter.inner) @_delimiter .)
+        ]
+        (#make-range! "parameter.outer" @parameter.inner @_delimiter))
+      (binary_operator
+        left: (call
+          [
+            (arguments
+              (_) @parameter.inner
+              .
+              "," @_delimiter)
+            (arguments
+              ((_) @parameter.inner) @_delimiter .)
+          ]
+          (#make-range! "parameter.outer" @parameter.inner @_delimiter)))
+    ])
   [
     (do_block
       "do"
@@ -85,16 +98,68 @@
   target: ((identifier) @_identifier
     (#any-of? @_identifier "def" "defmacro" "defmacrop" "defn" "defnp" "defp"))
   (arguments
-    (call
-      [
-        (arguments
-          (_) @parameter.inner
-          .
-          "," @_delimiter)
-        (arguments
-          ((_) @parameter.inner) @_delimiter .)
-      ]
-      (#make-range! "parameter.outer" @parameter.inner @_delimiter))
+    [
+      (identifier)
+      (binary_operator
+        (identifier))
+    ])
+  [
+    (do_block
+      "do"
+      .
+      (_) @_do
+      (_) @_end
+      .
+      "end")
+    (do_block
+      "do"
+      .
+      ((_) @_do) @_end
+      .
+      "end")
+  ]
+  (#make-range! "function.inner" @_do @_end)) @function.outer
+
+(call
+  target: ((identifier) @_identifier
+    (#any-of? @_identifier "def" "defmacro" "defmacrop" "defn" "defnp" "defp"))
+  (arguments
+    [
+      (call
+        [
+          (arguments
+            (_) @parameter.inner
+            .
+            "," @_delimiter)
+          (arguments
+            ((_) @parameter.inner) @_delimiter .)
+        ]
+        (#make-range! "parameter.outer" @parameter.inner @_delimiter))
+      (binary_operator
+        left: (call
+          [
+            (arguments
+              (_) @parameter.inner
+              .
+              "," @_delimiter)
+            (arguments
+              ((_) @parameter.inner) @_delimiter .)
+          ]
+          (#make-range! "parameter.outer" @parameter.inner @_delimiter)))
+    ]
+    (keywords
+      (pair
+        value: (_) @function.inner)))) @function.outer
+
+(call
+  target: ((identifier) @_identifier
+    (#any-of? @_identifier "def" "defmacro" "defmacrop" "defn" "defnp" "defp"))
+  (arguments
+    [
+      (identifier)
+      (binary_operator
+        (identifier))
+    ]
     (keywords
       (pair
         value: (_) @function.inner)))) @function.outer

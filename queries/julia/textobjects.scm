@@ -214,6 +214,13 @@
   .
   ) @assignment.outer
 
+(compound_assignment_expression
+  .
+  (_) @assignment.lhs
+  (_) @assignment.inner @assignment.rhs
+  .
+  ) @assignment.outer
+
 ; Comments
 [
   (line_comment)

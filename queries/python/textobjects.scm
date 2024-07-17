@@ -1,5 +1,5 @@
 (function_definition
-  body: (block)? @function.inner) @function.outer
+  body: (block)? @function.inner)
 
 (decorated_definition
   (function_definition)) @function.outer

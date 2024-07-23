@@ -2,11 +2,9 @@
   (function_definition
     body: (block) @function.inner)) @function.outer
 
-(class_definition
-  body: (block)? @class.inner) @class.outer
-
-(decorated_definition
-  (class_definition)) @class.outer
+((decorated_definition)?
+  (class_definition
+    body: (block)? @class.inner)) @class.outer
 
 (while_statement
   body: (block)? @loop.inner) @loop.outer

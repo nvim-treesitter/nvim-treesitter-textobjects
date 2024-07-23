@@ -1,6 +1,6 @@
 ((decorated_definition)?
   (function_definition
-    body: (block) @function.inner)) @function.outer
+    body: (block)? @function.inner)) @function.outer
 
 ((decorated_definition)?
   (class_definition

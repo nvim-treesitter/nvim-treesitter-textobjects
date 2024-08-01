@@ -77,13 +77,3 @@
 (binary_operator
   lhs: (_) @assignment.inner @assignment.lhs
   rhs: (_) @assignment.rhs) @assignment.outer
-
-((comma)
-  name: (_) @assignment.lhs
-  value: (_) @assignment.inner @assignment.rhs) @assignment.outer
-
-((comma)
-  name: (_) @assignment.inner)
-
-(binary_operator)
-   name: (_) @assignment.inner

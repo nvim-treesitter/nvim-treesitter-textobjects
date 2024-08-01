@@ -1,39 +1,35 @@
 ; Blocks
 (compound_statement) @block.outer
+
 ((compound_statement
   .
   (_) @_start
-  (_)? @_end
-  .
-  )
+  (_)? @_end .)
   (#make-range! "block.inner" @_start @_end))
 
 (quote_statement) @block.outer
+
 ((quote_statement
   .
   (_) @_start
-  (_)? @_end
-  .
-  )
+  (_)? @_end .)
   (#make-range! "block.inner" @_start @_end))
 
 (let_statement) @block.outer
+
 ((let_statement
   .
   (_) @_start
-  (_)? @_end
-  .
-  )
+  (_)? @_end .)
   (#make-range! "block.inner" @_start @_end))
 
 ; Conditionals
 (if_statement
-  condition: (_) @conditional.inner
-  ) @conditional.outer
+  condition: (_) @conditional.inner) @conditional.outer
 
 (if_statement
-  alternative: (elseif_clause condition: (_) @conditional.inner)
-  )
+  alternative: (elseif_clause
+    condition: (_) @conditional.inner))
 
 ((if_statement
   condition: (_)
@@ -63,47 +59,41 @@
 
 ; Loops
 (for_statement) @loop.outer
+
 ((for_statement
   .
   (_) @_start
-  (_)? @_end
-  .
-  )
+  (_)? @_end .)
   (#make-range! "loop.inner" @_start @_end))
 
 (while_statement
-  condition: (_) @loop.inner
-  ) @loop.outer
+  condition: (_) @loop.inner) @loop.outer
 
 ((while_statement
-  . condition: (_)
+  condition: (_)
   .
   (_) @_start
-  (_)? @_end
-  .
-  )
+  (_)? @_end .)
   (#make-range! "loop.inner" @_start @_end))
 
 ; Type definitions
 (struct_definition) @class.outer
+
 ((struct_definition
   name: (_)
   .
   (_) @_start
-  (_)? @_end
-  .
-  )
+  (_)? @_end .)
   (#make-range! "class.inner" @_start @_end))
 
 ; Function definitions
 (function_definition) @function.outer
+
 ((function_definition
   (signature)
   .
   (_) @_start
-  (_)? @_end
-  .
-  )
+  (_)? @_end .)
   (#make-range! "function.inner" @_start @_end))
 
 (assignment
@@ -120,17 +110,17 @@
   (_) @function.inner) @function.outer
 
 (macro_definition) @function.outer
+
 ((macro_definition
   (signature)
   .
   (_) @_start
-  (_)? @_end
-  .
-  )
+  (_)? @_end .)
   (#make-range! "function.inner" @_start @_end))
 
 ; Calls
 (call_expression) @call.outer
+
 (call_expression
   (argument_list
     .
@@ -143,6 +133,7 @@
     (#make-range! "call.inner" @_start @_end)))
 
 (macrocall_expression) @call.outer
+
 (macrocall_expression
   (argument_list
     .
@@ -155,6 +146,7 @@
     (#make-range! "call.inner" @_start @_end)))
 
 (broadcast_call_expression) @call.outer
+
 (broadcast_call_expression
   (argument_list
     .
@@ -168,7 +160,10 @@
 
 ; Parameters
 ((argument_list
-  ["," ";"] @_start
+  [
+    ","
+    ";"
+  ] @_start
   .
   (_) @parameter.inner)
   (#make-range! "parameter.outer" @_start @parameter.inner))
@@ -176,11 +171,17 @@
 ((argument_list
   (_) @parameter.inner
   .
-  ["," ";"] @_end)
+  [
+    ","
+    ";"
+  ] @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((tuple_expression
-  ["," ";"] @_start
+  [
+    ","
+    ";"
+  ] @_start
   .
   (_) @parameter.inner)
   (#make-range! "parameter.outer" @_start @parameter.inner))
@@ -190,11 +191,17 @@
   .
   (_) @parameter.inner
   .
-  ["," ";"] ? @_end)
+  [
+    ","
+    ";"
+  ]? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((vector_expression
-  ["," ";"] @_start
+  [
+    ","
+    ";"
+  ] @_start
   .
   (_) @parameter.inner)
   (#make-range! "parameter.outer" @_start @parameter.inner))
@@ -203,23 +210,22 @@
   .
   (_) @parameter.inner
   .
-  ["," ";"] ? @_end)
+  [
+    ","
+    ";"
+  ]? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ; Assignment
 (assignment
   .
   (_) @assignment.lhs
-  (_) @assignment.inner @assignment.rhs
-  .
-  ) @assignment.outer
+  (_) @assignment.inner @assignment.rhs .) @assignment.outer
 
 (compound_assignment_expression
   .
   (_) @assignment.lhs
-  (_) @assignment.inner @assignment.rhs
-  .
-  ) @assignment.outer
+  (_) @assignment.inner @assignment.rhs .) @assignment.outer
 
 ; Comments
 [

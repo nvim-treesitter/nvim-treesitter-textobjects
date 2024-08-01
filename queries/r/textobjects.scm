@@ -74,19 +74,9 @@
 (float) @number.inner
 
 ; assignment
-("<-"
-  name: (_) @assignment.lhs
-  value: (_) @assignment.inner @assignment.rhs) @assignment.outer
-
-("<-"
-  name: (_) @assignment.inner)
-
-("->"
-  value: (_) @assignment.inner @assignment.lhs
-  name: (_) @assignment.rhs) @assignment.outer
-
-("->"
-  name: (_) @assignment.inner)
+(binary_operator
+  lhs: (_) @assignment.inner @assignment.lhs
+  rhs: (_) @assignment.rhs) @assignment.outer
 
 ((comma)
   name: (_) @assignment.lhs
@@ -94,17 +84,6 @@
 
 ((comma)
   name: (_) @assignment.inner)
-
-("<<-"
-  name: (_) @assignment.lhs
-  value: (_) @assignment.inner @assignment.rhs) @assignment.outer
-
-("<<-"
-  name: (_) @assignment.inner)
-
-("->>"
-  value: (_) @assignment.inner @assignment.lhs
-  name: (_) @assignment.rhs) @assignment.outer
 
 (binary_operator)
-  name: (_) @assignment.inner
+   name: (_) @assignment.inner

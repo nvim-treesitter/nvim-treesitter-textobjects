@@ -222,10 +222,18 @@
   (_) @assignment.lhs
   (_) @assignment.inner @assignment.rhs .) @assignment.outer
 
+(assignment
+  .
+  (_) @assignment.inner)
+
 (compound_assignment_expression
   .
   (_) @assignment.lhs
   (_) @assignment.inner @assignment.rhs .) @assignment.outer
+
+(compound_assignment_expression
+  .
+  (_) @assignment.inner)
 
 ; Comments
 [

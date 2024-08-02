@@ -1,24 +1,30 @@
 ((generic_environment
-  .
-  (_)
+  begin: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
-  (_) .) @block.outer
+  end: (_)) @block.outer
   (#make-range! "block.inner" @_start @_end))
 
-((generic_environment
-  (begin
-    name: (curly_group_text
-      (text) @_frame))
+((math_environment
+  begin: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
-  (_) .) @frame.outer
-  (#eq? @_frame "frame")
-  (#make-range! "frame.inner" @_start @_end))
+  end: (_)) @block.outer
+  (#make-range! "block.inner" @_start @_end))
+
+(generic_environment
+  begin: (begin
+    name: (curly_group_text
+      text: (text) @frame.inner))) @frame.outer
+
+(math_environment
+  begin: (begin
+    name: (curly_group_text
+      text: (text) @frame.inner))) @frame.outer
 
 [
   (generic_command)

@@ -225,4 +225,11 @@
 (assignment
   left: (_) @assignment.inner)
 
+(augmented_assignment
+  left: (_) @assignment.lhs
+  right: (_) @assignment.inner @assignment.rhs) @assignment.outer
+
+(augmented_assignment
+  left: (_) @assignment.inner)
+
 ; TODO: exclude comments using the future negate syntax from tree-sitter

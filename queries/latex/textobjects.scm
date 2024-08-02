@@ -51,12 +51,51 @@
     "}")
   (#make-range! "call.inner" @_start @_end))
 
-[
-  (chapter)
-  (part)
-  (section)
-  (subsection)
-  (subsubsection)
-  (paragraph)
-  (subparagraph)
-] @class.outer
+((part
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((chapter
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((section
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((subsection
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((subsubsection
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((paragraph
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((subparagraph
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))

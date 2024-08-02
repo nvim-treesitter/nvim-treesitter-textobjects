@@ -10,7 +10,9 @@ ts.query.add_directive("make-range!", function(match, pattern, buf, predicate, m
   local start_nodes = match[start_node_id]
   local end_nodes = match[end_node_id]
 
-  assert(#start_nodes == 1, "#make-range! does not support captures on multiple nodes")
+  if start_nodes then
+    assert(#start_nodes == 1, "#make-range! does not support captures on multiple nodes")
+  end
   if end_nodes then
     assert(#end_nodes == 1, "#make-range! does not support captures on multiple nodes")
   end

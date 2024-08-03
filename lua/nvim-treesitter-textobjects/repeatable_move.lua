@@ -15,7 +15,7 @@
 local M = {}
 
 ---@class TSTextObjects.RepeatableMove
----@field func function
+---@field func string | function
 ---@field opts table
 ---@field additional_args table
 

@@ -16,7 +16,7 @@ local function goto_node(range, goto_end, avoid_set_jump)
   if not avoid_set_jump then
     shared.set_jump()
   end
-  local vim_range = { range:to_vim_range() } ---@type Range4
+  local vim_range = range:to_vim_range()
   ---@type table<number>
   local position
   if not goto_end then

@@ -533,7 +533,7 @@ function M.Range:to_lsp_range()
   }
 end
 
----@return integer, integer, integer, integer
+---@return Range4
 function M.Range:to_vim_range()
   local srow, scol, erow, ecol = unpack(self:range4()) ---@type integer, integer, integer, integer
   srow = srow + 1
@@ -550,7 +550,7 @@ function M.Range:to_vim_range()
     end
     ecol = math.max(ecol, 1)
   end
-  return srow, scol, erow, ecol
+  return { srow, scol, erow, ecol }
 end
 
 ---@return string[]

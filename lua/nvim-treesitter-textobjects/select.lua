@@ -5,7 +5,8 @@ local shared = require "nvim-treesitter-textobjects.shared"
 ---@param range TSTextObjects.Range
 ---@param selection_mode string
 local function update_selection(range, selection_mode)
-  local start_row, start_col, end_row, end_col = range:to_vim_range()
+  ---@type integer, integer, integer, integer
+  local start_row, start_col, end_row, end_col = unpack(range:to_vim_range())
 
   local v_table = { charwise = "v", linewise = "V", blockwise = "<C-v>" }
   selection_mode = selection_mode or "charwise"

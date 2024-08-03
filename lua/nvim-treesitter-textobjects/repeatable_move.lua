@@ -105,7 +105,7 @@ M.make_repeatable_move_pair = function(forward_move_fn, backward_move_fn)
   return repeatable_forward_move_fn, repeatable_backward_move_fn
 end
 
----@param opts_extend table
+---@param opts_extend table?
 ---@return boolean
 M.repeat_last_move = function(opts_extend)
   if M.last_move then

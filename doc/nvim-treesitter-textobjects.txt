@@ -19,6 +19,7 @@ Supported options:
 - enable: `true` or `false`.
 - disable: list of languages.
 - lookahead: `true` or `false`, whether or not to look ahead for the textobject
+- on_not_selected: callback when could not found the textobject, parameter (query_string, query_group, keymap_mode)
 - keymaps: map of keymaps to a tree-sitter query
   (`(function_definition) @function`) or capture group (`@function.inner`).
 - selection_modes: map of capture group to `v`(charwise), `V`(linewise), or `<c-v>`(blockwise),

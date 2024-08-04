@@ -33,6 +33,7 @@ function M.init()
         lookbehind = false,
         keymaps = {},
         selection_modes = {},
+        on_not_selected = function(query_string, query_group, keymap_mode) end,
       },
       move = {
         module_path = "nvim-treesitter.textobjects.move",

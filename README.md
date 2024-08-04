@@ -217,30 +217,6 @@ vim.keymap.set({ "n", "x", "o" }, "[h", prev_hunk_repeat)
 
 Alternatively, you could use a repeatable movement managing plugin such as [nvim-next](https://github.com/ghostbuster91/nvim-next).
 
-## Textobjects: LSP interop
-
-- `peek_definition_code`: show textobject surrounding definition as determined
-  using Neovim's built-in LSP in a floating window. Press the shortcut twice
-  to enter the floating window.
-
-```lua
--- configuration
-require("nvim-treesitter-textobjects").setup {
-    lsp_interop = {
-      floating_preview_opts = {},
-    },
-}
-
--- keymaps
--- You can use the capture groups defined in `textobjects.scm`
-vim.keymap.set({"n", "x"}, "<leader>df", function()
-  require "nvim-treesitter-textobjects.lsp_interop".peek_definition_code("@function.outer", "textobjects")
-end)
-vim.keymap.set({"n", "x"}, "<leader>dF", function()
-  require "nvim-treesitter-textobjects.lsp_interop".peek_definition_code("@class.outer", "textobjects")
-end)
-```
-
 # Overriding or extending textobjects
 
 Textobjects are defined in the `textobjects.scm` files.

@@ -12,7 +12,7 @@
 
 (function_definition) @function.outer
 
-(anonymous_function_creation_expression
+(anonymous_function
   body: (compound_statement
     .
     "{"
@@ -23,7 +23,7 @@
     "}"
     (#make-range! "function.inner" @_start @_end)))
 
-(anonymous_function_creation_expression) @function.outer
+(anonymous_function) @function.outer
 
 ; methods
 (method_declaration

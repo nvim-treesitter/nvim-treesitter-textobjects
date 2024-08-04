@@ -111,18 +111,14 @@ local function swap_textobject(query_strings_regex, query_group, direction)
 end
 
 ---@param fn function
----@return function
 local function make_dot_repeatable(fn)
-  return function()
-    _G._nvim_treesitter_textobject_last_function = fn
-    vim.o.opfunc = "v:lua._nvim_treesitter_textobject_last_function"
-    vim.api.nvim_feedkeys("g@l", "n", false)
-  end
+  _G._nvim_treesitter_textobject_last_function = fn
+  vim.o.opfunc = "v:lua._nvim_treesitter_textobject_last_function"
+  vim.api.nvim_feedkeys("g@l", "n", false)
 end
 
 ---@param query_strings_regex string lua pattern describing the query string
 ---@param query_group? string
----@return function #Function inteded to be used on mappings
 function M.swap_next(query_strings_regex, query_group)
   return make_dot_repeatable(function()
     swap_textobject(query_strings_regex, query_group, 1)
@@ -131,7 +127,6 @@ end
 
 ---@param query_strings_regex string lua pattern describing the query string
 ---@param query_group? string
----@return function #Function inteded to be used on mappings
 function M.swap_previous(query_strings_regex, query_group)
   return make_dot_repeatable(function()
     swap_textobject(query_strings_regex, query_group, -1)

@@ -1,5 +1,4 @@
 ; Solidity textobjects
-
 ; Functions
 (function_definition
   body: (block)) @function.outer

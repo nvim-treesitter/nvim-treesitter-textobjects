@@ -1,10 +1,10 @@
 ; Solidity textobjects
 ; Functions
 (function_definition
-  body: (block)) @function.outer
+  body: (_)) @function.outer
 
 (function_definition
-  body: (block
+  body: (_
     .
     "{"
     .
@@ -16,10 +16,10 @@
 
 ; Constructors
 (constructor_definition
-  body: (block)) @function.outer
+  body: (_)) @function.outer
 
 (constructor_definition
-  body: (block
+  body: (_
     .
     "{"
     .
@@ -31,10 +31,10 @@
 
 ; Modifiers
 (modifier_definition
-  body: (block)) @function.outer
+  body: (_)) @function.outer
 
 (modifier_definition
-  body: (block
+  body: (_
     .
     "{"
     .
@@ -46,23 +46,23 @@
 
 ; Contracts
 (contract_declaration
-  body: (contract_body) @class.inner) @class.outer
+  body: (_) @class.inner) @class.outer
 
 ; Interfaces
 (interface_declaration
-  body: (contract_body) @class.inner) @class.outer
+  body: (_) @class.inner) @class.outer
 
 ; Libraries
 (library_declaration
-  body: (contract_body) @class.inner) @class.outer
+  body: (_) @class.inner) @class.outer
 
 ; Structs
 (struct_declaration
-  body: (struct_body) @class.inner) @class.outer
+  body: (_) @class.inner) @class.outer
 
 ; Loops
 (for_statement
-  body: (block
+  body: (_
     .
     "{"
     .
@@ -73,7 +73,7 @@
     (#make-range! "loop.inner" @_start @_end))) @loop.outer
 
 (while_statement
-  body: (block
+  body: (_
     .
     "{"
     .
@@ -85,7 +85,7 @@
 
 ; Conditionals
 (if_statement
-  consequence: (block
+  consequence: (_
     .
     "{"
     .
@@ -97,7 +97,7 @@
 
 (if_statement
   alternative: (else_clause
-    (block
+    (_
       .
       "{"
       .
@@ -125,7 +125,7 @@
 
 ; Blocks
 (_
-  (block) @block.inner) @block.outer
+  (_) @block.inner) @block.outer
 
 ; Parameters
 (parameter_list

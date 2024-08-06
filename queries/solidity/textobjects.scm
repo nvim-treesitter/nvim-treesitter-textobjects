@@ -85,24 +85,24 @@
 
 ; Conditionals
 (if_statement
-  consequence: (_
+  consequence: (statement
     .
     "{"
     .
     (_) @_start @_end
-    (_)? @_end
+    (_) @_end
     .
     "}"
     (#make-range! "conditional.inner" @_start @_end))) @conditional.outer
 
 (if_statement
   alternative: (else_clause
-    (_
+    (statement
       .
       "{"
       .
       (_) @_start @_end
-      (_)? @_end
+      (_) @_end
       .
       "}"
       (#make-range! "conditional.inner" @_start @_end)))) @conditional.outer

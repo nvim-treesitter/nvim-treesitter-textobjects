@@ -1,5 +1,4 @@
 local api = vim.api
-local ts = vim.treesitter
 
 local shared = require "nvim-treesitter-textobjects.shared"
 local repeatable_move = require "nvim-treesitter-textobjects.repeatable_move"
@@ -14,7 +13,7 @@ local function goto_node(range, goto_end, avoid_set_jump)
   end
 
   if not avoid_set_jump then
-    shared.set_jump()
+    vim.cmd "normal! m'"
   end
   local vim_range = range:to_vim_range()
   ---@type table<number>
@@ -42,19 +41,15 @@ local M = {}
 local function move(opts)
   local query_group = opts.query_group or "textobjects"
 
-  local query_strings_pattern = shared.make_query_strings_table(opts.query_strings_regex)
+  local query_strings_pattern = shared.force_table(opts.query_strings_regex)
   local winid = opts.winid or vim.api.nvim_get_current_win()
   local bufnr = vim.api.nvim_win_get_buf(winid)
-  local query_strings = shared.get_query_strings_from_pattern(
-    query_strings_pattern,
-    query_group,
-    ts.language.get_lang(vim.bo[bufnr].filetype)
-  )
+  local query_strings = shared.get_query_strings_from_pattern(query_strings_pattern, query_group)
 
   if not shared.check_support(api.nvim_get_current_buf(), query_group, query_strings) then
     vim.notify(
       ("The filetype `%s` does not support the textobjects `%s` for the query file `%s`"):format(
-        vim.bo.filetype,
+        vim.bo[bufnr].filetype,
         vim.inspect(query_strings),
         query_group
       ),

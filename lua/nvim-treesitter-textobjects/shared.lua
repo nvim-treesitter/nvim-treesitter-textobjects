@@ -8,10 +8,6 @@ local Range = require "nvim-treesitter-textobjects.range"
 
 local M = {}
 
-function M.set_jump()
-  vim.cmd "normal! m'"
-end
-
 ---@param object any
 ---@param path string[]
 ---@param value any
@@ -223,37 +219,14 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
   return best
 end
 
---- Convert single query string to list for backwards compatibility and the Vim commands
----
----@param query_strings string|string[]
+---@param strings string|string[]
 ---@return string[]
-function M.make_query_strings_table(query_strings)
-  if type(query_strings) == "string" then
-    return { query_strings }
+function M.force_table(strings)
+  if type(strings) == "string" then
+    return { strings }
   else
-    return query_strings
+    return strings
   end
-end
-
---- Get query strings from pattern
----@param query_patterns string[]
----@param query_group? string
----@param lang? string
----@return string[]
-function M.get_query_strings_from_pattern(query_patterns, query_group, lang)
-  query_group = query_group or "textobjects"
-  lang = lang or ts.language.get_lang(vim.bo.filetype)
-  local available_textobjects = M.available_textobjects(lang, query_group)
-  local query_strings = {}
-  for _, query_pattern in ipairs(query_patterns) do
-    for _, available_textobject in ipairs(available_textobjects) do
-      if string.match("@" .. available_textobject, query_pattern) then
-        table.insert(query_strings, "@" .. available_textobject)
-      end
-    end
-  end
-
-  return query_strings
 end
 
 --- Get the best `TSTextObjects.Range` at a given point
@@ -263,7 +236,7 @@ end
 ---@param ranges TSTextObjects.Range[] list of ranges
 ---@param row number 0-indexed
 ---@param col number 0-indexed
----@param opts {lookahead: boolean, lookbehind: boolean} lookahead and lookbehind options
+---@param opts {lookahead: boolean?, lookbehind: boolean?} lookahead and lookbehind options
 ---@return TSTextObjects.Range?
 local function best_range_at_point(ranges, row, col, opts)
   local range_length ---@type integer
@@ -344,7 +317,7 @@ end
 ---@param query_group string
 ---@param pos? {[1]: integer, [2]: integer}
 ---@param bufnr? integer
----@param opts? {lookahead: boolean, lookbehind: boolean} lookahead and lookbehind options
+---@param opts? {lookahead: boolean?, lookbehind: boolean?} lookahead and lookbehind options
 ---@return integer bufnr
 ---@return TSTextObjects.Range? range
 function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
@@ -417,24 +390,13 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
   end
 end
 
--- TODO(clason): move to swap?
----@param forward boolean
+-- TODO(clason): move next three functions to swap?
 ---@param range TSTextObjects.Range
 ---@param query_string string
 ---@param query_group string
 ---@param bufnr integer
 ---@return TSTextObjects.Range?
-function M.get_adjacent(forward, range, query_string, query_group, bufnr)
-  local fn = forward and M.next_textobject or M.previous_textobject
-  return fn(range, query_string, query_group, bufnr)
-end
-
----@param range TSTextObjects.Range
----@param query_string string
----@param query_group string
----@param bufnr integer
----@return TSTextObjects.Range?
-function M.next_textobject(range, query_string, query_group, bufnr)
+local next_textobject = function(range, query_string, query_group, bufnr)
   local node_end = range.end_byte
   local search_start = node_end
 
@@ -469,7 +431,7 @@ end
 ---@param query_group? string
 ---@param bufnr integer
 ---@return TSTextObjects.Range?
-function M.previous_textobject(range, query_string, query_group, bufnr)
+local previous_textobject = function(range, query_string, query_group, bufnr)
   query_group = query_group or "textobjects"
 
   local node_start = range.start_byte
@@ -498,21 +460,31 @@ function M.previous_textobject(range, query_string, query_group, bufnr)
   return previous_range
 end
 
--- TODO(clason): move to configs?
+---@param forward boolean
+---@param range TSTextObjects.Range
+---@param query_string string
+---@param query_group string
+---@param bufnr integer
+---@return TSTextObjects.Range?
+function M.get_adjacent(forward, range, query_string, query_group, bufnr)
+  local fn = forward and next_textobject or previous_textobject
+  return fn(range, query_string, query_group, bufnr)
+end
+
 ---@param lang? string
 ---@param query_group? string
 ---@return string[]
-function M.available_textobjects(lang, query_group)
-  lang = lang or ts.language.get_lang(vim.bo.filetype)
+M.available_textobjects = memoize(function(lang, query_group)
   if not lang then
-    error(string.format("There is no language registered for filetype %s", vim.bo.filetype))
+    return {}
   end
+
   query_group = query_group or "textobjects"
-  -- TODO (TheLeoP): should be cached?
   local parsed_queries = ts.query.get(lang, query_group)
   if not parsed_queries then
     return {}
   end
+
   local found_textobjects = parsed_queries.captures or {}
   for _, pattern in pairs(parsed_queries.info.patterns) do
     for _, q in ipairs(pattern) do
@@ -523,17 +495,10 @@ function M.available_textobjects(lang, query_group)
     end
   end
   return found_textobjects
-  --patterns = {
-  --[2] = { { "make-range!", "function.inner", 2, 3 } },
-  --[4] = { { "make-range!", "function.inner", 2, 3 } },
-  --[11] = { { "make-range!", "parameter.outer", 2, 12 } },
-  --[12] = { { "make-range!", "parameter.outer", 12, 3 } },
-  --[13] = { { "make-range!", "parameter.outer", 2, 12 } },
-  --[14] = { { "make-range!", "parameter.outer", 12, 3 } }
-  --}
-end
+end, function(lang, query_group)
+  return string.format("%s-%s", lang, query_group)
+end)
 
--- TODO(clason): move to configs?
 ---@param bufnr integer
 ---@param query_group? string
 ---@param queries? string[]
@@ -550,9 +515,9 @@ function M.check_support(bufnr, query_group, queries)
   if not parser then
     return false
   end
-  -- TODO (TheLeoP): should be cached?
-  local ok, _queries = pcall(ts.query.get, buf_lang, query_group)
-  if not ok or not _queries then
+
+  local available_textobjects = M.available_textobjects(buf_lang, query_group)
+  if not available_textobjects then
     return false
   end
 
@@ -561,7 +526,6 @@ function M.check_support(bufnr, query_group, queries)
       return false
     end
 
-    local available_textobjects = M.available_textobjects(buf_lang, query_group)
     for _, query in ipairs(queries) do
       if not vim.list_contains(available_textobjects, query:sub(2)) then
         return false
@@ -571,6 +535,27 @@ function M.check_support(bufnr, query_group, queries)
   end
 
   return true
+end
+
+--- Get query strings from pattern
+---@param query_patterns string[]
+---@param query_group? string
+---@param lang? string
+---@return string[]
+function M.get_query_strings_from_pattern(query_patterns, query_group, lang)
+  query_group = query_group or "textobjects"
+  lang = lang or ts.language.get_lang(vim.bo.filetype)
+  local available_textobjects = M.available_textobjects(lang, query_group)
+  local query_strings = {}
+  for _, query_pattern in ipairs(query_patterns) do
+    for _, available_textobject in ipairs(available_textobjects) do
+      if string.match("@" .. available_textobject, query_pattern) then
+        table.insert(query_strings, "@" .. available_textobject)
+      end
+    end
+  end
+
+  return query_strings
 end
 
 return M

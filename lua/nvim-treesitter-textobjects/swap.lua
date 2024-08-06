@@ -67,14 +67,12 @@ end
 
 local M = {}
 
----@param query_strings_regex string|string[]
+---@param captures string|string[]
 ---@param query_group? string
 ---@param direction integer
-local function swap_textobject(query_strings_regex, query_group, direction)
-  query_strings_regex = shared.make_query_strings_table(query_strings_regex)
+local function swap_textobject(captures, query_group, direction)
+  local query_strings = type(captures) == "string" and { captures } or captures
   query_group = query_group or "textobjects"
-
-  local query_strings = shared.get_query_strings_from_pattern(query_strings_regex, query_group)
 
   if not shared.check_support(api.nvim_get_current_buf(), "textobjects", query_strings) then
     vim.notify(
@@ -117,19 +115,19 @@ local function make_dot_repeatable(fn)
   api.nvim_feedkeys("g@l", "n", false)
 end
 
----@param query_strings_regex string lua pattern describing the query string
+---@param query_strings string lua pattern describing the query string
 ---@param query_group? string
-function M.swap_next(query_strings_regex, query_group)
+function M.swap_next(query_strings, query_group)
   return make_dot_repeatable(function()
-    swap_textobject(query_strings_regex, query_group, 1)
+    swap_textobject(query_strings, query_group, 1)
   end)
 end
 
----@param query_strings_regex string lua pattern describing the query string
+---@param query_strings string lua pattern describing the query string
 ---@param query_group? string
-function M.swap_previous(query_strings_regex, query_group)
+function M.swap_previous(query_strings, query_group)
   return make_dot_repeatable(function()
-    swap_textobject(query_strings_regex, query_group, -1)
+    swap_textobject(query_strings, query_group, -1)
   end)
 end
 

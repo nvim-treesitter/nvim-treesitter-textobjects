@@ -85,7 +85,7 @@
 
 ; Conditionals
 (if_statement
-  consequence: (statement
+  (statement
     .
     "{"
     .
@@ -96,7 +96,7 @@
     (#make-range! "conditional.inner" @_start @_end))) @conditional.outer
 
 (if_statement
-  alternative: (else_clause
+  (else_clause
     (statement
       .
       "{"

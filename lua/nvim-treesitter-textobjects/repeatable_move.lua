@@ -12,10 +12,6 @@ local M = {}
 -- prefer to set using M.set_last_move
 M.last_move = nil
 
-M.clear_last_move = function()
-  M.last_move = nil
-end
-
 --- move_fn's first argument must be a table of options, and it should include a `forward` boolean
 --- indicating whether to move forward (true) or backward (false)
 ---
@@ -23,7 +19,7 @@ end
 ---@param opts table
 ---@param ... any
 ---@return boolean
-M.set_last_move = function(move_fn, opts, ...)
+local set_last_move = function(move_fn, opts, ...)
   if type(move_fn) ~= "function" then
     vim.notify(
       "nvim-treesitter-textobjects: move_fn has to be a function but got " .. vim.inspect(move_fn),
@@ -57,38 +53,9 @@ end
 ---@return fun(opts: table, ...: any)
 M.make_repeatable_move = function(move_fn)
   return function(opts, ...)
-    M.set_last_move(move_fn, opts, ...)
+    set_last_move(move_fn, opts, ...)
     move_fn(opts, ...)
   end
-end
-
--- Alternative:
--- Get a movement function pair (forward, backward) and turn them into two repeatable movement functions
--- They don't need to have the first argument as a table of options
----@param forward_move_fn function
----@param backward_move_fn function
----@return fun(...: any) repeatable_forward_move_fn
----@return fun(...: any) repeatable_backward_move_fn
-M.make_repeatable_move_pair = function(forward_move_fn, backward_move_fn)
-  local general_repeatable_move_fn = function(opts, ...)
-    if opts.forward then
-      forward_move_fn(...)
-    else
-      backward_move_fn(...)
-    end
-  end
-
-  local repeatable_forward_move_fn = function(...)
-    M.set_last_move(general_repeatable_move_fn, { forward = true }, ...)
-    forward_move_fn(...)
-  end
-
-  local repeatable_backward_move_fn = function(...)
-    M.set_last_move(general_repeatable_move_fn, { forward = false }, ...)
-    backward_move_fn(...)
-  end
-
-  return repeatable_forward_move_fn, repeatable_backward_move_fn
 end
 
 ---@param opts_extend table?

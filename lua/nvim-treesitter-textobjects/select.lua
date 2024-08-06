@@ -23,8 +23,8 @@ local function update_selection(range, selection_mode)
   local mode = api.nvim_get_mode()
   if mode.mode ~= selection_mode then
     -- Call to `nvim_replace_termcodes()` is needed for sending appropriate command to enter blockwise mode
-    selection_mode = vim.api.nvim_replace_termcodes(selection_mode, true, true, true)
-    api.nvim_cmd({ cmd = "normal", bang = true, args = { selection_mode } }, {})
+    selection_mode = api.nvim_replace_termcodes(selection_mode, true, true, true)
+    vim.cmd.normal { selection_mode, bang = true }
   end
 
   api.nvim_win_set_cursor(0, { start_row, start_col - 1 })
@@ -42,7 +42,7 @@ local function get_char_after_position(bufnr, row, col)
   if row == nil then
     return nil
   end
-  local ok, char = pcall(vim.api.nvim_buf_get_text, bufnr, row, col, row, col + 1, {})
+  local ok, char = pcall(api.nvim_buf_get_text, bufnr, row, col, row, col + 1, {})
   if ok then
     return char[1]
   end
@@ -58,7 +58,7 @@ local function is_whitespace_after(bufnr, row, col)
     return false
   end
   if char == "" then
-    if row == vim.api.nvim_buf_line_count(bufnr) - 1 then
+    if row == api.nvim_buf_line_count(bufnr) - 1 then
       return false
     else
       return true
@@ -68,7 +68,7 @@ local function is_whitespace_after(bufnr, row, col)
 end
 
 local function get_line(bufnr, row)
-  return vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1]
+  return api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1]
 end
 
 ---@param bufnr integer
@@ -79,7 +79,7 @@ end
 ---@return integer? col
 local function next_position(bufnr, row, col, forward)
   local max_col = #get_line(bufnr, row)
-  local max_row = vim.api.nvim_buf_line_count(bufnr)
+  local max_row = api.nvim_buf_line_count(bufnr)
   if forward then
     if col == max_col then
       if row == max_row then

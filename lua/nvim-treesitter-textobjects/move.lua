@@ -26,7 +26,7 @@ local function goto_node(range, goto_end, avoid_set_jump)
 
   -- Enter visual mode if we are in operator pending mode
   -- If we don't do this, it will miss the last character.
-  local mode = vim.api.nvim_get_mode()
+  local mode = api.nvim_get_mode()
   if mode.mode == "no" then
     vim.cmd "normal! v"
   end
@@ -42,8 +42,8 @@ local function move(opts)
   local query_group = opts.query_group or "textobjects"
 
   local query_strings_pattern = shared.force_table(opts.query_strings_regex)
-  local winid = opts.winid or vim.api.nvim_get_current_win()
-  local bufnr = vim.api.nvim_win_get_buf(winid)
+  local winid = opts.winid or api.nvim_get_current_win()
+  local bufnr = api.nvim_win_get_buf(winid)
   local query_strings = shared.get_query_strings_from_pattern(query_strings_pattern, query_group)
 
   if not shared.check_support(api.nvim_get_current_buf(), query_group, query_strings) then
@@ -96,7 +96,7 @@ local function move(opts)
   ---@return boolean
   local function filter_function(start_, range)
     local range4 = range:range4()
-    local row, col = unpack(vim.api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
+    local row, col = unpack(api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
     row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
 
     if not start_ then

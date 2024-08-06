@@ -1,11 +1,10 @@
 name: Tests
 
 on:
-  push:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
     branches:
-      - "master"
+      - "main"
+  workflow_dispatch:
 
 # Cancel any in-progress CI runs for a PR if it is updated
 concurrency:
@@ -26,35 +25,33 @@ jobs:
     env:
       CC: ${{ matrix.cc }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-
-      - name: Install tree-sitter CLI
-        run: npm i -g tree-sitter-cli
+      - uses: actions/checkout@v4
+      - uses: tree-sitter/setup-action/cli@v1
 
       - name: Test Dependencies
         run: |
-          mkdir -p ~/.local/share/nvim/site/pack/ci/opt
-          cd ~/.local/share/nvim/site/pack/ci/opt
+          mkdir -p ~/.local/share/nvim/site/pack/ci/start
+          cd ~/.local/share/nvim/site/pack/ci/start
           git clone https://github.com/nvim-lua/plenary.nvim
           git clone -b main https://github.com/nvim-treesitter/nvim-treesitter.git
+          cp nvim-treesitter/lua/nvim-treesitter/parsers.lua ~/work/nvim-treesitter-textobjects/nvim-treesitter-textobjects/
+
       - name: Install and prepare Neovim
         env:
           NVIM_TAG: ${{ matrix.nvim_tag }}
         run: |
           bash ./scripts/ci-install-${{ matrix.os }}.sh
+
       - name: Setup Parsers Cache
         id: parsers-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: |
-            ./parser/
-            ~/AppData/Local/nvim/pack/nvim-treesitter/start/nvim-treesitter/parser/
-          key: ${{ matrix.os }}-${{ matrix.cc }}-parsers-v1-${{ hashFiles('./lockfile.json', './lua/nvim-treesitter/parsers.lua', './lua/nvim-treesitter/install.lua', './lua/nvim-treesitter/shell_selectors.lua') }}
+          path: ~/.local/share/nvim/site/parser/
+          key: parsers-${{ hashFiles('parsers.lua') }}
 
       - name: Compile parsers Unix like
-        if: ${{ matrix.os != 'windows-latest' && steps.parsers-cache.outputs.cache-hit != 'true' }}
-        run: |
-          run: ./nvim.appimage -l scripts/install_parsers.lua all
+        if: ${{ steps.parsers-cache.outputs.cache-hit != 'true' }}
+        run: nvim -l scripts/install_parsers.lua all
+
       - name: Tests
         run: PATH=/usr/local/bin:$PATH ./scripts/run_tests.sh

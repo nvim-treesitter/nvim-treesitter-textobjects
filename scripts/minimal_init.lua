@@ -1,22 +1,5 @@
-require("nvim-treesitter").setup {
-  -- A list of parser names, or "all"
-  ensure_installed = { "python" },
-
-  -- Automatically install missing parsers when entering buffer
-  -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
-  auto_install = true,
-
-  ---- If you need to change the installation directory of the parsers (see -> Advanced Setup)
-  -- Remember to run vim.opt.runtimepath:append("/some/path/to/store/parsers")!
-  -- parser_install_dir = "/some/path/to/store/parsers",
-}
-
-vim.cmd [[
-packadd nvim-treesitter
-packadd nvim-treesitter-textobjects
-packadd plenary.nvim
-TSUpdate
-]]
+vim.opt.runtimepath:append "."
+vim.cmd.runtime { "plugin/query_predicates.lua", bang = true }
 
 require("nvim-treesitter-textobjects").setup {
   select = {
@@ -101,17 +84,37 @@ for _, mode in ipairs { "x", "o" } do
   end)
 end
 
-vim.keymap.set("n", ")m", require("nvim-treesitter-textobjects.swap").swap_next "@function.outer")
-vim.keymap.set("n", ")c", require("nvim-treesitter-textobjects.swap").swap_next "@comment.outer")
-vim.keymap.set("n", ")a", require("nvim-treesitter-textobjects.swap").swap_next "@parameter.inner")
-vim.keymap.set("n", ")b", require("nvim-treesitter-textobjects.swap").swap_next "@block.outer")
-vim.keymap.set("n", ")C", require("nvim-treesitter-textobjects.swap").swap_next "@class.outer")
+vim.keymap.set("n", ")m", function()
+  require("nvim-treesitter-textobjects.swap").swap_next "@function.outer"
+end)
+vim.keymap.set("n", ")c", function()
+  require("nvim-treesitter-textobjects.swap").swap_next "@comment.outer"
+end)
+vim.keymap.set("n", ")a", function()
+  require("nvim-treesitter-textobjects.swap").swap_next "@parameter.inner"
+end)
+vim.keymap.set("n", ")b", function()
+  require("nvim-treesitter-textobjects.swap").swap_next "@block.outer"
+end)
+vim.keymap.set("n", ")C", function()
+  require("nvim-treesitter-textobjects.swap").swap_next "@class.outer"
+end)
 
-vim.keymap.set("n", "(m", require("nvim-treesitter-textobjects.swap").swap_previous "@function.outer")
-vim.keymap.set("n", "(c", require("nvim-treesitter-textobjects.swap").swap_previous "@comment.outer")
-vim.keymap.set("n", "(a", require("nvim-treesitter-textobjects.swap").swap_previous "@parameter.inner")
-vim.keymap.set("n", "(b", require("nvim-treesitter-textobjects.swap").swap_previous "@block.outer")
-vim.keymap.set("n", "(C", require("nvim-treesitter-textobjects.swap").swap_previous "@class.outer")
+vim.keymap.set("n", "(m", function()
+  require("nvim-treesitter-textobjects.swap").swap_previous "@function.outer"
+end)
+vim.keymap.set("n", "(c", function()
+  require("nvim-treesitter-textobjects.swap").swap_previous "@comment.outer"
+end)
+vim.keymap.set("n", "(a", function()
+  require("nvim-treesitter-textobjects.swap").swap_previous "@parameter.inner"
+end)
+vim.keymap.set("n", "(b", function()
+  require("nvim-treesitter-textobjects.swap").swap_previous "@block.outer"
+end)
+vim.keymap.set("n", "(C", function()
+  require("nvim-treesitter-textobjects.swap").swap_previous "@class.outer"
+end)
 
 vim.keymap.set({ "n", "x", "o" }, "]m", function()
   require("nvim-treesitter-textobjects.move").goto_next_start "@function.outer"

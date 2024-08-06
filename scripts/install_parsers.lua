@@ -1,7 +1,5 @@
 #!/usr/bin/env -S nvim -l
 
-vim.opt.runtimepath:append(vim.fn.expand "~/.local/share/nvim/site/pack/nvim-treesitter/start")
-
 local languages = _G.arg
 languages[0] = nil
 

@@ -238,7 +238,7 @@ end
 function M.available_textobjects(lang, query_group)
   lang = lang or ts.language.get_lang(vim.bo.filetype)
   if not lang then
-    error(string.format("There ist no languare resgitered for filetype %s", vim.bo.filetype))
+    error(string.format("There is no language registered for filetype %s", vim.bo.filetype))
   end
   query_group = query_group or "textobjects"
   -- TODO (TheLeoP): should be cached?
@@ -364,7 +364,7 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
 
   local lang = ts.language.get_lang(vim.bo[bufnr].filetype)
   if not lang then
-    error(string.format("There ist no languare resgitered for filetype %s", vim.bo.filetype))
+    error(string.format("There is no language registered for filetype %s", vim.bo.filetype))
   end
 
   local row, col = unpack(pos) --[[@as integer, integer]]

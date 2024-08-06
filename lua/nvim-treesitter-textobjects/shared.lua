@@ -2,6 +2,10 @@ local ts = vim.treesitter
 -- TODO(clason): replace with vim.treesitter._range
 local Range = require "nvim-treesitter-textobjects.range"
 
+-- luacheck: push ignore 631
+---@alias TSTextObjects.Metadata {range: {[1]: number, [2]: number, [3]: number, [4]: number, [5]: number, [6]: number, [7]: string}}
+-- luacheck: pop
+
 local M = {}
 
 function M.set_jump()
@@ -26,83 +30,99 @@ local function insert_to_path(object, path, value)
   curr_obj[path[#path]] = value
 end
 
--- luacheck: push ignore 631
----@alias TSTextObjects.Metadata {range: {[1]: number, [2]: number, [3]: number, [4]: number, [5]: number, [6]: number, [7]: string}}
--- luacheck: pop
+---Memoize a function using hash_fn to hash the arguments.
+---@generic F: function
+---@param fn F
+---@param hash_fn fun(...): any
+---@return F
+local function memoize(fn, hash_fn)
+  local cache = setmetatable({}, { __mode = "kv" }) ---@type table<any,any>
 
--- TODO(clason): replace with upstream functions, memoize
----@param query vim.treesitter.Query
----@param qnode TSNode
----@param bufnr integer
----@param start_row integer
----@param end_row integer
----@return fun():table<string, any|table<string, any>>?
-local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
-  local matches = query:iter_matches(qnode, bufnr, start_row, end_row)
+  return function(...)
+    local key = hash_fn(...)
+    if cache[key] == nil then
+      local v = { fn(...) } ---@type any
 
-  local function iterator()
-    local pattern, match, metadata = matches()
-    if pattern == nil then
-      return
+      for k, value in pairs(v) do
+        if value == nil then
+          value[k] = vim.NIL
+        end
+      end
+
+      cache[key] = v
     end
 
-    local prepared_match = {}
+    local v = cache[key]
 
-    -- Extract capture names from each match
-    for id, node in pairs(match) do
-      local query_name = query.captures[id] -- name of the capture in the query
-      if query_name ~= nil then
-        local path = vim.split(query_name, "%.")
-        local range = Range:from_node(node, bufnr)
-        range.metadata = metadata[id]
-        insert_to_path(prepared_match, path, range)
+    for k, value in pairs(v) do
+      if value == vim.NIL then
+        value[k] = nil
       end
     end
 
-    if metadata.range and metadata.range[7] then
-      ---@cast metadata TSTextObjects.Metadata
-      local query_name = metadata.range[7]
-      local path = vim.split(query_name, "%.")
-      insert_to_path(
-        prepared_match,
-        path,
-        Range:new(
-          metadata.range[1],
-          metadata.range[2],
-          metadata.range[3],
-          metadata.range[4],
-          metadata.range[5],
-          metadata.range[6],
-          "-1",
-          "-1"
-        )
-      )
-    end
-
-    return prepared_match
+    return unpack(v)
   end
-  return iterator
 end
 
--- TODO(clason): replace with upstream functions, memoize
+--- Prepare matches for given query_group and parsed tree
+--- memoize by buffer tick and query group
+---
 ---@param bufnr integer the buffer
 ---@param query_group string the query file to use
 ---@param root TSNode the root node
 ---@param root_lang string the root node lang, if known
-local function iter_group_results(bufnr, query_group, root, root_lang)
-  -- TODO (TheLeoP): should be cached?
+---@return table
+local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
   local query = ts.query.get(root_lang, query_group)
   if not query then
-    return function() end -- empty iterator
+    return {}
   end
 
-  local range = { root:range() } ---@type Range4
-  local start = range[1]
+  local matches = {}
+  local start_row, _, end_row, _ = root:range()
   -- The end row is exclusive so we need to add 1 to it.
-  local stop = range[3] + 1
+  for pattern, match, metadata in query:iter_matches(root, bufnr, start_row, end_row + 1) do
+    if pattern then
+      local prepared_match = {}
 
-  return iter_prepared_matches(query, root, bufnr, start, stop)
-end
+      -- Extract capture names from each match
+      for id, node in pairs(match) do
+        local query_name = query.captures[id] -- name of the capture in the query
+        if query_name ~= nil then
+          local path = vim.split(query_name, "%.")
+          local range = Range:from_node(node, bufnr)
+          range.metadata = metadata[id]
+          insert_to_path(prepared_match, path, range)
+        end
+      end
+
+      if metadata.range and metadata.range[7] then
+        ---@cast metadata TSTextObjects.Metadata
+        local query_name = metadata.range[7]
+        local path = vim.split(query_name, "%.")
+        insert_to_path(
+          prepared_match,
+          path,
+          Range:new(
+            metadata.range[1],
+            metadata.range[2],
+            metadata.range[3],
+            metadata.range[4],
+            metadata.range[5],
+            metadata.range[6],
+            "-1",
+            "-1"
+          )
+        )
+      end
+
+      matches[#matches + 1] = prepared_match
+    end
+  end
+  return matches
+end, function(bufnr, query_group, root)
+  return string.format("%d-%s-%s", bufnr, root:id(), query_group)
+end)
 
 ---@param tbl table<string, any|table<string, any>> the table to access
 ---@param path string the '.' separated path
@@ -125,7 +145,7 @@ local function get_at_path(tbl, path)
   return result
 end
 
--- TODO(clason): memoize
+-- TODO(clason): memoize?
 ---@param bufnr integer
 ---@param query_string string
 ---@param query_group string
@@ -146,7 +166,8 @@ local function get_capture_ranges_recursively(bufnr, query_string, query_group)
   parser:for_each_tree(function(tree, lang_tree)
     local tree_lang = lang_tree:lang()
 
-    for match in iter_group_results(bufnr, query_group, tree:root(), tree_lang) do
+    local matches = get_query_matches(bufnr, query_group, tree:root(), tree_lang)
+    for _, match in pairs(matches) do
       local found = get_at_path(match, query_string)
       if found then
         ---@cast found TSTextObjects.Range
@@ -182,7 +203,8 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
   local best ---@type TSTextObjects.Range?
   local best_score ---@type number
 
-  for maybe_match in iter_group_results(bufnr, query_group, root, lang) do
+  local matches = get_query_matches(bufnr, query_group, root, lang)
+  for _, maybe_match in pairs(matches) do
     local range = get_at_path(maybe_match, capture_string)
     ---@cast range TSTextObjects.Range
 
@@ -395,7 +417,7 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
   end
 end
 
--- TODO(clason): move to swap
+-- TODO(clason): move to swap?
 ---@param forward boolean
 ---@param range TSTextObjects.Range
 ---@param query_string string
@@ -549,41 +571,6 @@ function M.check_support(bufnr, query_group, queries)
   end
 
   return true
-end
-
--- TODO(clason): make local, use
----Memoize a function using hash_fn to hash the arguments.
----@generic F: function
----@param fn F
----@param hash_fn fun(...): any
----@return F
-function M.memoize(fn, hash_fn)
-  local cache = setmetatable({}, { __mode = "kv" }) ---@type table<any,any>
-
-  return function(...)
-    local key = hash_fn(...)
-    if cache[key] == nil then
-      local v = { fn(...) } ---@type any
-
-      for k, value in pairs(v) do
-        if value == nil then
-          value[k] = vim.NIL
-        end
-      end
-
-      cache[key] = v
-    end
-
-    local v = cache[key]
-
-    for k, value in pairs(v) do
-      if value == vim.NIL then
-        value[k] = nil
-      end
-    end
-
-    return unpack(v)
-  end
 end
 
 return M

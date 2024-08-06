@@ -85,35 +85,14 @@
 
 ; Conditionals
 (if_statement
-  (statement
-    .
-    "{"
-    .
-    (_) @_start @_end
-    (_) @_end
-    .
-    "}"
-    (#make-range! "conditional.inner" @_start @_end))) @conditional.outer
-
-(if_statement
-  (else_clause
-    (statement
-      .
-      "{"
-      .
-      (_) @_start @_end
-      (_) @_end
-      .
-      "}"
-      (#make-range! "conditional.inner" @_start @_end)))) @conditional.outer
-
-(if_statement) @conditional.outer
+  consequence: (statement_block) @conditional.inner
+  alternative: (statement_block)? @conditional.inner) @conditional.outer
 
 ; Function calls
 (call_expression) @call.outer
 
 (call_expression
-  arguments: (call_arguments
+  arguments: (_
     .
     "("
     .
@@ -124,7 +103,7 @@
     (#make-range! "call.inner" @_start @_end)))
 
 ; Blocks
-(_
+(block
   (_) @block.inner) @block.outer
 
 ; Parameters

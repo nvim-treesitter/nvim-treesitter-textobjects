@@ -114,7 +114,7 @@ end
 local function make_dot_repeatable(fn)
   _G._nvim_treesitter_textobject_last_function = fn
   vim.o.opfunc = "v:lua._nvim_treesitter_textobject_last_function"
-  vim.api.nvim_feedkeys("g@l", "n", false)
+  api.nvim_feedkeys("g@l", "n", false)
 end
 
 ---@param query_strings_regex string lua pattern describing the query string

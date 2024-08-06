@@ -129,7 +129,7 @@
 
 ; Parameters
 (parameter_list
-  "," @_start
+  ","? @_start
   .
   (_) @parameter.inner
   (#make-range! "parameter.outer" @_start @parameter.inner))
@@ -143,7 +143,7 @@
 
 ; Arguments
 (call_arguments
-  "," @_start
+  ","? @_start
   .
   (_) @parameter.inner
   (#make-range! "parameter.outer" @_start @parameter.inner))

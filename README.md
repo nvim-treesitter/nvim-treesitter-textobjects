@@ -200,22 +200,7 @@ vim.keymap.set({ "n", "x", "o" }, "<end>", function()
 end)
 ```
 
-Furthermore, you can make any custom movements (e.g. from another plugin) repeatable with the same keys.
-This doesn't need to be treesitter-related.
-
-```lua
--- example: make gitsigns.nvim movement repeatable with ; and , keys.
-local gs = require("gitsigns")
-
--- make sure forward function comes first
-local next_hunk_repeat, prev_hunk_repeat = ts_repeat_move.make_repeatable_move_pair(gs.next_hunk, gs.prev_hunk)
--- Or, use `make_repeatable_move` or `set_last_move` functions for more control. See the code for instructions.
-
-vim.keymap.set({ "n", "x", "o" }, "]h", next_hunk_repeat)
-vim.keymap.set({ "n", "x", "o" }, "[h", prev_hunk_repeat)
-```
-
-Alternatively, you could use a repeatable movement managing plugin such as [nvim-next](https://github.com/ghostbuster91/nvim-next).
+For a similar way of making arbitrary movements repeatable, see [nvim-next](https://github.com/ghostbuster91/nvim-next).
 
 # Overriding or extending textobjects
 

@@ -1,77 +1,38 @@
 local M = {}
 
+---@class TSTextObjects.MoveOpts
+---@field query_strings_regex? string[]|string
+---@field query_group? string
+---@field forward boolean
+---@field start? boolean If true, choose the start of the node, and false is for the end.
+---@field winid? integer
+
 ---@class TSTextObjects.RepeatableMove
 ---@field func string | function
----@field opts table
+---@field opts TSTextObjects.MoveOpts
 ---@field additional_args table
 
 ---@type TSTextObjects.RepeatableMove
--- { func = move, opts = { ... }, additional_args = {} }
--- { func = "f", opts = { ... }, additional_args = {} }
--- register any other function, but make sure the the first args is an opts table with a `forward` boolean.
--- prefer to set using M.set_last_move
 M.last_move = nil
 
---- move_fn's first argument must be a table of options, and it should include a `forward` boolean
---- indicating whether to move forward (true) or backward (false)
+--- Make move function repeatable. Creates a wrapper that takes a TSTextObjects.MoveOpts table,
+--- stores them, and executes the move.
 ---
 ---@param move_fn function
----@param opts table
----@param ... any
----@return boolean
-local set_last_move = function(move_fn, opts, ...)
-  if type(move_fn) ~= "function" then
-    vim.notify(
-      "nvim-treesitter-textobjects: move_fn has to be a function but got " .. vim.inspect(move_fn),
-      vim.log.levels.ERROR
-    )
-    return false
-  end
-
-  if type(opts) ~= "table" then
-    vim.notify(
-      "nvim-treesitter-textobjects: opts has to be a table but got " .. vim.inspect(opts),
-      vim.log.levels.ERROR
-    )
-    return false
-  elseif opts.forward == nil then
-    vim.notify(
-      "nvim-treesitter-textobjects: opts has to include a `forward` boolean but got " .. vim.inspect(opts),
-      vim.log.levels.ERROR
-    )
-    return false
-  end
-
-  M.last_move = { func = move_fn, opts = vim.deepcopy(opts), additional_args = { ... } }
-  return true
-end
-
---- Pass a function that takes a table of options (should include `forward` boolean)
---- and it returns the same function that is magically repeatable
----
----@param move_fn function
----@return fun(opts: table, ...: any)
+---@return fun(opts: TSTextObjects.MoveOpts, ...: any)
 M.make_repeatable_move = function(move_fn)
   return function(opts, ...)
-    set_last_move(move_fn, opts, ...)
+    M.last_move = { func = move_fn, opts = vim.deepcopy(opts), additional_args = { ... } }
     move_fn(opts, ...)
   end
 end
 
----@param opts_extend table?
+---@param opts_extend TSTextObjects.MoveOpts?
 ---@return boolean
 M.repeat_last_move = function(opts_extend)
   if M.last_move then
     local opts ---@type table
     if opts_extend ~= nil then
-      if type(opts_extend) ~= "table" then
-        vim.notify(
-          "nvim-treesitter-textobjects: opts_extend has to be a table but got " .. vim.inspect(opts_extend),
-          vim.log.levels.ERROR
-        )
-        return false
-      end
-
       opts = vim.tbl_deep_extend("force", {}, M.last_move.opts, opts_extend)
     else
       opts = M.last_move.opts

@@ -219,16 +219,6 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
   return best
 end
 
----@param strings string|string[]
----@return string[]
-function M.force_table(strings)
-  if type(strings) == "string" then
-    return { strings }
-  else
-    return strings
-  end
-end
-
 --- Get the best `TSTextObjects.Range` at a given point
 --- If the point is inside a `TSTextObjects.Range`, the smallest range is returned
 --- If the point is not inside a `TSTextObjects.Range`, the closest one is returned
@@ -535,27 +525,6 @@ function M.check_support(bufnr, query_group, queries)
   end
 
   return true
-end
-
---- Get query strings from pattern
----@param query_patterns string[]
----@param query_group? string
----@param lang? string
----@return string[]
-function M.get_query_strings_from_pattern(query_patterns, query_group, lang)
-  query_group = query_group or "textobjects"
-  lang = lang or ts.language.get_lang(vim.bo.filetype)
-  local available_textobjects = M.available_textobjects(lang, query_group)
-  local query_strings = {}
-  for _, query_pattern in ipairs(query_patterns) do
-    for _, available_textobject in ipairs(available_textobjects) do
-      if string.match("@" .. available_textobject, query_pattern) then
-        table.insert(query_strings, "@" .. available_textobject)
-      end
-    end
-  end
-
-  return query_strings
 end
 
 return M

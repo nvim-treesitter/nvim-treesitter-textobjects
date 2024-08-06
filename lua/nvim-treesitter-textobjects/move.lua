@@ -38,13 +38,6 @@ end
 
 local M = {}
 
----@class TSTextObjects.MoveOpts
----@field query_strings_regex string[]|string
----@field query_group? string
----@field forward boolean
----@field start? boolean If true, choose the start of the node, and false is for the end.
----@field winid? integer
-
 ---@param opts TSTextObjects.MoveOpts
 local function move(opts)
   local query_group = opts.query_group or "textobjects"

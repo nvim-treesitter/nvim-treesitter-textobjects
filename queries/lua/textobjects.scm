@@ -13,12 +13,8 @@
   arguments: (arguments
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    _+ @call.inner
+    ")"))
 
 ; class
 ; comment
@@ -71,34 +67,29 @@
 ; parameter
 (arguments
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 (parameters
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 (table_constructor
-  (field) @parameter.inner
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  (field) @parameter.inner @parameter.outer
+  ","? @parameter.outer)
 
 (arguments
-  "," @_start
+  "," @parameter.outer
   .
-  (_) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
 (parameters
-  "," @_start
+  "," @parameter.outer
   .
-  (_) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
 ; number
 (number) @number.inner

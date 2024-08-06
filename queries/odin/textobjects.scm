@@ -4,12 +4,8 @@
     (block
       .
       "{"
-      .
-      (_) @_start
-      (_)? @_end
-      .
-      "}"
-      (#make-range! "function.inner" @_start @_end)))) @function.outer
+      _+ @function.inner
+      "}"))) @function.outer
 
 ; returns
 (return_statement
@@ -25,69 +21,34 @@
   (#not-kind-eq? @_parent "member_expression"))
 
 ; call arguments
-((call_expression
+(call_expression
   function: (_)
   .
-  argument: (_) @_first
-  argument: (_) @_last .)
-  (#make-range! "call.inner" @_first @_last))
+  argument: (_) @call.inner
+  argument: (_) @call.inner .)
 
 ; block
 (block
   .
   "{"
-  .
-  (_) @_start
-  (_)? @_end
-  .
-  "}"
-  (#make-range! "block.inner" @_start @_end)) @block.outer
+  _+ @block.inner
+  "}") @block.outer
 
 ; classes
 (struct_declaration
-  .
-  (identifier)
-  .
-  (tag)*
-  .
   "{"
-  .
-  (_) @_first
-  (_)?
-  "," @_last
-  .
-  "}"
-  (#make-range! "class.inner" @_first @_last)) @class.outer
+  _+ @class.inner
+  "}") @class.outer
 
 (union_declaration
-  .
-  (identifier)
-  .
-  (tag)*
-  .
   "{"
-  .
-  (_) @_first
-  (_)?
-  "," @_last
-  .
-  "}"
-  (#make-range! "class.inner" @_first @_last)) @class.outer
+  _+ @class.inner
+  "}") @class.outer
 
 (enum_declaration
-  .
-  (identifier)
-  .
-  (tag)*
-  .
   "{"
-  .
-  (_) @_first
-  (_)?
-  "," @_last
-  .
-  "}"
-  (#make-range! "class.inner" @_first @_last)) @class.outer
+  _+ @class.inner
+  "}") @class.outer
 
 ; comments
 (comment) @comment.outer
@@ -96,13 +57,12 @@
 
 ; assignment
 ; works also for multiple targets in lhs. ex. 'res, ok := get_res()'
-((assignment_statement
+(assignment_statement
   .
-  (_) @_first
-  (_) @_prelast
+  (_) @assignment.lhs
+  (_) @assignment.lhs
   .
-  (_) @assignment.rhs @assignment.inner .)
-  (#make-range! "assignment.lhs" @_first @_prelast)) @assignment.outer
+  (_) @assignment.rhs @assignment.inner .) @assignment.outer
 
 ; attribute
 (attribute
@@ -112,30 +72,26 @@
 (number) @number.inner
 
 ; parameters
-((parameters
-  "," @_start
+(parameters
+  "," @parameter.outer
   .
-  (parameter) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (parameter) @parameter.inner @parameter.outer)
 
-((parameters
+(parameters
   .
-  (parameter) @parameter.inner
+  (parameter) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((call_expression
+(call_expression
   function: (_)
-  "," @_start
+  "," @parameter.outer
   .
-  argument: (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  argument: (_) @parameter.inner @parameter.outer)
 
-((call_expression
+(call_expression
   function: (_)
   .
-  argument: (_) @parameter.inner
+  argument: (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)

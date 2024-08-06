@@ -8,23 +8,15 @@
   body: (statement_block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (function_expression
   body: (statement_block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (export_statement
   (function_declaration)) @function.outer
@@ -36,12 +28,8 @@
   body: (statement_block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (method_definition
   body: (statement_block)) @function.outer
@@ -50,12 +38,8 @@
   body: (statement_block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (class_declaration
   body: (class_body) @class.inner) @class.outer
@@ -67,68 +51,44 @@
   body: (statement_block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (for_statement
   body: (statement_block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (while_statement
   body: (statement_block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (do_statement
   body: (statement_block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (if_statement
   consequence: (statement_block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "conditional.inner" @_start @_end))) @conditional.outer
+    _+ @conditional.inner
+    "}")) @conditional.outer
 
 (if_statement
   alternative: (else_clause
     (statement_block
       .
       "{"
-      .
-      (_) @_start
-      (_)? @_end
-      .
-      "}"
-      (#make-range! "conditional.inner" @_start @_end)))) @conditional.outer
+      _+ @conditional.inner
+      "}"))) @conditional.outer
 
 (if_statement) @conditional.outer
 
@@ -141,25 +101,16 @@
   arguments: (arguments
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    _+ @call.inner
+    ")"))
 
-((new_expression
-  constructor: (identifier) @_cons
+(new_expression
+  constructor: (identifier) @call.outer
   arguments: (arguments
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")") @_args)
-  (#make-range! "call.outer" @_cons @_args)
-  (#make-range! "call.inner" @_start @_end))
+    _+ @call.inner
+    ")") @call.outer)
 
 ; blocks
 (_
@@ -170,17 +121,15 @@
 ; function ([ x ]) ...
 ; function (v = default_value)
 (formal_parameters
-  "," @_start
+  "," @parameter.outer
   .
-  (_) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
 (formal_parameters
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 ; If the array/object pattern is the first parameter, treat its elements as the argument list
 (formal_parameters
@@ -188,15 +137,14 @@
   (_
     [
       (object_pattern
-        "," @_start
+        "," @parameter.outer
         .
-        (_) @parameter.inner)
+        (_) @parameter.inner @parameter.outer)
       (array_pattern
-        "," @_start
+        "," @parameter.outer
         .
-        (_) @parameter.inner)
-    ])
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+        (_) @parameter.inner @parameter.outer)
+    ]))
 
 (formal_parameters
   .
@@ -204,30 +152,27 @@
     [
       (object_pattern
         .
-        (_) @parameter.inner
+        (_) @parameter.inner @parameter.outer
         .
-        ","? @_end)
+        ","? @parameter.outer)
       (array_pattern
         .
-        (_) @parameter.inner
+        (_) @parameter.inner @parameter.outer
         .
-        ","? @_end)
-    ])
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+        ","? @parameter.outer)
+    ]))
 
 ; arguments
 (arguments
-  "," @_start
+  "," @parameter.outer
   .
-  (_) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
 (arguments
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 ; comment
 (comment) @comment.outer

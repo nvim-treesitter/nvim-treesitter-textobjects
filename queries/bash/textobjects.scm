@@ -4,12 +4,8 @@
   body: (compound_statement
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (case_statement) @conditional.outer
 

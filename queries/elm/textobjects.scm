@@ -36,43 +36,37 @@
 
 ; Parameters
 ; type annotations
-((type_expression
-  (arrow) @_start
+(type_expression
+  (arrow) @parameter.outer
   .
-  (type_ref) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (type_ref) @parameter.inner @parameter.outer)
 
-((type_expression
+(type_expression
   .
-  (type_ref) @parameter.inner
+  (type_ref) @parameter.inner @parameter.outer
   .
-  (arrow)? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  (arrow)? @parameter.outer)
 
 ; list items
-((list_expr
-  "," @_start
+(list_expr
+  "," @parameter.outer
   .
-  exprList: (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  exprList: (_) @parameter.inner @parameter.outer)
 
-((list_expr
+(list_expr
   .
-  exprList: (_) @parameter.inner
+  exprList: (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 ; tuple items
-((tuple_expr
-  "," @_start
+(tuple_expr
+  "," @parameter.outer
   .
-  expr: (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  expr: (_) @parameter.inner @parameter.outer)
 
-((tuple_expr
+(tuple_expr
   .
-  expr: (_) @parameter.inner
+  expr: (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)

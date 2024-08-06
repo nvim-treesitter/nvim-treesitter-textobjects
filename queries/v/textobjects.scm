@@ -27,12 +27,8 @@
   (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}")
-  (#make-range! "block.inner" @_start @_end)) @block.outer
+    _+ @block.inner
+    "}")) @block.outer
 
 ; call
 (call_expression) @call.outer
@@ -41,22 +37,14 @@
   arguments: (argument_list
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    _+ @call.inner
+    ")"))
 
 ; class: structs
 (struct_declaration
   ("{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 (struct_declaration) @class.outer
 
@@ -77,24 +65,16 @@
   block: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "conditional.inner" @_start @_end))?) @conditional.outer
+    _+ @conditional.inner
+    "}")?) @conditional.outer
 
 ; function
 (function_declaration
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (function_declaration) @function.outer
 
@@ -103,12 +83,8 @@
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))?) @loop.outer
+    _+ @loop.inner
+    "}")?) @loop.outer
 
 [
   (int_literal)
@@ -117,17 +93,15 @@
 
 ; parameter
 (parameter_list
-  "," @_start
+  "," @parameter.outer
   .
-  (parameter_declaration) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (parameter_declaration) @parameter.inner @parameter.outer)
 
 (parameter_list
   .
-  (parameter_declaration) @parameter.inner
+  (parameter_declaration) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 ; return
 (return_statement

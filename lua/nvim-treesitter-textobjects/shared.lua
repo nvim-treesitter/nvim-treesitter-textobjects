@@ -1,9 +1,8 @@
-local api = vim.api
 local ts = vim.treesitter
+-- TODO(clason): replace with vim.treesitter._range
+local Range = require "nvim-treesitter-textobjects.range"
 
 local M = {}
-
-local EMPTY_ITER = function() end
 
 function M.set_jump()
   vim.cmd "normal! m'"
@@ -31,6 +30,7 @@ end
 ---@alias TSTextObjects.Metadata {range: {[1]: number, [2]: number, [3]: number, [4]: number, [5]: number, [6]: number, [7]: string}}
 -- luacheck: pop
 
+-- TODO(clason): replace with upstream functions, memoize
 ---@param query vim.treesitter.Query
 ---@param qnode TSNode
 ---@param bufnr integer
@@ -53,7 +53,7 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
       local query_name = query.captures[id] -- name of the capture in the query
       if query_name ~= nil then
         local path = vim.split(query_name, "%.")
-        local range = M.Range:from_node(node, bufnr)
+        local range = Range:from_node(node, bufnr)
         range.metadata = metadata[id]
         insert_to_path(prepared_match, path, range)
       end
@@ -66,7 +66,7 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
       insert_to_path(
         prepared_match,
         path,
-        M.Range:new(
+        Range:new(
           metadata.range[1],
           metadata.range[2],
           metadata.range[3],
@@ -84,6 +84,7 @@ local function iter_prepared_matches(query, qnode, bufnr, start_row, end_row)
   return iterator
 end
 
+-- TODO(clason): replace with upstream functions, memoize
 ---@param bufnr integer the buffer
 ---@param query_group string the query file to use
 ---@param root TSNode the root node
@@ -92,7 +93,7 @@ local function iter_group_results(bufnr, query_group, root, root_lang)
   -- TODO (TheLeoP): should be cached?
   local query = ts.query.get(root_lang, query_group)
   if not query then
-    return EMPTY_ITER
+    return function() end -- empty iterator
   end
 
   local range = { root:range() } ---@type Range4
@@ -124,6 +125,7 @@ local function get_at_path(tbl, path)
   return result
 end
 
+-- TODO(clason): memoize
 ---@param bufnr integer
 ---@param query_string string
 ---@param query_group string
@@ -199,12 +201,6 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
   return best
 end
 
-if not unpack then
-  -- luacheck: push ignore 121
-  unpack = table.unpack
-  -- luacheck: pop
-end
-
 --- Convert single query string to list for backwards compatibility and the Vim commands
 ---
 ---@param query_strings string|string[]
@@ -236,40 +232,6 @@ function M.get_query_strings_from_pattern(query_patterns, query_group, lang)
   end
 
   return query_strings
-end
-
----@param lang? string
----@param query_group? string
----@return string[]
-function M.available_textobjects(lang, query_group)
-  lang = lang or ts.language.get_lang(vim.bo.filetype)
-  if not lang then
-    error(string.format("There is no language registered for filetype %s", vim.bo.filetype))
-  end
-  query_group = query_group or "textobjects"
-  -- TODO (TheLeoP): should be cached?
-  local parsed_queries = ts.query.get(lang, query_group)
-  if not parsed_queries then
-    return {}
-  end
-  local found_textobjects = parsed_queries.captures or {}
-  for _, pattern in pairs(parsed_queries.info.patterns) do
-    for _, q in ipairs(pattern) do
-      local query, arg1 = unpack(q) --[=[@as string, string[]]=]
-      if query == "make-range!" and not vim.tbl_contains(found_textobjects, arg1) then
-        table.insert(found_textobjects, arg1)
-      end
-    end
-  end
-  return found_textobjects
-  --patterns = {
-  --[2] = { { "make-range!", "function.inner", 2, 3 } },
-  --[4] = { { "make-range!", "function.inner", 2, 3 } },
-  --[11] = { { "make-range!", "parameter.outer", 2, 12 } },
-  --[12] = { { "make-range!", "parameter.outer", 12, 3 } },
-  --[13] = { { "make-range!", "parameter.outer", 2, 12 } },
-  --[14] = { { "make-range!", "parameter.outer", 12, 3 } }
-  --}
 end
 
 --- Get the best `TSTextObjects.Range` at a given point
@@ -433,176 +395,7 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
   end
 end
 
----@class TSTextObjects.Range
----@field start_col integer
----@field start_row integer
----@field start_byte integer
----@field end_col integer
----@field end_row integer
----@field end_byte integer
----@field parent_id any
----@field id any
----@field bufnr integer
----@field metadata? {range?: Range4}
-M.Range = {}
-M.Range.__index = M.Range
-
----@param range2 TSTextObjects.Range
-function M.Range:__eq(range2)
-  if self.bufnr ~= range2.bufnr then
-    return false
-  end
-
-  if self.id == -1 or range2.id == -1 then
-    local srow1, scol1, erow1, ecol1 = unpack(self:range4()) ---@type integer, integer, integer, integer
-    local srow2, scol2, erow2, ecol2 = unpack(range2:range4()) ---@type integer, integer, integer, integer
-    return srow1 == srow2 and scol1 == scol2 and erow1 == erow2 and ecol1 == ecol2
-  end
-
-  return self.id == range2.id
-end
-
----@param start_col integer
----@param start_row integer
----@param start_byte integer
----@param end_col integer
----@param end_row integer
----@param end_byte integer
----@param parent_id string
----@param id string
----@return TSTextObjects.Range
-function M.Range:new(start_row, start_col, start_byte, end_row, end_col, end_byte, parent_id, id, bufnr)
-  local range = {
-    start_col = start_col,
-    start_row = start_row,
-    start_byte = start_byte,
-    end_col = end_col,
-    end_row = end_row,
-    end_byte = end_byte,
-    parent_id = parent_id,
-    id = id,
-    bufnr = bufnr,
-  }
-  return setmetatable(range, self)
-end
-
----@param node TSNode
----@param bufnr integer
----@return TSTextObjects.Range
-function M.Range:from_node(node, bufnr)
-  local start_row, start_col, start_byte, end_row, end_col, end_byte = node:range(true)
-  local id = node:id()
-  local parent_id = node:parent():id()
-  return M.Range:new(start_row, start_col, start_byte, end_row, end_col, end_byte, parent_id, id, bufnr)
-end
-
---- Returns Range4 taking into account the `offset` directive
----
----@return Range4
-function M.Range:range4()
-  if self.metadata and self.metadata.range then
-    return self.metadata.range
-  end
-
-  return { self.start_row, self.start_col, self.end_row, self.end_col }
-end
-
---- Sets Range4 taking into account the `offset` directive
----
----@param range4 Range4
-function M.Range:set_range4(range4)
-  if self.metadata and self.metadata.range then
-    self.metadata.range = range4
-  end
-  self.start_row = range4[1]
-  self.start_col = range4[2]
-  self.end_row = range4[3]
-  self.end_col = range4[4]
-end
-
----@return lsp.Range
-function M.Range:to_lsp_range()
-  return {
-    start = {
-      line = self.start_row,
-      character = self.start_col,
-    },
-    ["end"] = {
-      line = self.end_row,
-      character = self.end_col,
-    },
-  }
-end
-
----@return Range4
-function M.Range:to_vim_range()
-  local srow, scol, erow, ecol = unpack(self:range4()) ---@type integer, integer, integer, integer
-  srow = srow + 1
-  scol = scol + 1
-  erow = erow + 1
-
-  if ecol == 0 then
-    -- Use the value of the last col of the previous row instead.
-    erow = erow - 1
-    if not self.bufnr or self.bufnr == 0 then
-      ecol = vim.fn.col { erow, "$" } - 1
-    else
-      ecol = #api.nvim_buf_get_lines(self.bufnr, erow - 1, erow, false)[1]
-    end
-    ecol = math.max(ecol, 1)
-  end
-  return { srow, scol, erow, ecol }
-end
-
----@return string[]
-function M.Range:get_text()
-  if self.start_row == self.end_row then
-    local line = api.nvim_buf_get_lines(self.bufnr, self.start_row, self.start_row + 1, false)[1]
-    return line and { string.sub(line, self.start_col + 1, self.end_col) } or {}
-  else
-    local lines = api.nvim_buf_get_lines(self.bufnr, self.start_row, self.end_row + 1, false)
-    if vim.tbl_isempty(lines) == nil then
-      return lines
-    end
-    lines[1] = string.sub(lines[1], self.start_col + 1)
-    -- end_row might be just after the last line. In this case the last line is not truncated.
-    if #lines == self.end_row - self.start_row + 1 then
-      lines[#lines] = string.sub(lines[#lines], 1, self.end_col)
-    end
-    return lines
-  end
-end
-
----@param row integer
----@param col integer
----@return boolean
-function M.Range:is_in_range(row, col)
-  local start_row, start_col, end_row, end_col = unpack(self:range4()) ---@type integer, integer, integer, integer
-  end_col = end_col - 1
-
-  local is_in_rows = start_row <= row and end_row >= row
-  local is_after_start_col_if_needed = true
-  if start_row == row then
-    is_after_start_col_if_needed = col >= start_col
-  end
-  local is_before_end_col_if_needed = true
-  if end_row == row then
-    is_before_end_col_if_needed = col <= end_col
-  end
-  return is_in_rows and is_after_start_col_if_needed and is_before_end_col_if_needed
-end
-
----@param range TSTextObjects.Range
----@return boolean
-function M.Range:contains(range)
-  return self:is_in_range(range.start_row, range.start_col) and self:is_in_range(range.end_row, range.end_col)
-end
-
----@return integer
-function M.Range:length()
-  return self.end_byte - self.start_byte
-end
-
+-- TODO(clason): move to swap
 ---@param forward boolean
 ---@param range TSTextObjects.Range
 ---@param query_string string
@@ -683,6 +476,42 @@ function M.previous_textobject(range, query_string, query_group, bufnr)
   return previous_range
 end
 
+-- TODO(clason): move to configs?
+---@param lang? string
+---@param query_group? string
+---@return string[]
+function M.available_textobjects(lang, query_group)
+  lang = lang or ts.language.get_lang(vim.bo.filetype)
+  if not lang then
+    error(string.format("There is no language registered for filetype %s", vim.bo.filetype))
+  end
+  query_group = query_group or "textobjects"
+  -- TODO (TheLeoP): should be cached?
+  local parsed_queries = ts.query.get(lang, query_group)
+  if not parsed_queries then
+    return {}
+  end
+  local found_textobjects = parsed_queries.captures or {}
+  for _, pattern in pairs(parsed_queries.info.patterns) do
+    for _, q in ipairs(pattern) do
+      local query, arg1 = unpack(q) --[=[@as string, string[]]=]
+      if query == "make-range!" and not vim.tbl_contains(found_textobjects, arg1) then
+        table.insert(found_textobjects, arg1)
+      end
+    end
+  end
+  return found_textobjects
+  --patterns = {
+  --[2] = { { "make-range!", "function.inner", 2, 3 } },
+  --[4] = { { "make-range!", "function.inner", 2, 3 } },
+  --[11] = { { "make-range!", "parameter.outer", 2, 12 } },
+  --[12] = { { "make-range!", "parameter.outer", 12, 3 } },
+  --[13] = { { "make-range!", "parameter.outer", 2, 12 } },
+  --[14] = { { "make-range!", "parameter.outer", 12, 3 } }
+  --}
+end
+
+-- TODO(clason): move to configs?
 ---@param bufnr integer
 ---@param query_group? string
 ---@param queries? string[]
@@ -722,6 +551,7 @@ function M.check_support(bufnr, query_group, queries)
   return true
 end
 
+-- TODO(clason): make local, use
 ---Memoize a function using hash_fn to hash the arguments.
 ---@generic F: function
 ---@param fn F

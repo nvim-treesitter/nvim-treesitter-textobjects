@@ -1,7 +1,7 @@
 local M = {}
 
 ---@class TSTextObjects.MoveOpts
----@field query_strings_regex? string[]|string
+---@field query_strings? string[]|string
 ---@field query_group? string
 ---@field forward boolean
 ---@field start? boolean If true, choose the start of the node, and false is for the end.

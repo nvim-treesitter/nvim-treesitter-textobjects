@@ -117,14 +117,10 @@ end)
 vim.keymap.set({ "n", "x", "o" }, "]]", function()
   require("nvim-treesitter-textobjects.move").goto_next_start("@class.outer", "textobjects")
 end)
--- You can use lua patterns to group multiple queries.
-vim.keymap.set({ "n", "x", "o" }, "]o", function()
-  require("nvim-treesitter-textobjects.move").goto_next_start("@loop.*", "textobjects")
-end)
 -- You can also pass a list to group multiple queries.
--- vim.keymap.set({ "n", "x", "o" }, "]o", function()
---   move.goto_next_start({"@loop.inner", "@loop.outer"}, "textobjects")
--- end)
+vim.keymap.set({ "n", "x", "o" }, "]o", function()
+  move.goto_next_start({"@loop.inner", "@loop.outer"}, "textobjects")
+end)
 -- You can also use captures from other query groups like `locals.scm` or `folds.scm`
 vim.keymap.set({ "n", "x", "o" }, "]s", function()
   require("nvim-treesitter-textobjects.move").goto_next_start("@local.scope", "locals")
@@ -156,7 +152,6 @@ end)
 
 -- Go to either the start or the end, whichever is closer.
 -- Use if you want more granular movements
--- Make it even more gradual by adding multiple queries and regex.
 vim.keymap.set({ "n", "x", "o" }, "]d", function()
   require("nvim-treesitter-textobjects.move").goto_next("@conditional.outer", "textobjects")
 end)

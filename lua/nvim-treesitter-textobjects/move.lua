@@ -40,11 +40,10 @@ local M = {}
 ---@param opts TSTextObjects.MoveOpts
 local function move(opts)
   local query_group = opts.query_group or "textobjects"
+  local query_strings = type(opts.query_strings) == "string" and { opts.query_strings } or opts.query_strings
 
-  local query_strings_pattern = shared.force_table(opts.query_strings_regex)
   local winid = opts.winid or api.nvim_get_current_win()
   local bufnr = api.nvim_win_get_buf(winid)
-  local query_strings = shared.get_query_strings_from_pattern(query_strings_pattern, query_group)
 
   if not shared.check_support(api.nvim_get_current_buf(), query_group, query_strings) then
     vim.notify(
@@ -149,62 +148,62 @@ end
 ---@type fun(opts: TSTextObjects.MoveOpts)
 local move_repeatable = repeatable_move.make_repeatable_move(move)
 
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_next_start = function(query_strings_regex, query_group)
+M.goto_next_start = function(query_strings, query_group)
   move_repeatable {
     forward = true,
     start = true,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_next_end = function(query_strings_regex, query_group)
+M.goto_next_end = function(query_strings, query_group)
   move_repeatable {
     forward = true,
     start = false,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_previous_start = function(query_strings_regex, query_group)
+M.goto_previous_start = function(query_strings, query_group)
   move_repeatable {
     forward = false,
     start = true,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_previous_end = function(query_strings_regex, query_group)
+M.goto_previous_end = function(query_strings, query_group)
   move_repeatable {
     forward = false,
     start = false,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end
 
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_next = function(query_strings_regex, query_group)
+M.goto_next = function(query_strings, query_group)
   move_repeatable {
     forward = true,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_previous = function(query_strings_regex, query_group)
+M.goto_previous = function(query_strings, query_group)
   move_repeatable {
     forward = false,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end

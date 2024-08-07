@@ -141,18 +141,6 @@ local function swap_textobject(captures, query_group, direction)
   local query_strings = type(captures) == "string" and { captures } or captures
   query_group = query_group or "textobjects"
 
-  if not shared.check_support(api.nvim_get_current_buf(), "textobjects", query_strings) then
-    vim.notify(
-      ("The filetype `%s` does not support the textobjects `%s` for the query file `%s`"):format(
-        vim.bo.filetype,
-        vim.inspect(query_strings),
-        query_group
-      ),
-      vim.log.levels.WARN
-    )
-    return
-  end
-
   local bufnr, textobject_range, query_string ---@type integer?, TSTextObjects.Range?, string?
   for _, query_string_iter in ipairs(query_strings) do
     bufnr, textobject_range = shared.textobject_at_point(query_string_iter, query_group)

@@ -45,18 +45,6 @@ local function move(opts)
   local winid = opts.winid or api.nvim_get_current_win()
   local bufnr = api.nvim_win_get_buf(winid)
 
-  if not shared.check_support(api.nvim_get_current_buf(), query_group, query_strings) then
-    vim.notify(
-      ("The filetype `%s` does not support the textobjects `%s` for the query file `%s`"):format(
-        vim.bo[bufnr].filetype,
-        vim.inspect(query_strings),
-        query_group
-      ),
-      vim.log.levels.WARN
-    )
-    return
-  end
-
   local forward = opts.forward
   local starts ---@type {[1]: boolean, [2]: boolean}
   if opts.start == nil then

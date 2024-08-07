@@ -107,7 +107,8 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
             metadata.range[5],
             metadata.range[6],
             "-1",
-            "-1"
+            "-1",
+            bufnr
           )
         )
       end
@@ -378,87 +379,6 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
       end
     end
   end
-end
-
--- TODO(clason): move next three functions to swap?
----@param range TSTextObjects.Range
----@param query_string string
----@param query_group string
----@param bufnr integer
----@return TSTextObjects.Range?
-local next_textobject = function(range, query_string, query_group, bufnr)
-  local node_end = range.end_byte
-  local search_start = node_end
-
-  ---@param current_range TSTextObjects.Range
-  ---@return boolean
-  local function filter_function(current_range)
-    if current_range == range then
-      return false
-    end
-    if range.parent_id == current_range.parent_id then
-      local start = current_range.start_byte
-      local end_ = current_range.end_byte
-      return start >= search_start and end_ >= node_end
-    end
-    return false
-  end
-
-  ---@param current_range TSTextObjects.Range
-  ---@return integer
-  local function scoring_function(current_range)
-    local start = current_range.start_byte
-    return -start
-  end
-
-  local next_range = M.find_best_range(bufnr, query_string, query_group, filter_function, scoring_function)
-
-  return next_range
-end
-
----@param range TSTextObjects.Range
----@param query_string string
----@param query_group? string
----@param bufnr integer
----@return TSTextObjects.Range?
-local previous_textobject = function(range, query_string, query_group, bufnr)
-  query_group = query_group or "textobjects"
-
-  local node_start = range.start_byte
-  local search_end = node_start
-
-  ---@param current_range TSTextObjects.Range
-  ---@return boolean
-  local function filter_function(current_range)
-    if current_range.parent_id == current_range.parent_id then
-      local end_ = current_range.end_byte
-      local start = current_range.start_byte
-      return end_ <= search_end and start < node_start
-    end
-    return false
-  end
-
-  ---@param current_range TSTextObjects.Range
-  ---@return integer
-  local function scoring_function(current_range)
-    local node_end = current_range.end_byte
-    return node_end
-  end
-
-  local previous_range = M.find_best_range(bufnr, query_string, query_group, filter_function, scoring_function)
-
-  return previous_range
-end
-
----@param forward boolean
----@param range TSTextObjects.Range
----@param query_string string
----@param query_group string
----@param bufnr integer
----@return TSTextObjects.Range?
-function M.get_adjacent(forward, range, query_string, query_group, bufnr)
-  local fn = forward and next_textobject or previous_textobject
-  return fn(range, query_string, query_group, bufnr)
 end
 
 ---@param lang? string

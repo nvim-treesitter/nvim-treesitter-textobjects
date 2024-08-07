@@ -1,5 +1,4 @@
 local api = vim.api
-local ts = vim.treesitter
 
 local shared = require "nvim-treesitter-textobjects.shared"
 local repeatable_move = require "nvim-treesitter-textobjects.repeatable_move"
@@ -14,7 +13,7 @@ local function goto_node(range, goto_end, avoid_set_jump)
   end
 
   if not avoid_set_jump then
-    shared.set_jump()
+    vim.cmd "normal! m'"
   end
   local vim_range = range:to_vim_range()
   ---@type table<number>
@@ -27,7 +26,7 @@ local function goto_node(range, goto_end, avoid_set_jump)
 
   -- Enter visual mode if we are in operator pending mode
   -- If we don't do this, it will miss the last character.
-  local mode = vim.api.nvim_get_mode()
+  local mode = api.nvim_get_mode()
   if mode.mode == "no" then
     vim.cmd "normal! v"
   end
@@ -41,27 +40,10 @@ local M = {}
 ---@param opts TSTextObjects.MoveOpts
 local function move(opts)
   local query_group = opts.query_group or "textobjects"
+  local query_strings = type(opts.query_strings) == "string" and { opts.query_strings } or opts.query_strings
 
-  local query_strings_pattern = shared.make_query_strings_table(opts.query_strings_regex)
-  local winid = opts.winid or vim.api.nvim_get_current_win()
-  local bufnr = vim.api.nvim_win_get_buf(winid)
-  local query_strings = shared.get_query_strings_from_pattern(
-    query_strings_pattern,
-    query_group,
-    ts.language.get_lang(vim.bo[bufnr].filetype)
-  )
-
-  if not shared.check_support(api.nvim_get_current_buf(), query_group, query_strings) then
-    vim.notify(
-      ("The filetype `%s` does not support the textobjects `%s` for the query file `%s`"):format(
-        vim.bo.filetype,
-        vim.inspect(query_strings),
-        query_group
-      ),
-      vim.log.levels.WARN
-    )
-    return
-  end
+  local winid = opts.winid or api.nvim_get_current_win()
+  local bufnr = api.nvim_win_get_buf(winid)
 
   local forward = opts.forward
   local starts ---@type {[1]: boolean, [2]: boolean}
@@ -101,7 +83,7 @@ local function move(opts)
   ---@return boolean
   local function filter_function(start_, range)
     local range4 = range:range4()
-    local row, col = unpack(vim.api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
+    local row, col = unpack(api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
     row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
 
     if not start_ then
@@ -154,62 +136,62 @@ end
 ---@type fun(opts: TSTextObjects.MoveOpts)
 local move_repeatable = repeatable_move.make_repeatable_move(move)
 
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_next_start = function(query_strings_regex, query_group)
+M.goto_next_start = function(query_strings, query_group)
   move_repeatable {
     forward = true,
     start = true,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_next_end = function(query_strings_regex, query_group)
+M.goto_next_end = function(query_strings, query_group)
   move_repeatable {
     forward = true,
     start = false,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_previous_start = function(query_strings_regex, query_group)
+M.goto_previous_start = function(query_strings, query_group)
   move_repeatable {
     forward = false,
     start = true,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_previous_end = function(query_strings_regex, query_group)
+M.goto_previous_end = function(query_strings, query_group)
   move_repeatable {
     forward = false,
     start = false,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end
 
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_next = function(query_strings_regex, query_group)
+M.goto_next = function(query_strings, query_group)
   move_repeatable {
     forward = true,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end
----@param query_strings_regex string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_previous = function(query_strings_regex, query_group)
+M.goto_previous = function(query_strings, query_group)
   move_repeatable {
     forward = false,
-    query_strings_regex = query_strings_regex,
+    query_strings = query_strings,
     query_group = query_group,
   }
 end

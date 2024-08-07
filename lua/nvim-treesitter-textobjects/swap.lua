@@ -26,7 +26,7 @@ local function swap_nodes(range1, range2, bufnr, cursor_to_second)
   vim.lsp.util.apply_text_edits({ edit1, edit2 }, bufnr, "utf-8")
 
   if cursor_to_second then
-    shared.set_jump()
+    vim.cmd "normal! m'" -- set jump
 
     local char_delta = 0
     local line_delta = 0
@@ -64,29 +64,82 @@ local function swap_nodes(range1, range2, bufnr, cursor_to_second)
     )
   end
 end
+---
+---@param range TSTextObjects.Range
+---@param query_string string
+---@param query_group string
+---@param bufnr integer
+---@return TSTextObjects.Range?
+local next_textobject = function(range, query_string, query_group, bufnr)
+  local node_end = range.end_byte
+  local search_start = node_end
+
+  ---@param current_range TSTextObjects.Range
+  ---@return boolean
+  local function filter_function(current_range)
+    if current_range == range then
+      return false
+    end
+    if range.parent_id == current_range.parent_id then
+      local start = current_range.start_byte
+      local end_ = current_range.end_byte
+      return start >= search_start and end_ >= node_end
+    end
+    return false
+  end
+
+  ---@param current_range TSTextObjects.Range
+  ---@return integer
+  local function scoring_function(current_range)
+    local start = current_range.start_byte
+    return -start
+  end
+
+  local next_range = shared.find_best_range(bufnr, query_string, query_group, filter_function, scoring_function)
+
+  return next_range
+end
+
+---@param range TSTextObjects.Range
+---@param query_string string
+---@param query_group string
+---@param bufnr integer
+---@return TSTextObjects.Range?
+local previous_textobject = function(range, query_string, query_group, bufnr)
+  local node_start = range.start_byte
+  local search_end = node_start
+
+  ---@param current_range TSTextObjects.Range
+  ---@return boolean
+  local function filter_function(current_range)
+    if current_range.parent_id == current_range.parent_id then
+      local end_ = current_range.end_byte
+      local start = current_range.start_byte
+      return end_ <= search_end and start < node_start
+    end
+    return false
+  end
+
+  ---@param current_range TSTextObjects.Range
+  ---@return integer
+  local function scoring_function(current_range)
+    local node_end = current_range.end_byte
+    return node_end
+  end
+
+  local previous_range = shared.find_best_range(bufnr, query_string, query_group, filter_function, scoring_function)
+
+  return previous_range
+end
 
 local M = {}
 
----@param query_strings_regex string|string[]
+---@param captures string|string[]
 ---@param query_group? string
 ---@param direction integer
-local function swap_textobject(query_strings_regex, query_group, direction)
-  query_strings_regex = shared.make_query_strings_table(query_strings_regex)
+local function swap_textobject(captures, query_group, direction)
+  local query_strings = type(captures) == "string" and { captures } or captures
   query_group = query_group or "textobjects"
-
-  local query_strings = shared.get_query_strings_from_pattern(query_strings_regex, query_group)
-
-  if not shared.check_support(api.nvim_get_current_buf(), "textobjects", query_strings) then
-    vim.notify(
-      ("The filetype `%s` does not support the textobjects `%s` for the query file `%s`"):format(
-        vim.bo.filetype,
-        vim.inspect(query_strings),
-        query_group
-      ),
-      vim.log.levels.WARN
-    )
-    return
-  end
 
   local bufnr, textobject_range, query_string ---@type integer?, TSTextObjects.Range?, string?
   for _, query_string_iter in ipairs(query_strings) do
@@ -102,8 +155,8 @@ local function swap_textobject(query_strings_regex, query_group, direction)
 
   local step = direction > 0 and 1 or -1
   for _ = 1, math.abs(direction), step do
-    local forward = direction > 0
-    local adjacent = shared.get_adjacent(forward, textobject_range, query_string, query_group, bufnr)
+    local adjacent = direction > 0 and next_textobject(textobject_range, query_string, query_group, bufnr)
+      or previous_textobject(textobject_range, query_string, query_group, bufnr)
     if adjacent then
       swap_nodes(textobject_range, adjacent, bufnr, "yes, set cursor!")
     end
@@ -114,22 +167,22 @@ end
 local function make_dot_repeatable(fn)
   _G._nvim_treesitter_textobject_last_function = fn
   vim.o.opfunc = "v:lua._nvim_treesitter_textobject_last_function"
-  vim.api.nvim_feedkeys("g@l", "n", false)
+  api.nvim_feedkeys("g@l", "n", false)
 end
 
----@param query_strings_regex string lua pattern describing the query string
+---@param query_strings string lua pattern describing the query string
 ---@param query_group? string
-function M.swap_next(query_strings_regex, query_group)
+function M.swap_next(query_strings, query_group)
   return make_dot_repeatable(function()
-    swap_textobject(query_strings_regex, query_group, 1)
+    swap_textobject(query_strings, query_group, 1)
   end)
 end
 
----@param query_strings_regex string lua pattern describing the query string
+---@param query_strings string lua pattern describing the query string
 ---@param query_group? string
-function M.swap_previous(query_strings_regex, query_group)
+function M.swap_previous(query_strings, query_group)
   return make_dot_repeatable(function()
-    swap_textobject(query_strings_regex, query_group, -1)
+    swap_textobject(query_strings, query_group, -1)
   end)
 end
 

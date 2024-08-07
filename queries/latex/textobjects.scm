@@ -1,24 +1,30 @@
 ((generic_environment
-  .
-  (_)
+  begin: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
-  (_) .) @block.outer
+  end: (_)) @block.outer
   (#make-range! "block.inner" @_start @_end))
 
-((generic_environment
-  (begin
-    name: (curly_group_text
-      (text) @_frame))
+((math_environment
+  begin: (_)
   .
   (_) @_start
-  (_) @_end
+  (_)? @_end
   .
-  (_) .) @frame.outer
-  (#eq? @_frame "frame")
-  (#make-range! "frame.inner" @_start @_end))
+  end: (_)) @block.outer
+  (#make-range! "block.inner" @_start @_end))
+
+(generic_environment
+  begin: (begin
+    name: (curly_group_text
+      text: (text) @frame.inner))) @frame.outer
+
+(math_environment
+  begin: (begin
+    name: (curly_group_text
+      text: (text) @frame.inner))) @frame.outer
 
 [
   (generic_command)
@@ -45,12 +51,51 @@
     "}")
   (#make-range! "call.inner" @_start @_end))
 
-[
-  (chapter)
-  (part)
-  (section)
-  (subsection)
-  (subsubsection)
-  (paragraph)
-  (subparagraph)
-] @class.outer
+((part
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((chapter
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((section
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((subsection
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((subsubsection
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((paragraph
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))
+
+((subparagraph
+  text: (_)
+  .
+  (_) @_start
+  (_)? @_end .) @class.outer
+  (#make-range! "class.inner" @_start @_end))

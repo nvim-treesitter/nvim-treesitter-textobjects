@@ -89,9 +89,12 @@ like function parameters or arguments.
 
 ```lua
 -- keymaps
-local swap = require("nvim-treesitter-textobjects.swap")
-vim.keymap.set("n", "<leader>a", swap.swap_next("@parameter.inner"))
-vim.keymap.set("n", "<leader>A", swap.swap_next("@parameter.outer"))
+vim.keymap.set("n", "<leader>a", function()
+  require("nvim-treesitter-textobjects.swap").swap_next "@parameter.inner"
+end)
+vim.keymap.set("n", "<leader>A", function()
+  require("nvim-treesitter-textobjects.swap").swap_next "@parameter.outer"
+end)
 ```
 
 ## Text objects: move

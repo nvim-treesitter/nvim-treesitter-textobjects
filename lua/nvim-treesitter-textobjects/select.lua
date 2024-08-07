@@ -163,23 +163,6 @@ end
 function M.select_textobject(query_string, query_group)
   query_group = query_group or "textobjects"
 
-  if not shared.check_support(api.nvim_get_current_buf(), query_group, { query_string }) then
-    vim.notify(
-      ("The filetype `%s` does not support the textobject `%s` for the query file `%s`"):format(
-        vim.bo.filetype,
-        query_string,
-        query_group
-      ),
-      vim.log.levels.WARN
-    )
-    local mode = api.nvim_get_mode().mode
-    if mode == "v" or mode == "V" or mode == "\22" then
-      -- '\28\14' is an escaped version of `<C-\><C-n>`
-      vim.cmd "normal! \28\14"
-    end
-    return
-  end
-
   local config = global_config.select
   local lookahead = config.lookahead
   local lookbehind = config.lookbehind

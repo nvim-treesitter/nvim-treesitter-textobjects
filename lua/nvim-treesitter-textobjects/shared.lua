@@ -135,8 +135,10 @@ local function get_capture_ranges_recursively(bufnr, query_string, query_group)
   end
   query_string = query_string:sub(2)
 
-  local lang = ts.language.get_lang(vim.bo[bufnr].filetype)
-  local parser = ts.get_parser(bufnr, lang)
+  local parser = ts.get_parser(bufnr)
+  if not parser then
+    return {}
+  end
 
   local ranges = {} ---@type TSTextObjects.Range[]
   parser:for_each_tree(function(tree, lang_tree)
@@ -161,10 +163,14 @@ end
 ---@param scoring_function fun(current_range: TSTextObjects.Range): number
 ---@return TSTextObjects.Range?
 function M.find_best_range(bufnr, capture_string, query_group, filter_predicate, scoring_function)
-  local lang = assert(ts.language.get_lang(vim.bo[bufnr].filetype))
-  local parser = ts.get_parser(bufnr, lang)
+  local parser = ts.get_parser(bufnr)
+  if not parser then
+    return {}
+  end
+
   local first_tree = parser:trees()[1]
   local root = first_tree:root()
+  local lang = parser:lang()
 
   if string.sub(capture_string, 1, 1) == "@" then
     --remove leading "@"
@@ -361,11 +367,6 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
   opts = opts or {}
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   pos = pos or vim.api.nvim_win_get_cursor(0)
-
-  local lang = ts.language.get_lang(vim.bo[bufnr].filetype)
-  if not lang then
-    error(string.format("There is no language registered for filetype %s", vim.bo.filetype))
-  end
 
   local row, col = unpack(pos) --[[@as integer, integer]]
   row = row - 1
@@ -689,7 +690,8 @@ end
 function M.check_support(bufnr, query_group, queries)
   query_group = query_group or "textobjects"
 
-  local buf_lang = ts.language.get_lang(vim.bo[bufnr].filetype)
+  local filetype = vim.bo[bufnr].filetype
+  local buf_lang = ts.language.get_lang(filetype) or filetype
   if not buf_lang then
     return false
   end

@@ -40,15 +40,15 @@ M.repeat_last_move = function(opts_extend)
 
     if M.last_move.func == "f" or M.last_move.func == "t" then
       if opts.forward then
-        vim.cmd.normal { args = { vim.v.count1, ";" }, bang = true }
+        vim.cmd.normal { vim.v.count1 .. ";", bang = true }
       else
-        vim.cmd.normal { args = { vim.v.count1, "," }, bang = true }
+        vim.cmd.normal { vim.v.count1 .. ",", bang = true }
       end
     elseif M.last_move.func == "F" or M.last_move.func == "T" then
       if opts.forward then
-        vim.cmd.normal { args = { vim.v.count1, "," }, bang = true }
+        vim.cmd.normal { vim.v.count1 .. ",", bang = true }
       else
-        vim.cmd.normal { args = { vim.v.count1, ";" }, bang = true }
+        vim.cmd.normal { vim.v.count1 .. ";", bang = true }
       end
     else
       M.last_move.func(opts, unpack(M.last_move.additional_args))

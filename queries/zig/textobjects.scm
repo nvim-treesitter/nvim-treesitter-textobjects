@@ -7,7 +7,15 @@
 ; functions
 (_
   (FnProto)
-  (Block) @function.inner) @function.outer
+  ((Block
+    .
+    "{"
+    .
+    (_) @_start @_end
+    (_)? @_end
+    .
+    "}")
+    (#make-range! "function.inner" @_start @_end))) @function.outer
 
 ; loops
 (_

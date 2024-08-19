@@ -40,7 +40,9 @@ local M = {}
 ---@param query_group? string
 local function move(opts, query_strings, query_group)
   query_group = query_group or "textobjects"
-  query_strings = type(query_strings) == "string" and { query_strings } or query_strings
+  if type(query_strings) == "string" then
+    query_strings = { query_strings }
+  end
 
   local winid = api.nvim_get_current_win()
   local bufnr = api.nvim_win_get_buf(winid)

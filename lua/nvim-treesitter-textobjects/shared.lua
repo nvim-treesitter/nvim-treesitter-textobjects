@@ -1,6 +1,4 @@
 local ts = vim.treesitter
--- TODO(clason): replace with vim.treesitter._range
-local Range = require "nvim-treesitter-textobjects.range"
 
 -- luacheck: push ignore 631
 ---@alias TSTextObjects.Metadata {range: {[1]: number, [2]: number, [3]: number, [4]: number, [5]: number, [6]: number, [7]: string}}
@@ -82,13 +80,16 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
       local prepared_match = {}
 
       -- Extract capture names from each match
-      for id, node in pairs(match) do
+      for id, nodes in pairs(match) do
         local query_name = query.captures[id] -- name of the capture in the query
+        if type(nodes) ~= "table" then
+          nodes = { nodes }
+        end
         if query_name ~= nil then
           local path = vim.split(query_name, "%.")
-          local range = Range:from_node(node, bufnr)
-          range.metadata = metadata[id]
-          insert_to_path(prepared_match, path, range)
+          for _, node in ipairs(nodes) do
+            insert_to_path(prepared_match, path, { node:range(true) })
+          end
         end
       end
 
@@ -96,21 +97,14 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
         ---@cast metadata TSTextObjects.Metadata
         local query_name = metadata.range[7]
         local path = vim.split(query_name, "%.")
-        insert_to_path(
-          prepared_match,
-          path,
-          Range:new(
-            metadata.range[1],
-            metadata.range[2],
-            metadata.range[3],
-            metadata.range[4],
-            metadata.range[5],
-            metadata.range[6],
-            "-1",
-            "-1",
-            bufnr
-          )
-        )
+        insert_to_path(prepared_match, path, {
+          metadata.range[1],
+          metadata.range[2],
+          metadata.range[3],
+          metadata.range[4],
+          metadata.range[5],
+          metadata.range[6],
+        })
       end
 
       matches[#matches + 1] = prepared_match
@@ -146,7 +140,7 @@ end
 ---@param bufnr integer
 ---@param query_string string
 ---@param query_group string
----@return TSTextObjects.Range[]
+---@return Range6[]
 local function get_capture_ranges_recursively(bufnr, query_string, query_group)
   if query_string:sub(1, 1) ~= "@" then
     error 'Captures must start with "@"'
@@ -159,7 +153,7 @@ local function get_capture_ranges_recursively(bufnr, query_string, query_group)
     return {}
   end
 
-  local ranges = {} ---@type TSTextObjects.Range[]
+  local ranges = {} ---@type Range6[]
   parser:for_each_tree(function(tree, lang_tree)
     local tree_lang = lang_tree:lang()
 
@@ -167,7 +161,7 @@ local function get_capture_ranges_recursively(bufnr, query_string, query_group)
     for _, match in pairs(matches) do
       local found = get_at_path(match, query_string)
       if found then
-        ---@cast found TSTextObjects.Range
+        ---@cast found Range6
         table.insert(ranges, found)
       end
     end
@@ -179,9 +173,9 @@ end
 ---@param bufnr integer
 ---@param capture_string string
 ---@param query_group string
----@param filter_predicate fun(current_range: TSTextObjects.Range): boolean
----@param scoring_function fun(current_range: TSTextObjects.Range): number
----@return TSTextObjects.Range?
+---@param filter_predicate fun(current_range: Range6): boolean
+---@param scoring_function fun(current_range: Range6): number
+---@return Range6?
 function M.find_best_range(bufnr, capture_string, query_group, filter_predicate, scoring_function)
   local parser = ts.get_parser(bufnr)
   if not parser then
@@ -197,13 +191,13 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
     capture_string = string.sub(capture_string, 2)
   end
 
-  local best ---@type TSTextObjects.Range?
+  local best ---@type Range6?
   local best_score ---@type number
 
   local matches = get_query_matches(bufnr, query_group, root, lang)
   for _, maybe_match in pairs(matches) do
     local range = get_at_path(maybe_match, capture_string)
-    ---@cast range TSTextObjects.Range
+    ---@cast range Range6
 
     if range and filter_predicate(range) then
       local current_score = scoring_function(range)
@@ -220,37 +214,70 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
   return best
 end
 
+---@param range Range4
+---@param row integer
+---@param col integer
+---@return boolean
+local function is_in_range(range, row, col)
+  local start_row, start_col, end_row, end_col = unpack(range) ---@type integer, integer, integer, integer
+  end_col = end_col - 1
+
+  local is_in_rows = start_row <= row and end_row >= row
+  local is_after_start_col_if_needed = true
+  if start_row == row then
+    is_after_start_col_if_needed = col >= start_col
+  end
+  local is_before_end_col_if_needed = true
+  if end_row == row then
+    is_before_end_col_if_needed = col <= end_col
+  end
+  return is_in_rows and is_after_start_col_if_needed and is_before_end_col_if_needed
+end
+
+---@param range1 Range4
+---@param range2 Range4
+---@return boolean
+local function contains(range1, range2)
+  return is_in_range(range1, range2[1], range2[2]) and is_in_range(range1, range2[3], range2[4])
+end
+
+---@param range Range6
+---@return Range4
+function M.range6_range4(range)
+  return { range[1], range[2], range[4], range[5] }
+end
+
 --- Get the best `TSTextObjects.Range` at a given point
 --- If the point is inside a `TSTextObjects.Range`, the smallest range is returned
 --- If the point is not inside a `TSTextObjects.Range`, the closest one is returned
 --- (if `opts.lookahead` or `opts.lookbehind` is true)
----@param ranges TSTextObjects.Range[] list of ranges
+---@param ranges Range6[] list of ranges
 ---@param row number 0-indexed
 ---@param col number 0-indexed
 ---@param opts {lookahead: boolean?, lookbehind: boolean?} lookahead and lookbehind options
----@return TSTextObjects.Range?
+---@return Range6?
 local function best_range_at_point(ranges, row, col, opts)
   local range_length ---@type integer
-  local smallest_range ---@type TSTextObjects.Range
+  local smallest_range ---@type Range6
   local earliest_start ---@type integer
 
   local lookahead_match_length ---@type integer
-  local lookahead_largest_range ---@type TSTextObjects.Range
+  local lookahead_largest_range ---@type Range6
   local lookahead_earliest_start ---@type integer
   local lookbehind_match_length ---@type integer
-  local lookbehind_largest_range ---@type TSTextObjects.Range
+  local lookbehind_largest_range ---@type Range6
   local lookbehind_earliest_start ---@type integer
 
   for _, range in pairs(ranges) do
-    if range and range:is_in_range(row, col) then
-      local length = range:length()
+    if range and is_in_range(M.range6_range4(range), row, col) then
+      local length = range[6] - range[3]
       if not range_length or length < range_length then
         smallest_range = range
         range_length = length
       end
       -- for nodes with same length take the one with earliest start
-      if range_length and length == smallest_range:length() then
-        local start_byte = range.start_byte
+      if range_length and length == smallest_range[6] - smallest_range[3] then
+        local start_byte = range[3]
         if not earliest_start or start_byte < earliest_start then
           smallest_range = range
           range_length = length
@@ -258,9 +285,9 @@ local function best_range_at_point(ranges, row, col, opts)
         end
       end
     elseif opts.lookahead then
-      local start_line, start_col, start_byte = range.start_row, range.start_col, range.start_byte
+      local start_line, start_col, start_byte = range[1], range[2], range[3]
       if start_line > row or start_line == row and start_col > col then
-        local length = range:length()
+        local length = range[6] - range[3]
         if
           not lookahead_earliest_start
           or lookahead_earliest_start > start_byte
@@ -272,9 +299,9 @@ local function best_range_at_point(ranges, row, col, opts)
         end
       end
     elseif opts.lookbehind then
-      local start_line, start_col, start_byte = range.start_row, range.start_col, range.start_byte
+      local start_line, start_col, start_byte = range[1], range[2], range[3]
       if start_line < row or start_line == row and start_col < col then
-        local length = range:length()
+        local length = range[6] - range[3]
         if
           not lookbehind_earliest_start
           or lookbehind_earliest_start < start_byte
@@ -306,12 +333,11 @@ end
 --- when it's just after the end of the inner range (e.g. the "end" keyword of the function)
 ---@param query_string string
 ---@param query_group string
----@param pos? {[1]: integer, [2]: integer}
 ---@param bufnr? integer
+---@param pos? {[1]: integer, [2]: integer}
 ---@param opts? {lookahead: boolean?, lookbehind: boolean?} lookahead and lookbehind options
----@return integer bufnr
----@return TSTextObjects.Range? range
-function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
+---@return Range6?
+function M.textobject_at_point(query_string, query_group, bufnr, pos, opts)
   opts = opts or {}
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   pos = pos or vim.api.nvim_win_get_cursor(0)
@@ -326,7 +352,7 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
   local ranges = get_capture_ranges_recursively(bufnr, query_string, query_group)
   if vim.endswith(query_string, "outer") then
     local range = best_range_at_point(ranges, row, col, opts)
-    return bufnr, range
+    return range
   else
     -- query string is @*.inner or @*
     -- First search the @*.outer instead, and then search the @*.inner within the range of the @*.outer
@@ -340,7 +366,7 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
       -- Outer query doesn't exist or doesn't match anything
       -- Return the best range from the entire buffer, just like the @*.outer case
       local range = best_range_at_point(ranges, row, col, opts)
-      return bufnr, range
+      return range
     end
 
     -- Note that outer ranges don't perform lookahead
@@ -349,12 +375,12 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
       -- No @*.outer found
       -- Return the best range from the entire buffer, just like the @*.outer case
       local range = best_range_at_point(ranges, row, col, opts)
-      return bufnr, range
+      return range
     end
 
     local ranges_within_outer = {}
     for _, range in ipairs(ranges) do
-      if range_outer:contains(range) then
+      if contains(M.range6_range4(range_outer), M.range6_range4(range)) then
         table.insert(ranges_within_outer, range)
       end
     end
@@ -362,20 +388,19 @@ function M.textobject_at_point(query_string, query_group, pos, bufnr, opts)
       -- No @*.inner found within the range of the @*.outer
       -- Return the best range from the entire buffer, just like the @*.outer case
       local range = best_range_at_point(ranges, row, col, opts)
-      return bufnr, range
+      return range
     else
       -- Find the best range from the cursor position
       local range = best_range_at_point(ranges_within_outer, row, col, opts)
       if range ~= nil then
-        return bufnr, range
+        return range
       else
         -- If failed,
         -- find the best range within the range of the @*.outer
         -- starting from the outer range's start position (not the cursor position)
         -- with lookahead enabled
-        range =
-          best_range_at_point(ranges_within_outer, range_outer.start_row, range_outer.start_col, { lookahead = true })
-        return bufnr, range
+        range = best_range_at_point(ranges_within_outer, range_outer[1], range_outer[2], { lookahead = true })
+        return range
       end
     end
   end
@@ -445,6 +470,28 @@ function M.check_support(bufnr, query_group, queries)
   end
 
   return true
+end
+
+---@param range Range4
+---@param bufnr? integer
+---@return Range4
+function M.to_vim_range(range, bufnr)
+  local srow, scol, erow, ecol = unpack(range) ---@type integer, integer, integer, integer
+  srow = srow + 1
+  scol = scol + 1
+  erow = erow + 1
+
+  if ecol == 0 then
+    -- Use the value of the last col of the previous row instead.
+    erow = erow - 1
+    if not bufnr or bufnr == 0 then
+      ecol = vim.fn.col { erow, "$" } - 1
+    else
+      ecol = #vim.api.nvim_buf_get_lines(bufnr, erow - 1, erow, false)[1]
+    end
+    ecol = math.max(ecol, 1)
+  end
+  return { srow, scol, erow, ecol }
 end
 
 return M

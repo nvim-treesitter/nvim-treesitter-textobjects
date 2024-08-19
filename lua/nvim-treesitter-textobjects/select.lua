@@ -2,11 +2,11 @@ local api = vim.api
 local global_config = require "nvim-treesitter-textobjects.config"
 local shared = require "nvim-treesitter-textobjects.shared"
 
----@param range TSTextObjects.Range
+---@param range Range4
 ---@param selection_mode string
 local function update_selection(range, selection_mode)
   ---@type integer, integer, integer, integer
-  local start_row, start_col, end_row, end_col = unpack(range:to_vim_range())
+  local start_row, start_col, end_row, end_col = unpack(range)
 
   local v_table = { charwise = "v", linewise = "V", blockwise = "<C-v>" }
   selection_mode = selection_mode or "charwise"
@@ -105,11 +105,11 @@ local function next_position(bufnr, row, col, forward)
 end
 
 ---@param bufnr integer
----@param range TSTextObjects.Range
+---@param range Range4
 ---@param selection_mode string
----@return TSTextObjects.Range
+---@return Range4?
 local function include_surrounding_whitespace(bufnr, range, selection_mode)
-  local start_row, start_col, end_row, end_col = unpack(range:range4()) ---@type integer, integer, integer, integer
+  local start_row, start_col, end_row, end_col = unpack(range) ---@type integer, integer, integer, integer
   local extended = false
   while is_whitespace_after(bufnr, end_row, end_col) do
     extended = true
@@ -117,14 +117,13 @@ local function include_surrounding_whitespace(bufnr, range, selection_mode)
   end
   if extended then
     -- don't extend in both directions
-    range:set_range4 { start_row, start_col, end_row, end_col }
-    return range
+    return { start_row, start_col, end_row, end_col }
   end
   local next_row, next_col = next_position(bufnr, start_row, start_col, false)
 
   -- TODO (TheLeoP): this is only to prevent warnings from lsp
   if not next_row or not next_col then
-    return {}
+    return nil
   end
 
   while is_whitespace_after(bufnr, next_row, next_col) do
@@ -142,8 +141,7 @@ local function include_surrounding_whitespace(bufnr, range, selection_mode)
   end
   assert(start_row)
   assert(start_col)
-  range:set_range4 { start_row, start_col, end_row, end_col }
-  return range
+  return { start_row, start_col, end_row, end_col }
 end
 
 ---@generic T
@@ -162,14 +160,21 @@ end
 ---@param query_group? string
 function M.select_textobject(query_string, query_group)
   query_group = query_group or "textobjects"
+  local bufnr = vim.api.nvim_get_current_buf()
 
   local config = global_config.select
   local lookahead = config.lookahead
   local lookbehind = config.lookbehind
   local surrounding_whitespace = config.include_surrounding_whitespace
-  local bufnr, textobject =
-    shared.textobject_at_point(query_string, query_group, nil, nil, { lookahead = lookahead, lookbehind = lookbehind })
-  if textobject then
+  local range6 = shared.textobject_at_point(
+    query_string,
+    query_group,
+    bufnr,
+    nil,
+    { lookahead = lookahead, lookbehind = lookbehind }
+  )
+  if range6 then
+    local range4 = shared.range6_range4(range6)
     local selection_mode = M.detect_selection_mode(query_string)
     if
       function_or_value_to_value(surrounding_whitespace, {
@@ -177,9 +182,12 @@ function M.select_textobject(query_string, query_group)
         selection_mode = selection_mode,
       })
     then
-      textobject = include_surrounding_whitespace(bufnr, textobject, selection_mode)
+      ---@diagnostic disable-next-line: cast-local-type
+      range4 = include_surrounding_whitespace(bufnr, range4, selection_mode)
     end
-    update_selection(textobject, selection_mode)
+    if range4 then
+      update_selection(shared.to_vim_range(range4, bufnr), selection_mode)
+    end
   end
 end
 

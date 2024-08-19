@@ -4,7 +4,7 @@ local shared = require "nvim-treesitter-textobjects.shared"
 local repeatable_move = require "nvim-treesitter-textobjects.repeatable_move"
 local global_config = require "nvim-treesitter-textobjects.config"
 
----@param range TSTextObjects.Range?
+---@param range Range4?
 ---@param goto_end boolean
 ---@param avoid_set_jump boolean
 local function goto_node(range, goto_end, avoid_set_jump)
@@ -15,13 +15,12 @@ local function goto_node(range, goto_end, avoid_set_jump)
   if not avoid_set_jump then
     vim.cmd "normal! m'"
   end
-  local vim_range = range:to_vim_range()
   ---@type table<number>
   local position
   if not goto_end then
-    position = { vim_range[1], vim_range[2] }
+    position = { range[1], range[2] }
   else
-    position = { vim_range[3], vim_range[4] }
+    position = { range[3], range[4] }
   end
 
   -- Enter visual mode if we are in operator pending mode
@@ -62,14 +61,14 @@ local function move(opts)
   -- score is a byte position.
   ---
   ---@param start_ boolean
-  ---@param range TSTextObjects.Range
+  ---@param range Range6
   ---@return integer
   local function scoring_function(start_, range)
     local score ---@type integer
     if start_ then
-      score = range.start_byte
+      score = range[3]
     else
-      score = range.end_byte
+      score = range[6]
     end
     if forward then
       return -score
@@ -79,31 +78,32 @@ local function move(opts)
   end
 
   ---@param start_ boolean
-  ---@param range TSTextObjects.Range
+  ---@param range Range6
   ---@return boolean
   local function filter_function(start_, range)
-    local range4 = range:range4()
     local row, col = unpack(api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
     row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
+    ---@type integer, integer, integer, integer
+    local start_row, start_col, _, end_row, end_col, _ = unpack(range)
 
     if not start_ then
-      if range4[4] == 0 then
-        range4[1] = range4[3] - 1
-        range4[2] = range4[4]
+      if end_col == 0 then
+        start_row = end_row - 1
+        start_col = end_col
       else
-        range4[1] = range4[3]
-        range4[2] = range4[4] - 1
+        start_row = end_row
+        start_col = end_col - 1
       end
     end
     if forward then
-      return range4[1] > row or (range4[1] == row and range4[2] > col)
+      return start_row > row or (start_row == row and start_col > col)
     else
-      return range4[1] < row or (range4[1] == row and range4[2] < col)
+      return start_row < row or (start_row == row and start_col < col)
     end
   end
 
   for _ = 1, vim.v.count1 do
-    local best_range ---@type TSTextObjects.Range
+    local best_range ---@type Range6?
     local best_score ---@type integer
     local best_start ---@type boolean
     for _, query_string in ipairs(query_strings) do
@@ -129,7 +129,11 @@ local function move(opts)
         end
       end
     end
-    goto_node(best_range, not best_start, not config.set_jumps)
+    goto_node(
+      best_range and shared.to_vim_range(shared.range6_range4(best_range), bufnr),
+      not best_start,
+      not config.set_jumps
+    )
   end
 end
 

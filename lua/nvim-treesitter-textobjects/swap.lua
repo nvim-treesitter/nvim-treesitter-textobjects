@@ -6,8 +6,47 @@ local shared = require "nvim-treesitter-textobjects.shared"
 ---@field line integer
 ---@field character integer
 
----@param range1 TSTextObjects.Range
----@param range2 TSTextObjects.Range
+---@param range Range4
+---@return lsp.Range
+local function to_lsp_range(range)
+  ---@type integer, integer, integer, integer
+  local start_row, start_col, end_row, end_col = unpack(range)
+  return {
+    start = {
+      line = start_row,
+      character = start_col,
+    },
+    ["end"] = {
+      line = end_row,
+      character = end_col,
+    },
+  }
+end
+
+---@param range Range4
+---@return string[]
+local function get_text(bufnr, range)
+  ---@type integer, integer, integer, integer
+  local start_row, start_col, end_row, end_col = unpack(range)
+  if start_row == end_row then
+    local line = api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
+    return line and { string.sub(line, start_col + 1, end_col) } or {}
+  else
+    local lines = api.nvim_buf_get_lines(bufnr, start_row, end_row + 1, false)
+    if vim.tbl_isempty(lines) == nil then
+      return lines
+    end
+    lines[1] = string.sub(lines[1], start_col + 1)
+    -- end_row might be just after the last line. In this case the last line is not truncated.
+    if #lines == end_row - start_row + 1 then
+      lines[#lines] = string.sub(lines[#lines], 1, end_col)
+    end
+    return lines
+  end
+end
+
+---@param range1 Range4
+---@param range2 Range4
 ---@param bufnr integer
 ---@param cursor_to_second any
 local function swap_nodes(range1, range2, bufnr, cursor_to_second)
@@ -15,11 +54,11 @@ local function swap_nodes(range1, range2, bufnr, cursor_to_second)
     return
   end
 
-  local lsp_range1 = range1:to_lsp_range()
-  local lsp_range2 = range2:to_lsp_range()
+  local lsp_range1 = to_lsp_range(range1)
+  local lsp_range2 = to_lsp_range(range2)
 
-  local text1 = range1:get_text()
-  local text2 = range2:get_text()
+  local text1 = get_text(bufnr, range1)
+  local text2 = get_text(bufnr, range2)
 
   local edit1 = { range = lsp_range1, newText = table.concat(text2, "\n") }
   local edit2 = { range = lsp_range2, newText = table.concat(text1, "\n") }
@@ -64,34 +103,40 @@ local function swap_nodes(range1, range2, bufnr, cursor_to_second)
     )
   end
 end
+
+---@param range1 Range6
+---@param range2 Range6
+local function range_eq(range1, range2)
+  local srow1, scol1, _, erow1, ecol1, _ = unpack(range1) ---@type integer, integer, integer, integer, integer, integer
+  local srow2, scol2, _, erow2, ecol2, _ = unpack(range2) ---@type integer, integer, integer, integer, integer, integer
+  return srow1 == srow2 and scol1 == scol2 and erow1 == erow2 and ecol1 == ecol2
+end
+
 ---
----@param range TSTextObjects.Range
+---@param range Range6
 ---@param query_string string
 ---@param query_group string
 ---@param bufnr integer
----@return TSTextObjects.Range?
+---@return Range6?
 local next_textobject = function(range, query_string, query_group, bufnr)
-  local node_end = range.end_byte
+  local node_end = range[6]
   local search_start = node_end
 
-  ---@param current_range TSTextObjects.Range
+  ---@param current_range Range6
   ---@return boolean
   local function filter_function(current_range)
-    if current_range == range then
+    if range_eq(current_range, range) then
       return false
     end
-    if range.parent_id == current_range.parent_id then
-      local start = current_range.start_byte
-      local end_ = current_range.end_byte
-      return start >= search_start and end_ >= node_end
-    end
-    return false
+    local start = current_range[3]
+    local end_ = current_range[6]
+    return start >= search_start and end_ >= node_end
   end
 
-  ---@param current_range TSTextObjects.Range
+  ---@param current_range Range6
   ---@return integer
   local function scoring_function(current_range)
-    local start = current_range.start_byte
+    local start = current_range[3]
     return -start
   end
 
@@ -100,30 +145,27 @@ local next_textobject = function(range, query_string, query_group, bufnr)
   return next_range
 end
 
----@param range TSTextObjects.Range
+---@param range Range6
 ---@param query_string string
 ---@param query_group string
 ---@param bufnr integer
----@return TSTextObjects.Range?
+---@return Range6?
 local previous_textobject = function(range, query_string, query_group, bufnr)
-  local node_start = range.start_byte
+  local node_start = range[3]
   local search_end = node_start
 
-  ---@param current_range TSTextObjects.Range
+  ---@param current_range Range6
   ---@return boolean
   local function filter_function(current_range)
-    if current_range.parent_id == current_range.parent_id then
-      local end_ = current_range.end_byte
-      local start = current_range.start_byte
-      return end_ <= search_end and start < node_start
-    end
-    return false
+    local start = current_range[3]
+    local end_ = current_range[6]
+    return end_ <= search_end and start < node_start
   end
 
-  ---@param current_range TSTextObjects.Range
+  ---@param current_range Range6
   ---@return integer
   local function scoring_function(current_range)
-    local node_end = current_range.end_byte
+    local node_end = current_range[6]
     return node_end
   end
 
@@ -140,10 +182,11 @@ local M = {}
 local function swap_textobject(captures, query_group, direction)
   local query_strings = type(captures) == "string" and { captures } or captures
   query_group = query_group or "textobjects"
+  local bufnr = vim.api.nvim_get_current_buf()
 
-  local bufnr, textobject_range, query_string ---@type integer?, TSTextObjects.Range?, string?
+  local textobject_range, query_string ---@type Range6?, string?
   for _, query_string_iter in ipairs(query_strings) do
-    bufnr, textobject_range = shared.textobject_at_point(query_string_iter, query_group)
+    textobject_range = shared.textobject_at_point(query_string_iter, query_group, bufnr)
     if textobject_range then
       query_string = query_string_iter
       break
@@ -158,7 +201,7 @@ local function swap_textobject(captures, query_group, direction)
     local adjacent = direction > 0 and next_textobject(textobject_range, query_string, query_group, bufnr)
       or previous_textobject(textobject_range, query_string, query_group, bufnr)
     if adjacent then
-      swap_nodes(textobject_range, adjacent, bufnr, "yes, set cursor!")
+      swap_nodes(shared.range6_range4(textobject_range), shared.range6_range4(adjacent), bufnr, "yes, set cursor!")
     end
   end
 end

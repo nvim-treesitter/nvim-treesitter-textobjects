@@ -1,11 +1,8 @@
 local M = {}
 
 ---@class TSTextObjects.MoveOpts
----@field query_strings? string[]|string
----@field query_group? string
----@field forward boolean
+---@field forward boolean If true, move forward, and false is for backward.
 ---@field start? boolean If true, choose the start of the node, and false is for the end.
----@field winid? integer
 
 ---@class TSTextObjects.RepeatableMove
 ---@field func string | function

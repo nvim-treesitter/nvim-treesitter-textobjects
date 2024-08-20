@@ -128,7 +128,7 @@ local function move(opts)
         end
       end
     end
-    goto_node(best_range and shared.range6_range4(best_range), not best_start, not config.set_jumps)
+    goto_node(best_range and shared.torange4(best_range), not best_start, not config.set_jumps)
   end
 end
 

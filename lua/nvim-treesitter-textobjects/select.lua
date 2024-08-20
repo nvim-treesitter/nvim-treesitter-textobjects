@@ -27,9 +27,10 @@ local function update_selection(range, selection_mode)
     vim.cmd.normal { selection_mode, bang = true }
   end
 
-  api.nvim_win_set_cursor(0, { start_row, start_col - 1 })
+  -- Position is 1, 0 indexed.
+  api.nvim_win_set_cursor(0, { start_row + 1, start_col })
   vim.cmd "normal! o"
-  api.nvim_win_set_cursor(0, { end_row, end_col - 1 })
+  api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
 end
 
 local M = {}
@@ -38,10 +39,7 @@ local M = {}
 ---@param row integer
 ---@param col integer
 ---@return string?
-local function get_char_after_position(bufnr, row, col)
-  if row == nil then
-    return nil
-  end
+local function char_at_position(bufnr, row, col)
   local ok, char = pcall(api.nvim_buf_get_text, bufnr, row, col, row, col + 1, {})
   if ok then
     return char[1]
@@ -52,56 +50,52 @@ end
 ---@param row integer
 ---@param col integer
 ---@return boolean
-local function is_whitespace_after(bufnr, row, col)
-  local char = get_char_after_position(bufnr, row, col)
+local function is_whitespace(bufnr, row, col)
+  local char = char_at_position(bufnr, row, col)
   if char == nil then
     return false
   end
   if char == "" then
-    if row == api.nvim_buf_line_count(bufnr) - 1 then
-      return false
-    else
-      return true
-    end
+    return true
   end
   return string.match(char, "%s")
 end
 
-local function get_line(bufnr, row)
-  return api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1]
+---@param bufnr integer
+---@param row integer
+---@param col integer
+---@return { [1]: integer, [2]: integer }? position
+local function next_position(bufnr, row, col)
+  local max_col = #vim.fn.getbufoneline(bufnr, row + 1) - 1
+  local max_row = api.nvim_buf_line_count(bufnr) - 1
+  if col >= max_col then
+    if row >= max_row then
+      return nil
+    end
+    row = row + 1
+    col = 0
+  else
+    col = col + 1
+  end
+  return { row, col }
 end
 
 ---@param bufnr integer
----@param row integer?
----@param col integer?
----@param forward boolean
----@return integer? row
----@return integer? col
-local function next_position(bufnr, row, col, forward)
-  local max_col = #get_line(bufnr, row)
-  local max_row = api.nvim_buf_line_count(bufnr)
-  if forward then
-    if col == max_col then
-      if row == max_row then
-        return nil
-      end
-      row = row + 1
-      col = 0
-    else
-      col = col + 1
+---@param row integer
+---@param col integer
+---@return { [1]: integer, [2]: integer }? position
+local function previous_position(bufnr, row, col)
+  if col <= 0 then
+    if row <= 0 then
+      return nil
     end
+    row = row - 1
+    -- Empty line should be considered as a single character
+    col = math.max(#vim.fn.getbufoneline(bufnr, row + 1) - 1, 0)
   else
-    if col == 0 then
-      if row == 0 then
-        return nil
-      end
-      row = row - 1
-      col = #get_line(bufnr, row)
-    else
-      col = col - 1
-    end
+    col = col - 1
   end
-  return row, col
+  return { row, col }
 end
 
 ---@param bufnr integer
@@ -111,37 +105,29 @@ end
 local function include_surrounding_whitespace(bufnr, range, selection_mode)
   local start_row, start_col, end_row, end_col = unpack(range) ---@type integer, integer, integer, integer
   local extended = false
-  while is_whitespace_after(bufnr, end_row, end_col) do
+  local position = { end_row, end_col - 1 }
+  local next = next_position(bufnr, unpack(position))
+  while next and is_whitespace(bufnr, unpack(next)) do
     extended = true
-    end_row, end_col = next_position(bufnr, end_row, end_col, true)
+    position = next
+    next = next_position(bufnr, unpack(position))
   end
   if extended then
     -- don't extend in both directions
-    return { start_row, start_col, end_row, end_col }
-  end
-  local next_row, next_col = next_position(bufnr, start_row, start_col, false)
-
-  -- TODO (TheLeoP): this is only to prevent warnings from lsp
-  if not next_row or not next_col then
-    return nil
+    return { start_row, start_col, position[1], position[2] + 1 }
   end
 
-  while is_whitespace_after(bufnr, next_row, next_col) do
-    start_row = next_row
-    start_col = next_col
-    next_row, next_col = next_position(bufnr, start_row, start_col, false)
+  position = { start_row, start_col }
+  local previous = previous_position(bufnr, unpack(position))
 
-    -- TODO (TheLeoP): this is only to prevent warnings from lsp
-    if not next_row or not next_col then
-      break
-    end
+  while previous and is_whitespace(bufnr, unpack(previous)) do
+    position = previous
+    previous = previous_position(bufnr, unpack(position))
   end
   if selection_mode == "linewise" then
-    start_row, start_col = next_position(bufnr, start_row, start_col, true)
+    position = assert(next_position(bufnr, unpack(position)))
   end
-  assert(start_row)
-  assert(start_col)
-  return { start_row, start_col, end_row, end_col }
+  return { position[1], position[2], end_row, end_col }
 end
 
 ---@generic T
@@ -186,7 +172,7 @@ function M.select_textobject(query_string, query_group)
       range4 = include_surrounding_whitespace(bufnr, range4, selection_mode)
     end
     if range4 then
-      update_selection(shared.to_vim_range(range4, bufnr), selection_mode)
+      update_selection(range4, selection_mode)
     end
   end
 end

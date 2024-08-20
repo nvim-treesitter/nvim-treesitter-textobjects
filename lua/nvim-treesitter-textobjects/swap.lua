@@ -23,28 +23,6 @@ local function to_lsp_range(range)
   }
 end
 
----@param range Range4
----@return string[]
-local function get_text(bufnr, range)
-  ---@type integer, integer, integer, integer
-  local start_row, start_col, end_row, end_col = unpack(range)
-  if start_row == end_row then
-    local line = api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
-    return line and { string.sub(line, start_col + 1, end_col) } or {}
-  else
-    local lines = api.nvim_buf_get_lines(bufnr, start_row, end_row + 1, false)
-    if vim.tbl_isempty(lines) == nil then
-      return lines
-    end
-    lines[1] = string.sub(lines[1], start_col + 1)
-    -- end_row might be just after the last line. In this case the last line is not truncated.
-    if #lines == end_row - start_row + 1 then
-      lines[#lines] = string.sub(lines[#lines], 1, end_col)
-    end
-    return lines
-  end
-end
-
 ---@param range1 Range4
 ---@param range2 Range4
 ---@param bufnr integer
@@ -54,11 +32,11 @@ local function swap_nodes(range1, range2, bufnr, cursor_to_second)
     return
   end
 
+  local text1 = api.nvim_buf_get_text(bufnr, range1[1], range1[2], range1[3], range1[4], {})
+  local text2 = api.nvim_buf_get_text(bufnr, range2[1], range2[2], range2[3], range2[4], {})
+
   local lsp_range1 = to_lsp_range(range1)
   local lsp_range2 = to_lsp_range(range2)
-
-  local text1 = get_text(bufnr, range1)
-  local text2 = get_text(bufnr, range2)
 
   local edit1 = { range = lsp_range1, newText = table.concat(text2, "\n") }
   local edit2 = { range = lsp_range2, newText = table.concat(text1, "\n") }

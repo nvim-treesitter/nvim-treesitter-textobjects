@@ -160,7 +160,7 @@ function M.select_textobject(query_string, query_group)
     { lookahead = lookahead, lookbehind = lookbehind }
   )
   if range6 then
-    local range4 = shared.range6_range4(range6)
+    local range4 = shared.torange4(range6)
     local selection_mode = M.detect_selection_mode(query_string)
     if
       function_or_value_to_value(surrounding_whitespace, {

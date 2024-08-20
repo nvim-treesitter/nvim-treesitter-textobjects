@@ -243,7 +243,7 @@ end
 
 ---@param range Range6
 ---@return Range4
-function M.range6_range4(range)
+function M.torange4(range)
   return { range[1], range[2], range[4], range[5] }
 end
 
@@ -269,7 +269,7 @@ local function best_range_at_point(ranges, row, col, opts)
   local lookbehind_earliest_start ---@type integer
 
   for _, range in pairs(ranges) do
-    if range and is_in_range(M.range6_range4(range), row, col) then
+    if range and is_in_range(M.torange4(range), row, col) then
       local length = range[6] - range[3]
       if not range_length or length < range_length then
         smallest_range = range
@@ -380,7 +380,7 @@ function M.textobject_at_point(query_string, query_group, bufnr, pos, opts)
 
     local ranges_within_outer = {}
     for _, range in ipairs(ranges) do
-      if contains(M.range6_range4(range_outer), M.range6_range4(range)) then
+      if contains(M.torange4(range_outer), M.torange4(range)) then
         table.insert(ranges_within_outer, range)
       end
     end

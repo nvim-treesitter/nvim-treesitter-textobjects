@@ -472,26 +472,4 @@ function M.check_support(bufnr, query_group, queries)
   return true
 end
 
----@param range Range4
----@param bufnr? integer
----@return Range4
-function M.to_vim_range(range, bufnr)
-  local srow, scol, erow, ecol = unpack(range) ---@type integer, integer, integer, integer
-  srow = srow + 1
-  scol = scol + 1
-  erow = erow + 1
-
-  if ecol == 0 then
-    -- Use the value of the last col of the previous row instead.
-    erow = erow - 1
-    if not bufnr or bufnr == 0 then
-      ecol = vim.fn.col { erow, "$" } - 1
-    else
-      ecol = #vim.api.nvim_buf_get_lines(bufnr, erow - 1, erow, false)[1]
-    end
-    ecol = math.max(ecol, 1)
-  end
-  return { srow, scol, erow, ecol }
-end
-
 return M

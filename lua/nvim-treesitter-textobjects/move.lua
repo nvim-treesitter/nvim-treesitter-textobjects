@@ -15,13 +15,8 @@ local function goto_node(range, goto_end, avoid_set_jump)
   if not avoid_set_jump then
     vim.cmd "normal! m'"
   end
-  ---@type table<number>
-  local position
-  if not goto_end then
-    position = { range[1], range[2] }
-  else
-    position = { range[3], range[4] }
-  end
+  ---@type integer, integer, integer, integer
+  local start_row, start_col, end_row, end_col = unpack(range)
 
   -- Enter visual mode if we are in operator pending mode
   -- If we don't do this, it will miss the last character.
@@ -31,7 +26,11 @@ local function goto_node(range, goto_end, avoid_set_jump)
   end
 
   -- Position is 1, 0 indexed.
-  api.nvim_win_set_cursor(0, { position[1], position[2] - 1 })
+  if not goto_end then
+    api.nvim_win_set_cursor(0, { start_row + 1, start_col })
+  else
+    api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
+  end
 end
 
 local M = {}
@@ -129,11 +128,7 @@ local function move(opts)
         end
       end
     end
-    goto_node(
-      best_range and shared.to_vim_range(shared.range6_range4(best_range), bufnr),
-      not best_start,
-      not config.set_jumps
-    )
+    goto_node(best_range and shared.range6_range4(best_range), not best_start, not config.set_jumps)
   end
 end
 

@@ -179,7 +179,7 @@ local function swap_textobject(captures, query_group, direction)
     local adjacent = direction > 0 and next_textobject(textobject_range, query_string, query_group, bufnr)
       or previous_textobject(textobject_range, query_string, query_group, bufnr)
     if adjacent then
-      swap_nodes(shared.range6_range4(textobject_range), shared.range6_range4(adjacent), bufnr, "yes, set cursor!")
+      swap_nodes(shared.torange4(textobject_range), shared.torange4(adjacent), bufnr, "yes, set cursor!")
     end
   end
 end

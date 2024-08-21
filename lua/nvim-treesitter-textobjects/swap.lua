@@ -154,11 +154,13 @@ end
 
 local M = {}
 
----@param captures string|string[]
+---@param query_strings string|string[]
 ---@param query_group? string
 ---@param direction integer
-local function swap_textobject(captures, query_group, direction)
-  local query_strings = type(captures) == "string" and { captures } or captures
+local function swap_textobject(query_strings, query_group, direction)
+  if type(query_strings) == "string" then
+    query_strings = { query_strings }
+  end
   query_group = query_group or "textobjects"
   local bufnr = vim.api.nvim_get_current_buf()
 

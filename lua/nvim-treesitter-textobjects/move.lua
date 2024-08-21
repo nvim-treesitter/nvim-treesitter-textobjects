@@ -36,11 +36,15 @@ end
 local M = {}
 
 ---@param opts TSTextObjects.MoveOpts
-local function move(opts)
-  local query_group = opts.query_group or "textobjects"
-  local query_strings = type(opts.query_strings) == "string" and { opts.query_strings } or opts.query_strings
+---@param query_strings string[]|string
+---@param query_group? string
+local function move(opts, query_strings, query_group)
+  query_group = query_group or "textobjects"
+  if type(query_strings) == "string" then
+    query_strings = { query_strings }
+  end
 
-  local winid = opts.winid or api.nvim_get_current_win()
+  local winid = api.nvim_get_current_win()
   local bufnr = api.nvim_win_get_buf(winid)
 
   local forward = opts.forward
@@ -132,67 +136,57 @@ local function move(opts)
   end
 end
 
----@type fun(opts: TSTextObjects.MoveOpts)
+---@type fun(opts: TSTextObjects.MoveOpts, query_strings: string[]|string, query_group?: string)
 local move_repeatable = repeatable_move.make_repeatable_move(move)
 
 ---@param query_strings string|string[]
 ---@param query_group? string
 M.goto_next_start = function(query_strings, query_group)
-  move_repeatable {
+  move_repeatable({
     forward = true,
     start = true,
-    query_strings = query_strings,
-    query_group = query_group,
-  }
+  }, query_strings, query_group)
 end
 ---@param query_strings string|string[]
 ---@param query_group? string
 M.goto_next_end = function(query_strings, query_group)
-  move_repeatable {
+  move_repeatable({
     forward = true,
     start = false,
-    query_strings = query_strings,
-    query_group = query_group,
-  }
+  }, query_strings, query_group)
 end
 ---@param query_strings string|string[]
 ---@param query_group? string
 M.goto_previous_start = function(query_strings, query_group)
-  move_repeatable {
+  move_repeatable({
     forward = false,
     start = true,
-    query_strings = query_strings,
-    query_group = query_group,
-  }
+  }, query_strings, query_group)
 end
 ---@param query_strings string|string[]
 ---@param query_group? string
 M.goto_previous_end = function(query_strings, query_group)
-  move_repeatable {
+  move_repeatable({
     forward = false,
     start = false,
-    query_strings = query_strings,
-    query_group = query_group,
-  }
+  }, query_strings, query_group)
 end
 
 ---@param query_strings string|string[]
 ---@param query_group? string
 M.goto_next = function(query_strings, query_group)
-  move_repeatable {
+  move_repeatable({
     forward = true,
-    query_strings = query_strings,
-    query_group = query_group,
-  }
+  }, query_strings, query_group)
 end
 ---@param query_strings string|string[]
 ---@param query_group? string
 M.goto_previous = function(query_strings, query_group)
-  move_repeatable {
+  move_repeatable({
     forward = false,
     query_strings = query_strings,
     query_group = query_group,
-  }
+  }, query_strings, query_group)
 end
 
 return M

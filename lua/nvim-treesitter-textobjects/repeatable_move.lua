@@ -4,8 +4,10 @@ local M = {}
 ---@field forward boolean If true, move forward, and false is for backward.
 ---@field start? boolean If true, choose the start of the node, and false is for the end.
 
+---@alias TSTextObjects.MoveFunction fun(opts: TSTextObjects.MoveOpts, ...: any)
+
 ---@class TSTextObjects.RepeatableMove
----@field func string | function
+---@field func string | TSTextObjects.MoveFunction
 ---@field opts TSTextObjects.MoveOpts
 ---@field additional_args table
 
@@ -15,8 +17,8 @@ M.last_move = nil
 --- Make move function repeatable. Creates a wrapper that takes a TSTextObjects.MoveOpts table,
 --- stores them, and executes the move.
 ---
----@param move_fn function
----@return fun(opts: TSTextObjects.MoveOpts, ...: any)
+---@param move_fn TSTextObjects.MoveFunction
+---@return TSTextObjects.MoveFunction
 M.make_repeatable_move = function(move_fn)
   return function(opts, ...)
     M.last_move = { func = move_fn, opts = vim.deepcopy(opts), additional_args = { ... } }

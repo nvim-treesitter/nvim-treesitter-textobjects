@@ -1,10 +1,6 @@
 local ts = vim.treesitter
 local add_bytes = require("vim.treesitter._range").add_bytes
 
--- luacheck: push ignore 631
----@alias TSTextObjects.Metadata {range: {[1]: number, [2]: number, [3]: number, [4]: number, [5]: number, [6]: number, [7]: string}}
--- luacheck: pop
-
 local M = {}
 
 ---@param object any
@@ -98,20 +94,6 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
             insert_to_path(prepared_match, path, { srow, scol, sbyte, erow, ecol, ebyte })
           end
         end
-      end
-
-      if metadata.range and metadata.range[7] then
-        ---@cast metadata TSTextObjects.Metadata
-        local query_name = metadata.range[7]
-        local path = vim.split(query_name, "%.")
-        insert_to_path(prepared_match, path, {
-          metadata.range[1],
-          metadata.range[2],
-          metadata.range[3],
-          metadata.range[4],
-          metadata.range[5],
-          metadata.range[6],
-        })
       end
 
       matches[#matches + 1] = prepared_match

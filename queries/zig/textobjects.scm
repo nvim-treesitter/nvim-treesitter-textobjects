@@ -1,92 +1,131 @@
 ; "Classes"
-(VarDecl
-  (_
-    (_
-      (ContainerDecl) @class.inner))) @class.outer
+(variable_declaration
+  (struct_declaration)) @class.outer
+
+(variable_declaration
+  (struct_declaration
+    "struct"
+    "{"
+    .
+    _ @_start @_end
+    _? @_end
+    .
+    "}")
+  (#make-range! "class.inner" @_start @_end))
 
 ; functions
-(_
-  (FnProto)
-  ((Block
+(function_declaration) @function.outer
+
+(function_declaration
+  body: (block
     .
     "{"
     .
-    (_) @_start @_end
-    (_)? @_end
+    _ @_start @_end
+    _? @_end
     .
     "}")
-    (#make-range! "function.inner" @_start @_end))) @function.outer
+  (#make-range! "function.inner" @_start @_end))
 
 ; loops
-(_
-  (ForPrefix)
-  (_) @loop.inner) @loop.outer
+(for_statement) @loop.outer
 
-(_
-  (WhilePrefix)
-  (_) @loop.inner) @loop.outer
+(for_statement
+  body: (_) @loop.inner)
+
+(while_statement) @loop.outer
+
+(while_statement
+  body: (_) @loop.inner)
 
 ; blocks
-(_
-  (Block) @block.inner) @block.outer
+(block) @block.outer
+
+(block
+  "{"
+  .
+  _ @_start @_end
+  _? @_end
+  .
+  "}"
+  (#make-range! "block.inner" @_start @_end))
 
 ; statements
-(Statement) @statement.outer
+(statement) @statement.outer
 
 ; parameters
-((ParamDeclList
+(parameters
   "," @_start
   .
-  (ParamDecl) @parameter.inner)
+  (parameter) @parameter.inner
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
-((ParamDeclList
+(parameters
   .
-  (ParamDecl) @parameter.inner
+  (parameter) @parameter.inner
   .
-  ","? @_end)
+  ","? @_end
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ; arguments
-((FnCallArguments
+(call_expression
+  function: (_)
+  "("
   "," @_start
   .
-  (_) @parameter.inner)
+  (_) @parameter.inner
+  ")"
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
-((FnCallArguments
+(call_expression
+  function: (_)
+  "("
   .
   (_) @parameter.inner
   .
-  ","? @_end)
+  ","? @_end
+  ")"
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ; comments
-(doc_comment) @comment.outer
-
-(line_comment) @comment.outer
+(comment) @comment.outer
 
 ; conditionals
-(_
-  (IfPrefix)
-  (_) @conditional.inner) @conditional.outer
+(if_statement) @conditional.outer
 
-((SwitchExpr
-  "{" @_start
-  "}" @_end)
-  (#make-range! "conditional.inner" @_start @_end)) @conditional.outer
+(if_statement
+  condition: (_) @conditional.inner)
+
+(if_statement
+  body: (_) @conditional.inner)
+
+(switch_expression) @conditional.outer
+
+(switch_expression
+  "("
+  (_) @conditional.inner
+  ")")
+
+(switch_expression
+  "{"
+  .
+  _ @_start
+  _? @_end
+  .
+  "}"
+  (#make-range! "conditional.inner" @_start @_end))
+
+(while_statement
+  condition: (_) @conditional.inner)
 
 ; calls
-(_
-  (FnCallArguments)) @call.outer
+(call_expression) @call.outer
 
-(_
-  (FnCallArguments
-    .
-    "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+(call_expression
+  "("
+  .
+  _ @_start
+  _? @_end
+  .
+  ")"
+  (#make-range! "call.inner" @_start @_end))

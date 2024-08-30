@@ -88,7 +88,23 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
         if query_name ~= nil then
           local path = vim.split(query_name, "%.")
           for _, node in ipairs(nodes) do
-            insert_to_path(prepared_match, path, { node:range(true) })
+            local range = { node:range(true) }
+            ---@cast range Range6
+
+            -- Range could be changed by directives
+            local node_data = metadata[id]
+            if node_data and node_data.range then
+              range = {
+                node_data.range[1],
+                node_data.range[2],
+                range[3],
+                node_data.range[3],
+                node_data.range[4],
+                range[6],
+              }
+            end
+
+            insert_to_path(prepared_match, path, range)
           end
         end
       end

@@ -93,7 +93,7 @@ vim.keymap.set("n", "<leader>a", function()
   require("nvim-treesitter-textobjects.swap").swap_next "@parameter.inner"
 end)
 vim.keymap.set("n", "<leader>A", function()
-  require("nvim-treesitter-textobjects.swap").swap_next "@parameter.outer"
+  require("nvim-treesitter-textobjects.swap").swap_previous "@parameter.outer"
 end)
 ```
 

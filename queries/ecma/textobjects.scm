@@ -250,3 +250,6 @@
   (pair
     key: (_) @assignment.lhs
     value: (_) @assignment.inner @assignment.rhs) @assignment.outer)
+
+(return_statement
+  (identifier) @return.inner) @return.outer

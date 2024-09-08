@@ -38,3 +38,6 @@
     .
     "}"
     (#make-range! "class.inner" @_start @_end)))
+
+(type_annotation
+  (_) @annotation.inner) @annotation.outer

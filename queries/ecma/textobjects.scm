@@ -239,9 +239,10 @@
 ; number
 (number) @number.inner
 
-(variable_declarator
-  name: (_) @assignment.lhs
-  value: (_) @assignment.inner @assignment.rhs) @assignment.outer
+(lexical_declaration
+  (variable_declarator
+    name: (_) @assignment.lhs
+    value: (_) @assignment.inner @assignment.rhs)) @assignment.outer
 
 (variable_declarator
   name: (_) @assignment.inner)

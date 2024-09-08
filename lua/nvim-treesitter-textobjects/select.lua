@@ -27,10 +27,16 @@ local function update_selection(range, selection_mode)
     vim.cmd.normal { selection_mode, bang = true }
   end
 
+  local end_col_offset = 1
+
+  if selection_mode == "v" and vim.o.selection == "exclusive" then
+    end_col_offset = 0
+  end
+
   -- Position is 1, 0 indexed.
   api.nvim_win_set_cursor(0, { start_row + 1, start_col })
   vim.cmd "normal! o"
-  api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
+  api.nvim_win_set_cursor(0, { end_row + 1, end_col - end_col_offset })
 end
 
 local M = {}

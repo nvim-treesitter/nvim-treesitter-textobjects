@@ -93,9 +93,14 @@ function M.get_query_strings_from_regex(query_strings_regex, query_group, lang)
   return query_strings
 end
 
+local textobjects_cache = {}
 function M.available_textobjects(lang, query_group)
   lang = lang or parsers.get_buf_lang()
   query_group = query_group or "textobjects"
+  if textobjects_cache[lang] and textobjects_cache[lang][query_group] then
+    return textobjects_cache[lang][query_group]
+  end
+  textobjects_cache[lang] = textobjects_cache[lang] or {}
   local parsed_queries = ts.get_query(lang, query_group)
   if not parsed_queries then
     return {}
@@ -109,6 +114,7 @@ function M.available_textobjects(lang, query_group)
       end
     end
   end
+  textobjects_cache[lang][query_group] = found_textobjects
   return found_textobjects
   --patterns = {
   --[2] = { { "make-range!", "function.inner", 2, 3 } },

@@ -157,18 +157,22 @@
   left: (_) @assignment.lhs
   right: (_) @assignment.rhs @assignment.inner) @assignment.outer
 
-(var_spec
-  name: (_) @assignment.lhs
-  value: (_) @assignment.rhs @assignment.inner) @assignment.outer
+(var_declaration
+  (var_spec
+    name: (_) @assignment.lhs
+    value: (_) @assignment.rhs @assignment.inner)) @assignment.outer
 
-(var_spec
-  name: (_) @assignment.inner
-  type: (_)) @assignment.outer
+(var_declaration
+  (var_spec
+    name: (_) @assignment.inner
+    type: (_))) @assignment.outer
 
-(const_spec
-  name: (_) @assignment.lhs
-  value: (_) @assignment.rhs @assignment.inner) @assignment.outer
+(const_declaration
+  (const_spec
+    name: (_) @assignment.lhs
+    value: (_) @assignment.rhs @assignment.inner)) @assignment.outer
 
-(const_spec
-  name: (_) @assignment.inner
-  type: (_)) @assignment.outer
+(const_declaration
+  (const_spec
+    name: (_) @assignment.inner
+    type: (_))) @assignment.outer

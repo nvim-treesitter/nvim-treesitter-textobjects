@@ -103,9 +103,10 @@
 ; number
 (number) @number.inner
 
-(assignment_statement
-  (variable_list) @assignment.lhs
-  (expression_list) @assignment.inner @assignment.rhs) @assignment.outer
+(variable_declaration
+  (assignment_statement
+    (variable_list) @assignment.lhs
+    (expression_list) @assignment.inner @assignment.rhs)) @assignment.outer
 
 (assignment_statement
   (variable_list) @assignment.inner)

@@ -255,10 +255,17 @@
   (_) @return.inner) @return.outer
 
 (expression_statement) @statement.outer
+
 (return_statement) @statement.outer
+
 (if_statement) @statement.outer
+
 (for_statement) @statement.outer
+
 (while_statement) @statement.outer
+
 (do_statement) @statement.outer
+
 (for_in_statement) @statement.outer
+
 (export_statement) @statement.outer

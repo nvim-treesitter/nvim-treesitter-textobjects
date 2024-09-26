@@ -2,131 +2,61 @@
   body: (declaration_list
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end))) @class.outer
-
-(class_declaration
-  body: (declaration_list
-    .
-    "{"
-    .
+    _* @class.inner
     "}")) @class.outer
 
 (struct_declaration
   body: (declaration_list
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end))) @class.outer
-
-(struct_declaration
-  body: (declaration_list
-    .
-    "{"
-    .
+    _* @class.inner
     "}")) @class.outer
 
 (record_declaration
   body: (declaration_list
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end))) @class.outer
-
-(record_declaration
-  body: (declaration_list
-    .
-    "{"
-    .
-    "}")?) @class.outer
+    _* @class.inner
+    "}")) @class.outer
 
 (interface_declaration
   body: (declaration_list
     .
     "{"
-    .
-    (_) @_start @_end
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end))) @class.outer
-
-(interface_declaration
-  body: (declaration_list
-    .
-    "{"
-    .
+    _+ @class.inner
     "}")) @class.outer
 
 (enum_declaration
   body: (enum_member_declaration_list
     .
     "{"
-    .
-    (_) @_start @_end
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end))) @class.outer
-
-(enum_declaration
-  body: (enum_member_declaration_list
-    .
-    "{"
-    .
+    _* @class.inner
     "}")) @class.outer
 
 (method_declaration
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end))) @function.outer
+    _+ @function.inner
+    "}")) @function.outer
 
 (method_declaration
   body: (arrow_expression_clause
-    .
-    (_) @_start
-    (_)? @_end
-    (#make-range! "function.inner" @_start @_end))) @function.outer
+    _+ @function.inner)) @function.outer
 
 (constructor_declaration
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end))) @function.outer
+    _+ @function.inner
+    "}")) @function.outer
 
 (lambda_expression
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end))) @function.outer
+    _+ @function.inner
+    "}")) @function.outer
 
 ; loops
 (for_statement
@@ -156,43 +86,35 @@
   arguments: (argument_list
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    _+ @call.inner
+    ")"))
 
 ; blocks
 (_
   (block) @block.inner) @block.outer
 
 ; parameters
-((parameter_list
-  "," @_start
+(parameter_list
+  "," @parameter.outer
   .
-  (parameter) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (parameter) @parameter.inner @parameter.outer)
 
-((parameter_list
+(parameter_list
   .
-  (parameter) @parameter.inner
+  (parameter) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((argument_list
-  "," @_start
+(argument_list
+  "," @parameter.outer
   .
-  (argument) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (argument) @parameter.inner @parameter.outer)
 
-((argument_list
+(argument_list
   .
-  (argument) @parameter.inner
+  (argument) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 ; comments
 (comment) @comment.outer

@@ -1,28 +1,25 @@
 ; Blocks
 (compound_statement) @block.outer
 
-((compound_statement
+(compound_statement
   .
-  (_) @_start
-  (_)? @_end .)
-  (#make-range! "block.inner" @_start @_end))
+  (_) @block.inner
+  (_)? @block.inner .)
 
 (quote_statement) @block.outer
 
-((quote_statement
+(quote_statement
   .
-  (_) @_start
-  (_)? @_end .)
-  (#make-range! "block.inner" @_start @_end))
-
+  (_) @block.inner
+  (_)? @block.inner .)
+)
 (let_statement) @block.outer
 
-((let_statement
+(let_statement
   .
-  (_) @_start
-  (_)? @_end .)
-  (#make-range! "block.inner" @_start @_end))
-
+  (_) @block.inner
+  (_)? @block.inner .)
+)
 ; Conditionals
 (if_statement
   condition: (_) @conditional.inner) @conditional.outer
@@ -34,67 +31,59 @@
 ((if_statement
   condition: (_)
   .
-  (_) @_start
-  (_)? @_end
+  (_) @conditional.inner
+  (_)? @conditional.inner
   .
   [
     "end"
     (elseif_clause)
     (else_clause)
-  ])
-  (#make-range! "conditional.inner" @_start @_end)) @conditional.outer
+  ]) @conditional.outer
+  (elseif_clause
+    condition: (_)
+    .
+    (_) @conditional.inner
+    (_)? @conditional.inner .))
 
-((elseif_clause
-  condition: (_)
+(else_clause
   .
-  (_) @_start
-  (_)? @_end .)
-  (#make-range! "conditional.inner" @_start @_end))
-
-((else_clause
-  .
-  (_) @_start
-  (_)? @_end .)
-  (#make-range! "conditional.inner" @_start @_end))
-
+  (_) @conditional.inner
+  (_)? @conditional.inner .)
+)
 ; Loops
 (for_statement) @loop.outer
 
-((for_statement
+(for_statement
   .
-  (_) @_start
-  (_)? @_end .)
-  (#make-range! "loop.inner" @_start @_end))
+  (_) @loop.inner
+  (_)? @loop.inner .)
 
 (while_statement
   condition: (_) @loop.inner) @loop.outer
 
-((while_statement
+(while_statement
   condition: (_)
   .
-  (_) @_start
-  (_)? @_end .)
-  (#make-range! "loop.inner" @_start @_end))
+  (_) @loop.inner
+  (_)? @loop.inner .)
 
 ; Type definitions
 (struct_definition) @class.outer
 
-((struct_definition
+(struct_definition
   name: (_)
   .
-  (_) @_start
-  (_)? @_end .)
-  (#make-range! "class.inner" @_start @_end))
-
+  (_) @class.inner
+  (_)? @class.inner .)
+)
 ; Function definitions
 (function_definition) @function.outer
 
-((function_definition
+(function_definition
   (signature)
   .
-  (_) @_start
-  (_)? @_end .)
-  (#make-range! "function.inner" @_start @_end))
+  (_) @function.inner
+  (_)? @function.inner .)
 
 (assignment
   (call_expression)
@@ -111,12 +100,11 @@
 
 (macro_definition) @function.outer
 
-((macro_definition
+(macro_definition
   (signature)
   .
-  (_) @_start
-  (_)? @_end .)
-  (#make-range! "function.inner" @_start @_end))
+  (_) @function.inner
+  (_)? @function.inner .)
 
 ; Calls
 (call_expression) @call.outer
@@ -126,11 +114,10 @@
     .
     "("
     .
-    (_) @_start
-    (_)? @_end
+    (_) @call.inner
+    (_)? @call.inner
     .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    ")"))
 
 (macrocall_expression) @call.outer
 
@@ -139,11 +126,10 @@
     .
     "("
     .
-    (_) @_start
-    (_)? @_end
+    (_) @call.inner
+    (_)? @call.inner
     .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    ")"))
 
 (broadcast_call_expression) @call.outer
 
@@ -152,69 +138,61 @@
     .
     "("
     .
-    (_) @_start
-    (_)? @_end
+    (_) @call.inner
+    (_)? @call.inner
     .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    ")"))
 
 ; Parameters
 ((argument_list
   [
     ","
     ";"
-  ] @_start
+  ] @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
+  (argument_list
+    (_) @parameter.inner @parameter.outer
+    .
+    [
+      ","
+      ";"
+    ] @parameter.outer))
 
-((argument_list
-  (_) @parameter.inner
-  .
+(tuple_expression
   [
     ","
     ";"
-  ] @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
-
-((tuple_expression
-  [
-    ","
-    ";"
-  ] @_start
+  ] @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((tuple_expression
+(tuple_expression
   "("
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
   [
     ","
     ";"
-  ]? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ]? @parameter.outer)
 
-((vector_expression
+(vector_expression
   [
     ","
     ";"
-  ] @_start
+  ] @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((vector_expression
+(vector_expression
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
   [
     ","
     ";"
-  ]? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ]? @parameter.outer)
 
 ; Assignment
 (assignment

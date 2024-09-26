@@ -1,8 +1,3 @@
-; TODO: supported by official Tree-sitter  if (_)* is more than one node
-; Neovim: will only match if (_) is exactly one node
-;(function_definition
-;body:  (compound_statement
-;("{" (_)* @function.inner "}"))?) @function.outer
 (declaration
   declarator: (function_declarator)) @function.outer
 
@@ -13,12 +8,8 @@
   body: (compound_statement
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (struct_specifier
   body: (_) @class.inner) @class.outer
@@ -31,24 +22,16 @@
   consequence: (compound_statement
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "conditional.inner" @_start @_end))) @conditional.outer
+    _+ @conditional.inner
+    "}")) @conditional.outer
 
 (if_statement
   alternative: (else_clause
     (compound_statement
       .
       "{"
-      .
-      (_) @_start
-      (_)? @_end
-      .
-      "}"
-      (#make-range! "conditional.inner" @_start @_end)))) @conditional.outer
+      _+ @conditional.inner
+      "}"))) @conditional.outer
 
 (if_statement) @conditional.outer
 
@@ -74,12 +57,8 @@
   body: (compound_statement
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (for_statement) @loop.outer
 
@@ -87,12 +66,8 @@
   body: (compound_statement
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (do_statement) @loop.outer
 
@@ -100,12 +75,8 @@
   body: (compound_statement
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (compound_statement) @block.outer
 
@@ -117,12 +88,8 @@
   arguments: (argument_list
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    _+ @call.inner
+    ")"))
 
 (return_statement
   (_)? @return.inner) @return.outer
@@ -145,31 +112,27 @@
 (preproc_else
   (_) @statement.outer)
 
-((parameter_list
-  "," @_start
+(parameter_list
+  "," @parameter.outer
   .
-  (parameter_declaration) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (parameter_declaration) @parameter.inner @parameter.outer)
 
-((parameter_list
+(parameter_list
   .
-  (parameter_declaration) @parameter.inner
+  (parameter_declaration) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((argument_list
-  "," @_start
+(argument_list
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((argument_list
+(argument_list
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 (number_literal) @number.inner
 

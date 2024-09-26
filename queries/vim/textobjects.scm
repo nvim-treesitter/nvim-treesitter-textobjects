@@ -6,18 +6,16 @@
 (parameters
   (identifier) @parameter.inner)
 
-((parameters
-  "," @_start
+(parameters
+  "," @parameter.outer
   .
-  (identifier) @_end)
-  (#make-range! "parameter.outer" @_start @_end))
+  (identifier) @parameter.outer)
 
-((parameters
+(parameters
   .
-  (identifier) @_start
+  (identifier) @parameter.outer
   .
-  "," @_end)
-  (#make-range! "parameter.outer" @_start @_end))
+  "," @parameter.outer)
 
 (if_statement
   (body) @conditional.inner) @conditional.outer

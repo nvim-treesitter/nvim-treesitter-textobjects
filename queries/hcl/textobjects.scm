@@ -54,15 +54,13 @@
 
 (numeric_lit) @number.inner
 
-((function_arguments
-  "," @_start
+(function_arguments
+  "," @parameter.outer
   .
-  (expression) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (expression) @parameter.inner @parameter.outer)
 
-((function_arguments
+(function_arguments
   .
-  (expression) @parameter.inner
+  (expression) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)

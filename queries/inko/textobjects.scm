@@ -5,12 +5,8 @@
   body: (class_body
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 ; Traits
 (trait) @class.outer
@@ -19,12 +15,8 @@
   body: (trait_body
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 ; Implementations
 (implement_trait) @class.outer
@@ -33,12 +25,8 @@
   body: (implement_trait_body
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 (reopen_class) @class.outer
 
@@ -46,12 +34,8 @@
   body: (reopen_class_body
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "class.inner" @_start @_end)))
+    _+ @class.inner
+    "}"))
 
 ; Methods and closures
 (method) @function.outer
@@ -60,12 +44,8 @@
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (closure) @function.outer
 
@@ -73,24 +53,16 @@
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 ; Loops
 (while
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (while
   condition: (_) @conditional.inner)
@@ -99,12 +71,8 @@
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "loop.inner" @_start @_end))) @loop.outer
+    _+ @loop.inner
+    "}")) @loop.outer
 
 ; Conditionals
 (if
@@ -132,96 +100,80 @@
   arguments: (arguments
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    _+ @call.inner
+    ")"))
 
 (return
   (_)? @return.inner) @return.outer
 
 ; Call and type arguments
-((arguments
-  "," @_start
+(arguments
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((arguments
+(arguments
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((type_arguments
-  "," @_start
+(type_arguments
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((type_arguments
+(type_arguments
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 ; Patterns
-((class_pattern
-  "," @_start
+(class_pattern
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((class_pattern
+(class_pattern
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
-((tuple_pattern
-  "," @_start
+(tuple_pattern
+  "," @parameter.outer
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
-((tuple_pattern
+(tuple_pattern
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end)
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 ; Sequence types
 (tuple
-  "," @_start
+  "," @parameter.outer
   .
-  (_) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
 (tuple
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 (array
-  "," @_start
+  "," @parameter.outer
   .
-  (_) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
 (array
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 ; Blocks
 (block

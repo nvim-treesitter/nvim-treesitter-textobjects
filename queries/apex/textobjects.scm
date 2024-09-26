@@ -7,12 +7,8 @@
   body: (block
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (constructor_declaration) @function.outer
 
@@ -20,12 +16,8 @@
   body: (constructor_body
     .
     "{"
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    "}"
-    (#make-range! "function.inner" @_start @_end)))
+    _+ @function.inner
+    "}"))
 
 (for_statement
   body: (_)? @loop.inner) @loop.outer
@@ -59,39 +51,31 @@
   arguments: (argument_list
     .
     "("
-    .
-    (_) @_start
-    (_)? @_end
-    .
-    ")"
-    (#make-range! "call.inner" @_start @_end)))
+    _+ @call.inner
+    ")"))
 
 ; parameters
 (formal_parameters
-  "," @_start
+  "," @parameter.outer
   .
-  (formal_parameter) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (formal_parameter) @parameter.inner @parameter.outer)
 
 (formal_parameters
   .
-  (formal_parameter) @parameter.inner
+  (formal_parameter) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 (argument_list
-  "," @_start
+  "," @parameter.outer
   .
-  (_) @parameter.inner
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  (_) @parameter.inner @parameter.outer)
 
 (argument_list
   .
-  (_) @parameter.inner
+  (_) @parameter.inner @parameter.outer
   .
-  ","? @_end
-  (#make-range! "parameter.outer" @parameter.inner @_end))
+  ","? @parameter.outer)
 
 [
   (line_comment)

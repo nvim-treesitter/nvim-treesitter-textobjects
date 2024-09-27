@@ -49,22 +49,51 @@
 (type_declaration
   (type_spec
     (type_identifier)
-    (struct_type
-      (field_declaration_list
-        (_)?) @class.inner))) @class.outer
+    (struct_type))) @class.outer
 
 (type_declaration
   (type_spec
     (type_identifier)
-    (interface_type) @class.inner)) @class.outer
+    (struct_type
+      (field_declaration_list
+        "{"
+        .
+        _ @_start @_end
+        _? @_end
+        .
+        "}"
+        (#make-range! "class.inner" @_start @_end)))))
+
+(type_declaration
+  (type_spec
+    (type_identifier)
+    (interface_type))) @class.outer
+
+(type_declaration
+  (type_spec
+    (type_identifier)
+    (interface_type
+      "{"
+      .
+      _ @_start @_end
+      _? @_end
+      .
+      "}"
+      (#make-range! "class.inner" @_start @_end))))
 
 ; struct literals as class textobject
 (composite_literal
-  (type_identifier)?
-  (struct_type
-    (_))?
+  (literal_value)) @class.outer
+
+(composite_literal
   (literal_value
-    (_)) @class.inner) @class.outer
+    "{"
+    .
+    _ @_start @_end
+    _? @_end
+    .
+    "}")
+  (#make-range! "class.inner" @_start @_end))
 
 ; conditionals
 (if_statement
@@ -72,14 +101,31 @@
     (_) @conditional.inner)?) @conditional.outer
 
 (if_statement
-  consequence: (block)? @conditional.inner)
+  consequence: (block
+    "{"
+    .
+    _ @_start @_end
+    _? @_end
+    .
+    "}"
+    (#make-range! "conditional.inner" @_start @_end)))
 
 (if_statement
   condition: (_) @conditional.inner)
 
 ; loops
+(for_statement) @loop.outer
+
 (for_statement
-  body: (block)? @loop.inner) @loop.outer
+  body: (block
+    .
+    "{"
+    .
+    _ @_start @_end
+    _? @_end
+    .
+    "}"
+    (#make-range! "loop.inner" @_start @_end)))
 
 ; blocks
 (_

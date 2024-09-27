@@ -265,5 +265,3 @@
 (for_in_statement)
 (export_statement)
 ] @statement.outer
-
-

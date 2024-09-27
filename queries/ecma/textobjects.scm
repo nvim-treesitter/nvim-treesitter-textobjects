@@ -254,12 +254,11 @@
 (return_statement
   (_) @return.inner) @return.outer
 
-(expression_statement) @statement.outer
-
 (return_statement) @statement.outer
 
 [
 (if_statement)
+(expression_statement)
 (for_statement)
 (while_statement)
 (do_statement)

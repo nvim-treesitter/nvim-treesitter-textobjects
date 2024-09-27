@@ -257,11 +257,11 @@
 (return_statement) @statement.outer
 
 [
-(if_statement)
-(expression_statement)
-(for_statement)
-(while_statement)
-(do_statement)
-(for_in_statement)
-(export_statement)
+  (if_statement)
+  (expression_statement)
+  (for_statement)
+  (while_statement)
+  (do_statement)
+  (for_in_statement)
+  (export_statement)
 ] @statement.outer

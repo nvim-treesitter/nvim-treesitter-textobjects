@@ -251,3 +251,18 @@
   (pair
     key: (_) @assignment.lhs
     value: (_) @assignment.inner @assignment.rhs) @assignment.outer)
+
+(return_statement
+  (_) @return.inner) @return.outer
+
+(return_statement) @statement.outer
+
+[
+  (if_statement)
+  (expression_statement)
+  (for_statement)
+  (while_statement)
+  (do_statement)
+  (for_in_statement)
+  (export_statement)
+] @statement.outer

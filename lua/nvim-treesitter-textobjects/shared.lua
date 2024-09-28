@@ -72,28 +72,18 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
   local matches = {}
   local start_row, _, end_row, _ = root:range()
   -- The end row is exclusive so we need to add 1 to it.
-  for pattern, match, metadata in query:iter_matches(root, bufnr, start_row, end_row + 1) do
-    if pattern then
-      local prepared_match = {}
+  for id, node, metadata in query:iter_captures(root, bufnr, start_row, end_row + 1) do
+    local prepared_match = {}
 
-      -- Extract capture names from each match
-      for id, nodes in pairs(match) do
-        local query_name = query.captures[id] -- name of the capture in the query
-        if query_name ~= nil then
-          local path = vim.split(query_name, "%.")
-          if metadata[id] and metadata[id].range then
-            insert_to_path(prepared_match, path, add_bytes(bufnr, metadata[id].range))
-          else
-            local srow, scol, sbyte, erow, ecol, ebyte = nodes[1]:range(true)
-            if #nodes > 1 then
-              local _, _, _, e_erow, e_ecol, e_ebyte = nodes[#nodes]:range(true)
-              erow = e_erow
-              ecol = e_ecol
-              ebyte = e_ebyte
-            end
-            insert_to_path(prepared_match, path, { srow, scol, sbyte, erow, ecol, ebyte })
-          end
-        end
+    -- Extract capture names from each match
+    local query_name = query.captures[id] -- name of the capture in the query
+    if query_name ~= nil then
+      local path = vim.split(query_name, "%.")
+
+      if metadata[id] and metadata[id].range then
+        insert_to_path(prepared_match, path, add_bytes(bufnr, metadata[id].range))
+      else
+        insert_to_path(prepared_match, path, { node:range(true) })
       end
 
       matches[#matches + 1] = prepared_match

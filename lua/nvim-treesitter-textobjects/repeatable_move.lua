@@ -27,34 +27,19 @@ M.make_repeatable_move = function(move_fn)
 end
 
 ---@param opts_extend TSTextObjects.MoveOpts?
----@return boolean
+---@return string?
 M.repeat_last_move = function(opts_extend)
-  if M.last_move then
-    local opts ---@type table
-    if opts_extend ~= nil then
-      opts = vim.tbl_deep_extend("force", {}, M.last_move.opts, opts_extend)
-    else
-      opts = M.last_move.opts
-    end
-
-    if M.last_move.func == "f" or M.last_move.func == "t" then
-      if opts.forward then
-        vim.cmd.normal { vim.v.count1 .. ";", bang = true }
-      else
-        vim.cmd.normal { vim.v.count1 .. ",", bang = true }
-      end
-    elseif M.last_move.func == "F" or M.last_move.func == "T" then
-      if opts.forward then
-        vim.cmd.normal { vim.v.count1 .. ",", bang = true }
-      else
-        vim.cmd.normal { vim.v.count1 .. ";", bang = true }
-      end
-    else
-      M.last_move.func(opts, unpack(M.last_move.additional_args))
-    end
-    return true
+  if not M.last_move then
+    return
   end
-  return false
+  local opts = vim.tbl_deep_extend("force", M.last_move.opts, opts_extend or {})
+  if M.last_move.func == "f" or M.last_move.func == "t" then
+    return opts.forward and ";" or ","
+  elseif M.last_move.func == "F" or M.last_move.func == "T" then
+    return opts.forward and "," or ";"
+  else
+    return M.last_move.func(opts, unpack(M.last_move.additional_args))
+  end
 end
 
 M.repeat_last_move_opposite = function()

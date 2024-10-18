@@ -54,6 +54,9 @@ require'nvim-treesitter.configs'.setup {
         ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
         -- You can also use captures from other query groups like `locals.scm`
         ["as"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
+
+        -- You can specify lookahead or lookbehind and it will take precedence over the global setting just for that keymapping
+        ["ibc"] = { query = "@assignment.outer", desc = "Select outer part of an assignment looking behind the cursor instead of ahead", lookbehind = true },
       },
       -- You can choose the select mode (default is charwise 'v')
       --

@@ -12,14 +12,14 @@
   .
   (_) @block.inner
   (_)? @block.inner .)
-)
+
 (let_statement) @block.outer
 
 (let_statement
   .
   (_) @block.inner
   (_)? @block.inner .)
-)
+
 ; Conditionals
 (if_statement
   condition: (_) @conditional.inner) @conditional.outer
@@ -49,7 +49,7 @@
   .
   (_) @conditional.inner
   (_)? @conditional.inner .)
-)
+
 ; Loops
 (for_statement) @loop.outer
 
@@ -75,7 +75,7 @@
   .
   (_) @class.inner
   (_)? @class.inner .)
-)
+
 ; Function definitions
 (function_definition) @function.outer
 

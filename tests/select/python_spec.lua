@@ -21,6 +21,8 @@ describe("command equality Python:", function()
   })
   -- select using built-in finds (f, F, t, T)
   run:compare_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "dfi", "vfid", "cfi" } })
+  -- repeatable move should work like default behavior (#699)
+  run:compare_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "dfn", "d;" } })
   -- select using move
   run:compare_cmds("aligned_indent.py", { row = 1, col = 0, cmds = { "d]a", "v]ad", "c]a" } })
   run:compare_cmds("selection_mode.py", { row = 2, col = 4, cmds = { "dam", "dVam", "vamd", "Vamd" } })

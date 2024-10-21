@@ -394,14 +394,14 @@ end)
 
 -- Repeat movement with ; and ,
 -- ensure ; goes forward and , goes backward regardless of the last direction
--- vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next)
--- vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous)
+-- vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next, { expr = true })
+-- vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous, { expr = true })
 
 local repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
 
 -- vim way: ; goes to the direction you were moving.
-vim.keymap.set({ "n", "x", "o" }, ";", repeat_move.repeat_last_move)
-vim.keymap.set({ "n", "x", "o" }, ",", repeat_move.repeat_last_move_opposite)
+vim.keymap.set({ "n", "x", "o" }, ";", repeat_move.repeat_last_move, { expr = true })
+vim.keymap.set({ "n", "x", "o" }, ",", repeat_move.repeat_last_move_opposite, { expr = true })
 
 -- Optionally, make builtin f, F, t, T also repeatable with ; and ,
 vim.keymap.set({ "n", "x", "o" }, "f", repeat_move.builtin_f_expr, { expr = true })

@@ -184,8 +184,6 @@ end
 M.goto_previous = function(query_strings, query_group)
   move_repeatable({
     forward = false,
-    query_strings = query_strings,
-    query_group = query_group,
   }, query_strings, query_group)
 end
 

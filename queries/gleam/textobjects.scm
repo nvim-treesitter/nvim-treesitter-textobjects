@@ -2,8 +2,8 @@
 (function
   body: (_) @function.inner) @function.outer
 
-(function_type
-  (_)) @function.outer
+(anonymous_function
+  body: (_) @function.inner) @function.outer
 
 ; parameter
 (function_parameters

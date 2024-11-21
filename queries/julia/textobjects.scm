@@ -71,7 +71,7 @@
 (struct_definition) @class.outer
 
 (struct_definition
-  name: (_)
+  (type_head)
   .
   (_) @class.inner
   (_)? @class.inner .)
@@ -90,7 +90,7 @@
   (operator)
   (_) @function.inner) @function.outer
 
-(function_expression
+(arrow_function_expression
   [
     (identifier)
     (argument_list)

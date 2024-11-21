@@ -80,7 +80,7 @@
 (struct_definition) @class.outer
 
 ((struct_definition
-  name: (_)
+  (type_head)
   .
   (_) @_start
   (_)? @_end .)
@@ -101,7 +101,7 @@
   (operator)
   (_) @function.inner) @function.outer
 
-(function_expression
+(arrow_function_expression
   [
     (identifier)
     (argument_list)

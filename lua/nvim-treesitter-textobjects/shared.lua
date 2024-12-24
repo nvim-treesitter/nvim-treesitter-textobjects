@@ -233,7 +233,7 @@ local function is_in_range(range, row, col, end_col_offset)
     return false
   end
 
-  if start_row ~= row or col < start_col then
+  if start_row == row and col < start_col then
     return false
   end
 

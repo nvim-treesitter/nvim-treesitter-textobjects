@@ -133,7 +133,7 @@ vim.keymap.set({ "n", "x", "o" }, "]z", function()
 end)
 
 vim.keymap.set({ "n", "x", "o" }, "]M", function()
-  require("nvim-treesitter-textobjects.move").goto_next_end("@funciton.outer", "textobjects")
+  require("nvim-treesitter-textobjects.move").goto_next_end("@function.outer", "textobjects")
 end)
 vim.keymap.set({ "n", "x", "o" }, "][", function()
   require("nvim-treesitter-textobjects.move").goto_next_end("@class.outer", "textobjects")

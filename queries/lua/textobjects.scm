@@ -121,3 +121,5 @@
 
 ; scopename
 ; statement
+(statement) @statement.outer
+(return_statement) @statement.outer

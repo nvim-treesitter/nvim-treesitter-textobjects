@@ -23,6 +23,9 @@
 (while
   (block) @loop.inner) @loop.outer
 
+(return
+  (_)? @return.inner) @return.outer
+
 ; blocks
 (block) @block.outer
 

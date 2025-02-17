@@ -9,6 +9,8 @@ jobs:
   update-readme:
     name: Update README.md
     runs-on: ubuntu-latest
+    env:
+      APPIMAGE: nvim-linux-x86_64.appimage
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -20,8 +22,8 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install libfuse2
           sudo add-apt-repository universe
-          wget https://github.com/neovim/neovim/releases/download/nightly/nvim.appimage
-          chmod u+x nvim.appimage
+          wget https://github.com/neovim/neovim/releases/download/nightly/${APPIMAGE}
+          chmod u+x ${APPIMAGE}
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
           ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/start
@@ -29,14 +31,14 @@ jobs:
           git clone https://github.com/nvim-treesitter/nvim-treesitter.git
 
       - name: Compile parsers
-        run: ./nvim.appimage --headless -c "TSInstallSync all" -c "q"
+        run: ./${APPIMAGE} --headless -c "TSInstallSync all" -c "q"
 
       # inspired by nvim-lspconfigs
       - name: Check README
         run: |
           git config user.email "actions@github"
           git config user.name "Github Actions"
-          ./nvim.appimage --headless -c "luafile ./scripts/update-readme.lua" -c "q" || echo "Needs update"
+          ./${APPIMAGE} --headless -c "luafile ./scripts/update-readme.lua" -c "q" || echo "Needs update"
           git add README.md
           git commit -m "docs: update queries in README" || echo 'No commit necessary!'
           git clean -xf

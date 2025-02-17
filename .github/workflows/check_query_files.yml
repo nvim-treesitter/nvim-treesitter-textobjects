@@ -1,7 +1,6 @@
 name: Check loading of syntax files
 
 on:
-  push:
   pull_request:
   schedule:
     - cron: '0 0 * * *' # every day at midnight
@@ -10,6 +9,9 @@ jobs:
   luacheck:
     name: Check Query Files
     runs-on: ubuntu-latest
+    env:
+      NVIM_TAG: stable
+      APPIMAGE: nvim-linux-x86_64.appimage
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -20,11 +22,12 @@ jobs:
       - name: Prepare
         env:
           NVIM_TAG: stable
+          APPIMAGE: nvim-linux-x86_64.appimage
         run: |
           sudo apt-get update && sudo apt-get install libfuse2
           sudo add-apt-repository universe
-          wget https://github.com/neovim/neovim/releases/download/${NVIM_TAG}/nvim.appimage
-          chmod u+x nvim.appimage
+          wget https://github.com/neovim/neovim/releases/download/${NVIM_TAG}/${APPIMAGE}
+          chmod u+x ${APPIMAGE}
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
           ln -s $(pwd) ~/.local/share/nvim/site/pack/nvim-treesitter-textobject/start
           mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/start
@@ -32,7 +35,7 @@ jobs:
           git clone https://github.com/nvim-treesitter/nvim-treesitter.git
 
       - name: Compile parsers
-        run: ./nvim.appimage --headless -c "TSInstallSync all" -c "q"
+        run: ./${APPIMAGE} --headless -c "TSInstallSync all" -c "q"
 
       - name: Check query files
-        run: ./nvim.appimage --headless -c "luafile ./scripts/check-queries.lua" -c "q"
+        run: ./${APPIMAGE} --headless -c "luafile ./scripts/check-queries.lua" -c "q"

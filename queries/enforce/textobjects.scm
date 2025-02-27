@@ -10,18 +10,18 @@
   (literal_float)
 ] @number.inner
 
-(decl_class) @class.outer
-
-(decl_method) @function.outer
+; TODO: capture inside braces
+(decl_class
+  body: (_) @class.inner) @class.outer
 
 (decl_method
-  (block) @function.inner) @function.outer
+  body: (_) @function.inner) @function.outer
 
 (for
-  (block) @loop.inner) @loop.outer
+  body: (_) @loop.inner) @loop.outer
 
 (while
-  (block) @loop.inner) @loop.outer
+  body: (_) @loop.inner) @loop.outer
 
 (return
   (_)? @return.inner) @return.outer

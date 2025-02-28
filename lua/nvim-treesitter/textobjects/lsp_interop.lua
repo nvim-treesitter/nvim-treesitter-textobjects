@@ -111,7 +111,11 @@ function M.peek_definition_code(query_string, query_group, lsp_request, context)
   if vim.tbl_contains(vim.api.nvim_list_wins(), floating_win) then
     vim.api.nvim_set_current_win(floating_win)
   else
-    local params = vim.lsp.util.make_position_params()
+    local win_id = vim.api.nvim_get_current_win()
+    local params = vim.fn.has "nvim-0.11" == 0 and vim.lsp.util.make_position_params()
+      or function(client)
+        return vim.api.util.make_position_params(win_id, client.offset_encoding)
+      end
     return vim.lsp.buf_request(
       0,
       lsp_request,

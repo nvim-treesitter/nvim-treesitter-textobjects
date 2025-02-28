@@ -22,7 +22,8 @@
 
 ; class
 ; comment
-(comment) @comment.outer
+(comment
+  (comment_content) @comment.inner) @comment.outer
 
 ; conditional
 (if_statement
@@ -121,3 +122,6 @@
 
 ; scopename
 ; statement
+(statement) @statement.outer
+
+(return_statement) @statement.outer

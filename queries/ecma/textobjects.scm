@@ -279,4 +279,5 @@
   (do_statement)
   (for_in_statement)
   (export_statement)
+  (lexical_declaration)
 ] @statement.outer

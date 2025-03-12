@@ -384,6 +384,21 @@
   ","? @_end
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+; second and following
+(destruct_bind_list
+  "," @_start
+  .
+  (_) @parameter.inner
+  (#make-range! "parameter.outer" @_start @parameter.inner))
+
+; first
+(destruct_bind_list
+  .
+  (_) @parameter.inner
+  .
+  ","? @_end
+  (#make-range! "parameter.outer" @parameter.inner @_end))
+
 ; single parameter
 (receive_function
   parameter: (_) @parameter.inner @parameter.outer)

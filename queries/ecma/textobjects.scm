@@ -72,6 +72,9 @@
     (#make-range! "function.inner" @_start @_end)))
 
 (class_declaration
+  body: (class_body)) @class.outer
+
+(class_declaration
   body: (class_body
     .
     "{"

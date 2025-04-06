@@ -2,7 +2,7 @@
   [
     (class_body)
     (enum_class_body)
-  ] @class.inner) @class.outer
+  ]? @class.inner) @class.outer
 
 [
   (function_declaration

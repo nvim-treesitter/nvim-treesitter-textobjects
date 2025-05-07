@@ -18,3 +18,5 @@
 
 (declaration
   (property_name) @assignment.inner)
+
+(comment) @comment.outer

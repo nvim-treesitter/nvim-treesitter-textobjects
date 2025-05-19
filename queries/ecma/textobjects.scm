@@ -332,8 +332,47 @@
 (import_statement
   (import_clause
     (named_imports
-      "{"
       .
-      (import_specifier) @parameter.outer
-      .
-      "}")))
+      (import_specifier) @parameter.outer .)))
+
+; Treat list or object elements as @parameter
+; 1. parameter.inner
+(object
+  (_) @parameter.inner)
+
+(array
+  (_) @parameter.inner)
+
+; 2. parameter.outer: Only one element, no comma
+(object
+  .
+  (_) @parameter.outer .)
+
+(array
+  .
+  (_) @parameter.outer .)
+
+; 3. parameter.outer: Comma before or after
+([
+  (object
+    "," @_start
+    .
+    (_) @_end)
+  (array
+    "," @_start
+    .
+    (_) @_end)
+]
+  (#make-range! "parameter.outer" @_start @_end))
+
+([
+  (object
+    (_) @_start
+    .
+    "," @_end)
+  (array
+    (_) @_start
+    .
+    "," @_end)
+]
+  (#make-range! "parameter.outer" @_start @_end))

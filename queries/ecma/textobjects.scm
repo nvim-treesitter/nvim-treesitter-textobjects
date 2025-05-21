@@ -207,39 +207,6 @@
   ","? @_end
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
-; If the array/object pattern is the first parameter, treat its elements as the argument list
-(formal_parameters
-  .
-  (_
-    [
-      (object_pattern
-        "," @_start
-        .
-        (_) @parameter.inner)
-      (array_pattern
-        "," @_start
-        .
-        (_) @parameter.inner)
-    ])
-  (#make-range! "parameter.outer" @_start @parameter.inner))
-
-(formal_parameters
-  .
-  (_
-    [
-      (object_pattern
-        .
-        (_) @parameter.inner
-        .
-        ","? @_end)
-      (array_pattern
-        .
-        (_) @parameter.inner
-        .
-        ","? @_end)
-    ])
-  (#make-range! "parameter.outer" @parameter.inner @_end))
-
 ; arguments
 (arguments
   "," @_start

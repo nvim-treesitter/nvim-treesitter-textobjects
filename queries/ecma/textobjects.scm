@@ -343,12 +343,26 @@
 (array
   (_) @parameter.inner)
 
+(object_pattern
+  (_) @parameter.inner)
+
+(array_pattern
+  (_) @parameter.inner)
+
 ; 2. parameter.outer: Only one element, no comma
 (object
   .
   (_) @parameter.outer .)
 
 (array
+  .
+  (_) @parameter.outer .)
+
+(object_pattern
+  .
+  (_) @parameter.outer .)
+
+(array_pattern
   .
   (_) @parameter.outer .)
 
@@ -362,6 +376,14 @@
     "," @_start
     .
     (_) @_end)
+  (object_pattern
+    "," @_start
+    .
+    (_) @_end)
+  (array_pattern
+    "," @_start
+    .
+    (_) @_end)
 ]
   (#make-range! "parameter.outer" @_start @_end))
 
@@ -371,6 +393,14 @@
     .
     "," @_end)
   (array
+    (_) @_start
+    .
+    "," @_end)
+  (object_pattern
+    (_) @_start
+    .
+    "," @_end)
+  (array_pattern
     (_) @_start
     .
     "," @_end)

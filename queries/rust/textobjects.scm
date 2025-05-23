@@ -226,6 +226,13 @@
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+; last element, with trailing comma
+((parameters
+  (self_parameter) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
 ((parameters
   "," @_start
   .
@@ -238,6 +245,13 @@
   .
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
+
+; last element, with trailing comma
+((parameters
+  (parameter) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
 
 ((parameters
   "," @_start
@@ -252,6 +266,13 @@
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+; last element, with trailing comma
+((parameters
+  (type_identifier) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
 ((type_parameters
   "," @_start
   .
@@ -265,6 +286,13 @@
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+; last element, with trailing comma
+((type_parameters
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
 ((tuple_pattern
   "," @_start
   .
@@ -278,6 +306,13 @@
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+; last element, with trailing comma
+((tuple_pattern
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
 ((tuple_struct_pattern
   "," @_start
   .
@@ -290,6 +325,13 @@
   .
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
+
+; last element, with trailing comma
+((tuple_struct_pattern
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
 
 (tuple_expression
   "," @_start
@@ -304,6 +346,13 @@
   ","? @_end
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+; last element, with trailing comma
+((tuple_expression
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
 ((tuple_type
   "," @_start
   .
@@ -316,6 +365,13 @@
   .
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
+
+; last element, with trailing comma
+((tuple_type
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
 
 (struct_item
   body: (field_declaration_list
@@ -332,6 +388,15 @@
     ","? @_end
     (#make-range! "parameter.outer" @parameter.inner @_end)))
 
+; last element, with trailing comma
+(struct_item
+  body: (field_declaration_list
+    (_) @_start
+    .
+    "," @_end
+    .
+    (#make-range! "parameter.outer" @_start @_end)))
+
 (struct_expression
   body: (field_initializer_list
     "," @_start
@@ -347,6 +412,15 @@
     ","? @_end
     (#make-range! "parameter.outer" @parameter.inner @_end)))
 
+; last element, with trailing comma
+(struct_expression
+  body: (field_initializer_list
+    (_) @_start
+    .
+    "," @_end
+    .
+    (#make-range! "parameter.outer" @_start @_end)))
+
 ((closure_parameters
   "," @_start
   .
@@ -359,6 +433,13 @@
   .
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
+
+; last element, with trailing comma
+((closure_parameters
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
 
 ((arguments
   "," @_start
@@ -373,6 +454,13 @@
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+; last element, with trailing comma
+((arguments
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
 ((type_arguments
   "," @_start
   .
@@ -386,6 +474,13 @@
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+; last element, with trailing comma
+((type_arguments
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
 ((token_tree
   "," @_start
   .
@@ -398,6 +493,13 @@
   .
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
+
+; last element, with trailing comma
+((token_tree
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
 
 (scoped_use_list
   list: (use_list
@@ -413,6 +515,40 @@
     .
     ","? @_end
     (#make-range! "parameter.outer" @parameter.inner @_end)))
+
+; last element, with trailing comma
+(scoped_use_list
+  list: (use_list
+    (_) @_start
+    .
+    "," @_end
+    .
+    (#make-range! "parameter.outer" @_start @_end)))
+
+(array_expression
+  (_) @parameter.inner)
+
+; first element, with or without comma
+((array_expression
+  .
+  (_) @_start
+  .
+  ","? @_end)
+  (#make-range! "parameter.outer" @_start @_end))
+
+; second to last element (with leading comma)
+((array_expression
+  "," @_start
+  .
+  (_) @_end)
+  (#make-range! "parameter.outer" @_start @_end))
+
+; last element, with trailing comma
+((array_expression
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
 
 [
   (integer_literal)

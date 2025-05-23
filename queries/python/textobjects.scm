@@ -86,6 +86,20 @@
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+((parameters
+  [
+    (identifier)
+    (tuple)
+    (typed_parameter)
+    (default_parameter)
+    (typed_default_parameter)
+    (dictionary_splat_pattern)
+    (list_splat_pattern)
+  ] @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
 ((lambda_parameters
   "," @_start
   .
@@ -115,6 +129,20 @@
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+((lambda_parameters
+  [
+    (identifier)
+    (tuple)
+    (typed_parameter)
+    (default_parameter)
+    (typed_default_parameter)
+    (dictionary_splat_pattern)
+    (list_splat_pattern)
+  ] @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
 ((tuple
   "," @_start
   .
@@ -129,6 +157,12 @@
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+((tuple
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
 ((list
   "," @_start
   .
@@ -142,6 +176,18 @@
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
+((list
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
+((dictionary
+  "," @_start
+  .
+  (pair) @parameter.inner)
+  (#make-range! "parameter.outer" @_start @parameter.inner))
+
 ((dictionary
   .
   (pair) @parameter.inner
@@ -150,9 +196,15 @@
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((dictionary
+  (pair) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
+((argument_list
   "," @_start
   .
-  (pair) @parameter.inner)
+  (_) @parameter.inner)
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
 ((argument_list
@@ -163,6 +215,12 @@
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((argument_list
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
+((subscript
   "," @_start
   .
   (_) @parameter.inner)
@@ -177,6 +235,12 @@
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((subscript
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
+
+((import_statement
   "," @_start
   .
   (_) @parameter.inner)
@@ -190,10 +254,10 @@
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ((import_statement
-  "," @_start
+  (_) @_start
   .
-  (_) @parameter.inner)
-  (#make-range! "parameter.outer" @_start @parameter.inner))
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
 
 ((import_from_statement
   "," @_start
@@ -208,6 +272,12 @@
   .
   ","? @_end)
   (#make-range! "parameter.outer" @parameter.inner @_end))
+
+((import_from_statement
+  (_) @_start
+  .
+  "," @_end .)
+  (#make-range! "parameter.outer" @_start @_end))
 
 [
   (integer)

@@ -196,3 +196,64 @@
 
 ; comments
 (comment) @comment.outer
+
+; assignments
+(field_declaration
+  (_)
+  (variable_declaration
+    type: (_)
+    (variable_declarator
+      name: (_) @assignment.lhs
+      (_) @assignment.rhs) @assignment.inner)) @assignment.outer
+
+(field_declaration
+  (variable_declaration
+    type: (_)
+    (variable_declarator
+      name: (_) @assignment.lhs
+      (_) @assignment.rhs) @assignment.inner)) @assignment.outer
+
+(field_declaration
+  (_)
+  (variable_declaration
+    type: (_)
+    (variable_declarator
+      name: (_) @assignment.lhs @assignment.inner))) @assignment.outer
+
+(local_declaration_statement
+  (_)
+  (variable_declaration
+    type: (_)
+    (variable_declarator
+      name: (_) @assignment.lhs
+      (_) @assignment.rhs) @assignment.inner)) @assignment.outer
+
+(local_declaration_statement
+  (variable_declaration
+    type: (_)
+    (variable_declarator
+      name: (_) @assignment.lhs
+      (_) @assignment.rhs) @assignment.inner)) @assignment.outer
+
+(local_declaration_statement
+  (_)
+  (variable_declaration
+    type: (_)
+    (variable_declarator
+      name: (_) @assignment.lhs @assignment.inner))) @assignment.outer
+
+(expression_statement
+  (assignment_expression
+    left: (_) @assignment.lhs
+    right: (_) @assignment.rhs)) @assignment.inner @assignment.outer
+
+(method_declaration
+  name: (_) @assignment.lhs
+  body: (arrow_expression_clause
+    (_) @assignment.rhs) @assignment.inner) @assignment.outer
+
+(local_function_statement
+  type: (_)
+  name: (_) @assignment.lhs
+  body: (arrow_expression_clause
+    (_) @assignment.rhs)) @assignment.inner @assignment.outer

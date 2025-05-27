@@ -1,0 +1,71 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check_compilation:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        nvim_tag: [nightly]
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    env:
+      NVIM_TS_DIR: .test-deps/nvim-treesitter
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: tree-sitter/setup-action/cli@v1
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Install and prepare Neovim
+        env:
+          NVIM_TAG: ${{ matrix.nvim_tag }}
+        run: |
+          bash ./scripts/ci-install.sh
+
+      - name: Install nvim-treesitter
+        uses: actions/checkout@v4
+        with:
+          repository: nvim-treesitter/nvim-treesitter
+          ref: main
+          path: ${{ env.NVIM_TS_DIR }}
+
+      - name: Setup Parsers Cache
+        id: parsers-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/nvim/site/parser/
+          key: parsers-${{ hashFiles('parsers.lua') }}
+
+      - name: Compile parsers
+        if: steps.parsers-cache.outputs.cache-hit != 'true'
+        working-directory: ${{ env.NVIM_TS_DIR }}
+        run: nvim -l ./scripts/install-parsers.lua --max-jobs=10
+
+      - name: Lint docs
+        run: |
+          make docs
+          git diff --exit-code
+
+      - name: Check queries
+        run: make checkquery
+
+      - name: Run tests
+        run: make tests

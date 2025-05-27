@@ -1,56 +1,40 @@
-name: Linting and style checking
+name: Lint
 
 on:
+  push:
+    branches:
+      - "main"
   pull_request:
     branches:
       - "main"
+  workflow_dispatch:
 
 jobs:
-  luacheck:
-    name: Luacheck
+  lua:
+    name: Lint Lua files
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare
+      - name: Format
         run: |
-          sudo apt-get update
-          sudo add-apt-repository universe
-          sudo apt install luarocks -y
-          sudo luarocks install luacheck
-
-      - name: Run Luacheck
-        run: sudo ./scripts/style-check.sh
-
-  stylua:
-    name: StyLua
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Lint with stylua
-        uses: JohnnyMorganz/stylua-action@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          version: latest
-          args: --check .
-
-  format-queries:
-    name: Lint queries
-    runs-on: ubuntu-latest
-    env:
-      NVIM_TAG: stable
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prepare
-        run: |
-          bash ./scripts/ci-install-ubuntu-latest.sh
-          wget -P scripts/ https://raw.githubusercontent.com/nvim-treesitter/nvim-treesitter/main/scripts/format-queries.lua
-          mkdir -p ~/.local/share/nvim/site/pack/nvim-treesitter/start
-          cd ~/.local/share/nvim/site/pack/nvim-treesitter/start
-          git clone https://github.com/nvim-treesitter/nvim-treesitter.git
+          make formatlua
+          git diff --exit-code
 
       - name: Lint
+        run: make checklua
+
+  queries:
+    name: Lint query files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Format
         run: |
-          nvim --headless -c "TSInstallSync query" -c "q"
-          nvim -l scripts/format-queries.lua queries
+          make formatquery
           git diff --exit-code
+
+      - name: Lint
+        run: make lintquery
+

@@ -1,16 +1,10 @@
 #!/usr/bin/env -S nvim -l
+vim.opt.runtimepath:append(os.getenv('NVIM_TS'))
+vim.opt.runtimepath:append('.')
 
-local languages = _G.arg
-languages[0] = nil
+local parsers = {}
+for i = 1, #_G.arg do
+  parsers[#parsers + 1] = _G.arg[i] ---@type string
+end
 
--- needed on CI
-vim.fn.mkdir(vim.fn.stdpath('cache'), 'p')
-
-local done = false
-require('nvim-treesitter.install').install(languages, { force = true }, function()
-  done = true
-end)
-
-vim.wait(6000000, function()
-  return done
-end)
+require('nvim-treesitter').install(parsers, { force = true }):wait(1800000) -- wait max. 30 minutes

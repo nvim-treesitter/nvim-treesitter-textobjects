@@ -1,6 +1,6 @@
 local api = vim.api
-local global_config = require "nvim-treesitter-textobjects.config"
-local shared = require "nvim-treesitter-textobjects.shared"
+local global_config = require('nvim-treesitter-textobjects.config')
+local shared = require('nvim-treesitter-textobjects.shared')
 
 ---@param range Range4
 ---@param selection_mode string
@@ -8,8 +8,8 @@ local function update_selection(range, selection_mode)
   ---@type integer, integer, integer, integer
   local start_row, start_col, end_row, end_col = unpack(range)
 
-  local v_table = { charwise = "v", linewise = "V", blockwise = "<C-v>" }
-  selection_mode = selection_mode or "charwise"
+  local v_table = { charwise = 'v', linewise = 'V', blockwise = '<C-v>' }
+  selection_mode = selection_mode or 'charwise'
 
   -- Normalise selection_mode
   if vim.tbl_contains(vim.tbl_keys(v_table), selection_mode) then
@@ -24,18 +24,18 @@ local function update_selection(range, selection_mode)
   if mode.mode ~= selection_mode then
     -- Call to `nvim_replace_termcodes()` is needed for sending appropriate command to enter blockwise mode
     selection_mode = api.nvim_replace_termcodes(selection_mode, true, true, true)
-    vim.cmd.normal { selection_mode, bang = true }
+    vim.cmd.normal({ selection_mode, bang = true })
   end
 
   local end_col_offset = 1
 
-  if selection_mode == "v" and vim.o.selection == "exclusive" then
+  if selection_mode == 'v' and vim.o.selection == 'exclusive' then
     end_col_offset = 0
   end
 
   -- Position is 1, 0 indexed.
   api.nvim_win_set_cursor(0, { start_row + 1, start_col })
-  vim.cmd "normal! o"
+  vim.cmd('normal! o')
   api.nvim_win_set_cursor(0, { end_row + 1, end_col - end_col_offset })
 end
 
@@ -61,10 +61,10 @@ local function is_whitespace(bufnr, row, col)
   if char == nil then
     return false
   end
-  if char == "" then
+  if char == '' then
     return true
   end
-  return string.match(char, "%s")
+  return string.match(char, '%s')
 end
 
 ---@param bufnr integer
@@ -130,7 +130,7 @@ local function include_surrounding_whitespace(bufnr, range, selection_mode)
     position = previous
     previous = previous_position(bufnr, unpack(position))
   end
-  if selection_mode == "linewise" then
+  if selection_mode == 'linewise' then
     position = assert(next_position(bufnr, unpack(position)))
   end
   return { position[1], position[2], end_row, end_col }
@@ -141,7 +141,7 @@ end
 ---@param opts table
 ---@return T
 local function_or_value_to_value = function(val, opts)
-  if type(val) == "function" then
+  if type(val) == 'function' then
     return val(opts)
   else
     return val
@@ -151,7 +151,7 @@ end
 ---@param query_string string
 ---@param query_group? string
 function M.select_textobject(query_string, query_group)
-  query_group = query_group or "textobjects"
+  query_group = query_group or 'textobjects'
   local bufnr = vim.api.nvim_get_current_buf()
 
   local config = global_config.select
@@ -192,12 +192,12 @@ function M.detect_selection_mode(query_string)
   -- Update selection mode with different methods based on keymapping mode
   ---@type table<TSTextObjects.Mode, TSTextObjects.Method>
   local keymap_to_method = {
-    nov = "operator-pending",
-    noV = "operator-pending",
-    ["no\22"] = "operator-pending", -- \22 is the scape sequence of <c-v>
-    V = "visual",
-    v = "visual",
-    ["\22"] = "visual", -- \22 is the scape sequence of <c-v>
+    nov = 'operator-pending',
+    noV = 'operator-pending',
+    ['no\22'] = 'operator-pending', -- \22 is the scape sequence of <c-v>
+    V = 'visual',
+    v = 'visual',
+    ['\22'] = 'visual', -- \22 is the scape sequence of <c-v>
   }
   local method = keymap_to_method[api.nvim_get_mode().mode]
 
@@ -207,25 +207,25 @@ function M.detect_selection_mode(query_string)
     method = method,
   }) --[[@as TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>]]
   local selection_mode ---@type TSTextObjects.SelectionMode
-  if type(selection_modes) == "table" then
-    selection_mode = selection_modes[query_string] or "v"
+  if type(selection_modes) == 'table' then
+    selection_mode = selection_modes[query_string] or 'v'
   else
-    selection_mode = selection_modes or "v"
+    selection_mode = selection_modes or 'v'
   end
 
   local ret_value = selection_mode
   local mode = api.nvim_get_mode().mode --[[@as string]]
 
-  local is_normal_or_charwise_v = mode == "n" or mode == "v"
+  local is_normal_or_charwise_v = mode == 'n' or mode == 'v'
   if not is_normal_or_charwise_v then
     -- According to "mode()" mapping, if we are in operator pending mode or visual mode,
     -- then last char is {v,V,<C-v>}, exept for "no", which is "o", in which case we honor
     -- last set `selection_mode`
     mode = mode:sub(#mode)
-    ret_value = mode == "o" and selection_mode or mode
+    ret_value = mode == 'o' and selection_mode or mode
   end
 
-  return ret_value == "n" and "v" or ret_value
+  return ret_value == 'n' and 'v' or ret_value
 end
 
 return M

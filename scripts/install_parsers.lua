@@ -4,10 +4,10 @@ local languages = _G.arg
 languages[0] = nil
 
 -- needed on CI
-vim.fn.mkdir(vim.fn.stdpath "cache", "p")
+vim.fn.mkdir(vim.fn.stdpath('cache'), 'p')
 
 local done = false
-require("nvim-treesitter.install").install(languages, { force = true }, function()
+require('nvim-treesitter.install').install(languages, { force = true }, function()
   done = true
 end)
 

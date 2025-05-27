@@ -15,11 +15,6 @@
 (member_expression
   (call_expression)) @call.outer
 
-; plain call
-((_
-  (call_expression) @call.outer) @_parent
-  (#not-kind-eq? @_parent "member_expression"))
-
 ; call arguments
 (call_expression
   function: (_)

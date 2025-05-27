@@ -1,5 +1,8 @@
 -- Execute as `nvim --headless -c "luafile ./scripts/update-readme.lua"`
-local parsers = require("nvim-treesitter.parsers").configs
+vim.opt.runtimepath:append(os.getenv "NVIM_TS")
+vim.opt.runtimepath:append "."
+
+local parsers = require "nvim-treesitter.parsers"
 local shared = require "nvim-treesitter-textobjects.shared"
 local sorted_parsers = {}
 

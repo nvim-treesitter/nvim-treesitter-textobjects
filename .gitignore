@@ -1,3 +1,8 @@
+.test-deps
 doc/tags
 .luacheckcache
 /tags
+nvim.appimage
+nvim-linux-x86_64*
+nvim-macos*
+nvim-win64*

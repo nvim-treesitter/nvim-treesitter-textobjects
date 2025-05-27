@@ -32,26 +32,26 @@ M.repeat_last_move = function(opts_extend)
   if not M.last_move then
     return
   end
-  local opts = vim.tbl_deep_extend("force", M.last_move.opts, opts_extend or {})
-  if M.last_move.func == "f" or M.last_move.func == "t" then
-    return opts.forward and ";" or ","
-  elseif M.last_move.func == "F" or M.last_move.func == "T" then
-    return opts.forward and "," or ";"
+  local opts = vim.tbl_deep_extend('force', M.last_move.opts, opts_extend or {})
+  if M.last_move.func == 'f' or M.last_move.func == 't' then
+    return opts.forward and ';' or ','
+  elseif M.last_move.func == 'F' or M.last_move.func == 'T' then
+    return opts.forward and ',' or ';'
   else
     return M.last_move.func(opts, unpack(M.last_move.additional_args))
   end
 end
 
 M.repeat_last_move_opposite = function()
-  return M.last_move and M.repeat_last_move { forward = not M.last_move.opts.forward }
+  return M.last_move and M.repeat_last_move({ forward = not M.last_move.opts.forward })
 end
 
 M.repeat_last_move_next = function()
-  return M.repeat_last_move { forward = true }
+  return M.repeat_last_move({ forward = true })
 end
 
 M.repeat_last_move_previous = function()
-  return M.repeat_last_move { forward = false }
+  return M.repeat_last_move({ forward = false })
 end
 
 -- NOTE: map builtin_f_expr, builtin_F_expr, builtin_t_expr, builtin_T_expr with { expr = true }.
@@ -61,38 +61,38 @@ end
 -- We don't want to execute a move function, but instead return an expression (f, F, t, T).
 M.builtin_f_expr = function()
   M.last_move = {
-    func = "f",
+    func = 'f',
     opts = { forward = true },
     additional_args = {},
   }
-  return "f"
+  return 'f'
 end
 
 M.builtin_F_expr = function()
   M.last_move = {
-    func = "F",
+    func = 'F',
     opts = { forward = false },
     additional_args = {},
   }
-  return "F"
+  return 'F'
 end
 
 M.builtin_t_expr = function()
   M.last_move = {
-    func = "t",
+    func = 't',
     opts = { forward = true },
     additional_args = {},
   }
-  return "t"
+  return 't'
 end
 
 M.builtin_T_expr = function()
   M.last_move = {
-    func = "T",
+    func = 'T',
     opts = { forward = false },
     additional_args = {},
   }
-  return "T"
+  return 'T'
 end
 
 return M

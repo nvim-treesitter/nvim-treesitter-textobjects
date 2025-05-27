@@ -45,7 +45,7 @@ local M = {}
 
 ---@param cfg TSTextObjects.UserConfig
 function M.update(cfg)
-  config = vim.tbl_deep_extend("force", config, cfg)
+  config = vim.tbl_deep_extend('force', config, cfg)
 end
 
 ---@cast M +TSTextObjects.Config

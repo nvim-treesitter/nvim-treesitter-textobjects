@@ -86,7 +86,7 @@ local function move(opts, query_strings, query_group)
   local function filter_function(start_, range)
     local row, col = unpack(api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
     row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
-    ---@type integer, integer, integer, integer
+    ---@type integer, integer, integer, integer, integer, integer
     local start_row, start_col, _, end_row, end_col, _ = unpack(range)
 
     if not start_ then
@@ -95,7 +95,7 @@ local function move(opts, query_strings, query_group)
         start_col = end_col
       else
         start_row = end_row
-        start_col = end_col - 1
+        start_col = end_col - 1 ---@type integer
       end
     end
     if forward then

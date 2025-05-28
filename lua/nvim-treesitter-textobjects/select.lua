@@ -3,18 +3,11 @@ local global_config = require('nvim-treesitter-textobjects.config')
 local shared = require('nvim-treesitter-textobjects.shared')
 
 ---@param range Range4
----@param selection_mode string
+---@param selection_mode TSTextObjects.SelectionMode
 local function update_selection(range, selection_mode)
   ---@type integer, integer, integer, integer
   local start_row, start_col, end_row, end_col = unpack(range)
-
-  local v_table = { charwise = 'v', linewise = 'V', blockwise = '<C-v>' }
-  selection_mode = selection_mode or 'charwise'
-
-  -- Normalise selection_mode
-  if vim.tbl_contains(vim.tbl_keys(v_table), selection_mode) then
-    selection_mode = v_table[selection_mode]
-  end
+  selection_mode = selection_mode or 'v'
 
   -- enter visual mode if normal or operator-pending (no) mode
   -- Why? According to https://learnvimscriptthehardway.stevelosh.com/chapters/15.html
@@ -115,7 +108,7 @@ local function include_surrounding_whitespace(bufnr, range, selection_mode)
   local next = next_position(bufnr, unpack(position))
   while next and is_whitespace(bufnr, unpack(next)) do
     extended = true
-    position = next
+    position = next ---@type {[1]: integer, [2]: integer}
     next = next_position(bufnr, unpack(position))
   end
   if extended then
@@ -214,14 +207,14 @@ function M.detect_selection_mode(query_string)
   end
 
   local ret_value = selection_mode
-  local mode = api.nvim_get_mode().mode --[[@as string]]
+  local mode = api.nvim_get_mode().mode
 
   local is_normal_or_charwise_v = mode == 'n' or mode == 'v'
   if not is_normal_or_charwise_v then
     -- According to "mode()" mapping, if we are in operator pending mode or visual mode,
     -- then last char is {v,V,<C-v>}, exept for "no", which is "o", in which case we honor
     -- last set `selection_mode`
-    mode = mode:sub(#mode)
+    mode = mode:sub(#mode) --[[@as string]]
     ret_value = mode == 'o' and selection_mode or mode
   end
 

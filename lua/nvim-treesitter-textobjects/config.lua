@@ -1,7 +1,5 @@
 ---@alias TSTextObjects.SelectionMode 'v'|'V'|'<c-v>'
 
--- luacheck: push ignore 631
-
 ---@alias TSTextObjects.ConfigFunctionArgs {query_string: string, method: TSTextObjects.Method}
 
 ---@class (exact) TSTextObjects.Config.Select
@@ -9,8 +7,6 @@
 ---@field lookbehind? boolean
 ---@field selection_modes? table<string, TSTextObjects.SelectionMode>|fun(opts: TSTextObjects.ConfigFunctionArgs): TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>
 ---@field include_surrounding_whitespace? boolean|fun(opts: TSTextObjects.ConfigFunctionArgs): boolean
-
--- luacheck: pop
 
 ---@class (exact) TSTextObjects.Config.Move
 ---@field set_jumps? boolean

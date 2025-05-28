@@ -4,15 +4,13 @@ local add_bytes = require('vim.treesitter._range').add_bytes
 -- lookup table for parserless queries
 local lang_to_parser = { ecma = 'javascript', jsx = 'javascript' }
 
--- luacheck: push ignore 631
 ---@alias TSTextObjects.Metadata {range: {[1]: number, [2]: number, [3]: number, [4]: number, [5]: number, [6]: number, [7]: string}}
--- luacheck: pop
 
 local M = {}
 
----@param object any
+---@param object table
 ---@param path string[]
----@param value any
+---@param value table
 local function insert_to_path(object, path, value)
   ---@type table<string, any|table<string, any>>
   local curr_obj = object
@@ -22,9 +20,11 @@ local function insert_to_path(object, path, value)
       curr_obj[path[index]] = {}
     end
 
+    ---@type table<string, any|table<string, any>>
     curr_obj = curr_obj[path[index]]
   end
 
+  ---@type table<string, any|table<string, any>>
   curr_obj[path[#path]] = value
 end
 
@@ -39,26 +39,12 @@ local function memoize(fn, hash_fn)
   return function(...)
     local key = hash_fn(...)
     if cache[key] == nil then
-      local v = { fn(...) } ---@type any
-
-      for k, value in pairs(v) do
-        if value == nil then
-          value[k] = vim.NIL
-        end
-      end
-
-      cache[key] = v
+      local v = fn(...) ---@type any
+      cache[key] = v ~= nil and v or vim.NIL
     end
 
     local v = cache[key]
-
-    for k, value in pairs(v) do
-      if value == vim.NIL then
-        value[k] = nil
-      end
-    end
-
-    return unpack(v)
+    return v ~= vim.NIL and v or nil
   end
 end
 
@@ -69,14 +55,14 @@ end
 ---@param query_group string the query file to use
 ---@param root TSNode the root node
 ---@param root_lang string the root node lang, if known
----@return table
+---@return table[]
 local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
   local query = ts.query.get(root_lang, query_group)
   if not query then
     return {}
   end
 
-  local matches = {}
+  local matches = {} ---@type table[]
   local start_row, _, end_row, _ = root:range()
   -- The end row is exclusive so we need to add 1 to it.
   for pattern, match, metadata in query:iter_matches(root, bufnr, start_row, end_row + 1) do
@@ -127,18 +113,18 @@ end)
 
 ---@param tbl table<string, any|table<string, any>> the table to access
 ---@param path string the '.' separated path
----@return unknown|nil result the value at path or nil
+---@return any|nil result the value at path or nil
 local function get_at_path(tbl, path)
   if path == '' then
     return tbl
   end
 
   local segments = vim.split(path, '%.')
-  ---@type table<string, any|table<string, any>>
   local result = tbl
 
   for _, segment in ipairs(segments) do
     if type(result) == 'table' then
+      ---@type any
       result = result[segment]
     end
   end

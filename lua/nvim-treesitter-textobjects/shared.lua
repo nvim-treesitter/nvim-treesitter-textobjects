@@ -188,6 +188,7 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
   if not parser then
     return {}
   end
+  parser:parse(true)
 
   local first_tree = parser:trees()[1]
   local root = first_tree:root()

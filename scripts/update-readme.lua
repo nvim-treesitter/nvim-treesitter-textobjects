@@ -67,9 +67,6 @@ for _, v in ipairs(sorted_parsers) do
 end
 generated_text = generated_text .. '</table>\n'
 
-print(generated_text)
-print('\n')
-
 local readme_text = table.concat(vim.fn.readfile('README.md'), '\n')
 
 local new_readme_text = string.gsub(
@@ -79,16 +76,8 @@ local new_readme_text = string.gsub(
 )
 vim.fn.writefile(vim.fn.split(new_readme_text, '\n'), 'README.md')
 
-if string.find(readme_text, generated_text, 1, 'plain') then
-  print('README.md is up-to-date!')
-  vim.cmd('q')
+if string.find(readme_text, generated_text, 1, true) then
+  print('README.md is up-to-date\n')
 else
-  print('New README.md was written. Please commit that change! Old text was: ')
-  print(
-    string.sub(
-      readme_text,
-      string.find(readme_text, '<!%-%-textobjectinfo%-%->.*<!%-%-textobjectinfo%-%->')
-    )
-  )
-  vim.cmd('cq')
+  print('New README.md was written\n')
 end

@@ -1,6 +1,9 @@
 local ts = vim.treesitter
 local add_bytes = require('vim.treesitter._range').add_bytes
 
+-- lookup table for parserless queries
+local lang_to_parser = { ecma = 'javascript', jsx = 'javascript' }
+
 -- luacheck: push ignore 631
 ---@alias TSTextObjects.Metadata {range: {[1]: number, [2]: number, [3]: number, [4]: number, [5]: number, [6]: number, [7]: string}}
 -- luacheck: pop
@@ -428,7 +431,8 @@ M.available_textobjects = memoize(function(lang, query_group)
   end
 
   query_group = query_group or 'textobjects'
-  local parsed_queries = ts.query.get(lang, query_group)
+  local parsed_queries =
+    ts.query.get(lang_to_parser[lang] and lang_to_parser[lang] or lang, query_group)
   if not parsed_queries then
     return {}
   end

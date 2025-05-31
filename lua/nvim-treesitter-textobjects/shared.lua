@@ -1,15 +1,16 @@
 local ts = vim.treesitter
-local add_bytes = require("vim.treesitter._range").add_bytes
+local add_bytes = require('vim.treesitter._range').add_bytes
 
--- luacheck: push ignore 631
+-- lookup table for parserless queries
+local lang_to_parser = { ecma = 'javascript', jsx = 'javascript' }
+
 ---@alias TSTextObjects.Metadata {range: {[1]: number, [2]: number, [3]: number, [4]: number, [5]: number, [6]: number, [7]: string}}
--- luacheck: pop
 
 local M = {}
 
----@param object any
+---@param object table
 ---@param path string[]
----@param value any
+---@param value table
 local function insert_to_path(object, path, value)
   ---@type table<string, any|table<string, any>>
   local curr_obj = object
@@ -19,9 +20,11 @@ local function insert_to_path(object, path, value)
       curr_obj[path[index]] = {}
     end
 
+    ---@type table<string, any|table<string, any>>
     curr_obj = curr_obj[path[index]]
   end
 
+  ---@type table<string, any|table<string, any>>
   curr_obj[path[#path]] = value
 end
 
@@ -31,31 +34,17 @@ end
 ---@param hash_fn fun(...): any
 ---@return F
 local function memoize(fn, hash_fn)
-  local cache = setmetatable({}, { __mode = "kv" }) ---@type table<any,any>
+  local cache = setmetatable({}, { __mode = 'kv' }) ---@type table<any,any>
 
   return function(...)
     local key = hash_fn(...)
     if cache[key] == nil then
-      local v = { fn(...) } ---@type any
-
-      for k, value in pairs(v) do
-        if value == nil then
-          value[k] = vim.NIL
-        end
-      end
-
-      cache[key] = v
+      local v = fn(...) ---@type any
+      cache[key] = v ~= nil and v or vim.NIL
     end
 
     local v = cache[key]
-
-    for k, value in pairs(v) do
-      if value == vim.NIL then
-        value[k] = nil
-      end
-    end
-
-    return unpack(v)
+    return v ~= vim.NIL and v or nil
   end
 end
 
@@ -66,14 +55,14 @@ end
 ---@param query_group string the query file to use
 ---@param root TSNode the root node
 ---@param root_lang string the root node lang, if known
----@return table
+---@return table[]
 local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
   local query = ts.query.get(root_lang, query_group)
   if not query then
     return {}
   end
 
-  local matches = {}
+  local matches = {} ---@type table[]
   local start_row, _, end_row, _ = root:range()
   -- The end row is exclusive so we need to add 1 to it.
   for pattern, match, metadata in query:iter_matches(root, bufnr, start_row, end_row + 1) do
@@ -84,7 +73,7 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
       for id, nodes in pairs(match) do
         local query_name = query.captures[id] -- name of the capture in the query
         if query_name ~= nil then
-          local path = vim.split(query_name, "%.")
+          local path = vim.split(query_name, '%.')
           if metadata[id] and metadata[id].range then
             insert_to_path(prepared_match, path, add_bytes(bufnr, metadata[id].range))
           else
@@ -103,7 +92,7 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
       if metadata.range and metadata.range[7] then
         ---@cast metadata TSTextObjects.Metadata
         local query_name = metadata.range[7]
-        local path = vim.split(query_name, "%.")
+        local path = vim.split(query_name, '%.')
         insert_to_path(prepared_match, path, {
           metadata.range[1],
           metadata.range[2],
@@ -119,23 +108,23 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
   end
   return matches
 end, function(bufnr, query_group, root)
-  return string.format("%d-%s-%s", bufnr, root:id(), query_group)
+  return string.format('%d-%s-%s', bufnr, root:id(), query_group)
 end)
 
 ---@param tbl table<string, any|table<string, any>> the table to access
 ---@param path string the '.' separated path
----@return unknown|nil result the value at path or nil
+---@return any|nil result the value at path or nil
 local function get_at_path(tbl, path)
-  if path == "" then
+  if path == '' then
     return tbl
   end
 
-  local segments = vim.split(path, "%.")
-  ---@type table<string, any|table<string, any>>
+  local segments = vim.split(path, '%.')
   local result = tbl
 
   for _, segment in ipairs(segments) do
-    if type(result) == "table" then
+    if type(result) == 'table' then
+      ---@type any
       result = result[segment]
     end
   end
@@ -149,8 +138,8 @@ end
 ---@param query_group string
 ---@return Range6[]
 local function get_capture_ranges_recursively(bufnr, query_string, query_group)
-  if query_string:sub(1, 1) ~= "@" then
-    error 'Captures must start with "@"'
+  if query_string:sub(1, 1) ~= '@' then
+    error('Captures must start with "@"')
     return {}
   end
   query_string = query_string:sub(2)
@@ -188,12 +177,13 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
   if not parser then
     return {}
   end
+  parser:parse(true)
 
   local first_tree = parser:trees()[1]
   local root = first_tree:root()
   local lang = parser:lang()
 
-  if string.sub(capture_string, 1, 1) == "@" then
+  if string.sub(capture_string, 1, 1) == '@' then
     --remove leading "@"
     capture_string = string.sub(capture_string, 2)
   end
@@ -352,20 +342,20 @@ function M.textobject_at_point(query_string, query_group, bufnr, pos, opts)
   local row, col = unpack(pos) --[[@as integer, integer]]
   row = row - 1
 
-  if not string.match(query_string, "^@.*") then
-    error 'Captures must start with "@"'
+  if not string.match(query_string, '^@.*') then
+    error('Captures must start with "@"')
   end
 
   local ranges = get_capture_ranges_recursively(bufnr, query_string, query_group)
-  if vim.endswith(query_string, "outer") then
+  if vim.endswith(query_string, 'outer') then
     local range = best_range_at_point(ranges, row, col, opts)
     return range
   else
     -- query string is @*.inner or @*
     -- First search the @*.outer instead, and then search the @*.inner within the range of the @*.outer
-    local query_string_outer = string.gsub(query_string, "%..*", ".outer")
+    local query_string_outer = string.gsub(query_string, '%..*', '.outer')
     if query_string_outer == query_string then
-      query_string_outer = query_string .. ".outer"
+      query_string_outer = query_string .. '.outer'
     end
 
     local ranges_outer = get_capture_ranges_recursively(bufnr, query_string_outer, query_group)
@@ -406,7 +396,12 @@ function M.textobject_at_point(query_string, query_group, bufnr, pos, opts)
         -- find the best range within the range of the @*.outer
         -- starting from the outer range's start position (not the cursor position)
         -- with lookahead enabled
-        range = best_range_at_point(ranges_within_outer, range_outer[1], range_outer[2], { lookahead = true })
+        range = best_range_at_point(
+          ranges_within_outer,
+          range_outer[1],
+          range_outer[2],
+          { lookahead = true }
+        )
         return range
       end
     end
@@ -421,15 +416,16 @@ M.available_textobjects = memoize(function(lang, query_group)
     return {}
   end
 
-  query_group = query_group or "textobjects"
-  local parsed_queries = ts.query.get(lang, query_group)
+  query_group = query_group or 'textobjects'
+  local parsed_queries =
+    ts.query.get(lang_to_parser[lang] and lang_to_parser[lang] or lang, query_group)
   if not parsed_queries then
     return {}
   end
 
   return parsed_queries.captures or {}
 end, function(lang, query_group)
-  return string.format("%s-%s", lang, query_group)
+  return string.format('%s-%s', lang, query_group)
 end)
 
 ---@param bufnr integer
@@ -437,7 +433,7 @@ end)
 ---@param queries? string[]
 --- @return boolean
 function M.check_support(bufnr, query_group, queries)
-  query_group = query_group or "textobjects"
+  query_group = query_group or 'textobjects'
 
   local filetype = vim.bo[bufnr].filetype
   local buf_lang = ts.language.get_lang(filetype) or filetype

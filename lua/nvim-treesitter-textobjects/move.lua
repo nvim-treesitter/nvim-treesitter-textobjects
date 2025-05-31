@@ -1,8 +1,8 @@
 local api = vim.api
 
-local shared = require "nvim-treesitter-textobjects.shared"
-local repeatable_move = require "nvim-treesitter-textobjects.repeatable_move"
-local global_config = require "nvim-treesitter-textobjects.config"
+local shared = require('nvim-treesitter-textobjects.shared')
+local repeatable_move = require('nvim-treesitter-textobjects.repeatable_move')
+local global_config = require('nvim-treesitter-textobjects.config')
 
 ---@param range Range4?
 ---@param goto_end boolean
@@ -13,7 +13,7 @@ local function goto_node(range, goto_end, avoid_set_jump)
   end
 
   if not avoid_set_jump then
-    vim.cmd "normal! m'"
+    vim.cmd("normal! m'")
   end
   ---@type integer, integer, integer, integer
   local start_row, start_col, end_row, end_col = unpack(range)
@@ -21,8 +21,8 @@ local function goto_node(range, goto_end, avoid_set_jump)
   -- Enter visual mode if we are in operator pending mode
   -- If we don't do this, it will miss the last character.
   local mode = api.nvim_get_mode()
-  if mode.mode == "no" then
-    vim.cmd "normal! v"
+  if mode.mode == 'no' then
+    vim.cmd('normal! v')
   end
 
   -- Position is 1, 0 indexed.
@@ -39,8 +39,8 @@ local M = {}
 ---@param query_strings string[]|string
 ---@param query_group? string
 local function move(opts, query_strings, query_group)
-  query_group = query_group or "textobjects"
-  if type(query_strings) == "string" then
+  query_group = query_group or 'textobjects'
+  if type(query_strings) == 'string' then
     query_strings = { query_strings }
   end
 
@@ -86,7 +86,7 @@ local function move(opts, query_strings, query_group)
   local function filter_function(start_, range)
     local row, col = unpack(api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
     row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
-    ---@type integer, integer, integer, integer
+    ---@type integer, integer, integer, integer, integer, integer
     local start_row, start_col, _, end_row, end_col, _ = unpack(range)
 
     if not start_ then
@@ -95,7 +95,7 @@ local function move(opts, query_strings, query_group)
         start_col = end_col
       else
         start_row = end_row
-        start_col = end_col - 1
+        start_col = end_col - 1 ---@type integer
       end
     end
     if forward then
@@ -111,11 +111,17 @@ local function move(opts, query_strings, query_group)
     local best_start ---@type boolean
     for _, query_string in ipairs(query_strings) do
       for _, start_ in ipairs(starts) do
-        local current_range = shared.find_best_range(bufnr, query_string, query_group, function(range)
-          return filter_function(start_, range)
-        end, function(range)
-          return scoring_function(start_, range)
-        end)
+        local current_range = shared.find_best_range(
+          bufnr,
+          query_string,
+          query_group,
+          function(range)
+            return filter_function(start_, range)
+          end,
+          function(range)
+            return scoring_function(start_, range)
+          end
+        )
 
         if current_range then
           local score = scoring_function(start_, current_range)

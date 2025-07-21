@@ -65,10 +65,6 @@
 
 (stmt_const) @statement.outer
 
-(ctrl_return) @statement.outer @return.outer
-
-(ctrl_do) @statement.outer
-
 (ctrl_if) @statement.outer
 
 (ctrl_try) @statement.outer
@@ -78,8 +74,5 @@
 (ctrl_while) @statement.outer
 
 (ctrl_loop) @statement.outer
-
-("break"
-  "continue") @statement.outer
 
 (val_number) @number.inner

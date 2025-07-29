@@ -27,6 +27,9 @@
     "}"
     (#make-range! "function.inner" @_start @_end)))
 
+(return_statement
+  (_)? @return.inner) @return.outer
+
 (for_statement
   body: (_)? @loop.inner) @loop.outer
 

@@ -1,0 +1,245 @@
+{
+  "$schema": "https://raw.githubusercontent.com/ribru17/ts_query_ls/refs/heads/master/schemas/config.json",
+  "parser_install_directories": ["${HOME}/.local/share/nvim/site/parser"],
+  "parser_aliases": {
+    "ecma": "javascript",
+    "jsx": "javascript"
+  },
+  "valid_captures": {
+    "textobjects": {
+      "attribute.inner": "",
+      "attribute.outer": "",
+      "function.inner": "",
+      "function.outer": "",
+      "class.inner": "",
+      "class.outer": "",
+      "conditional.inner": "",
+      "conditional.outer": "",
+      "loop.inner": "",
+      "loop.outer": "",
+      "call.inner": "",
+      "call.outer": "",
+      "block.inner": "",
+      "block.outer": "",
+      "parameter.inner": "",
+      "parameter.outer": "",
+      "regex.inner": "",
+      "regex.outer": "",
+      "comment.inner": "",
+      "comment.outer": "",
+      "assignment.inner": "",
+      "assignment.outer": "",
+      "return.inner": "",
+      "return.outer": "",
+
+      "frame.inner": "",
+      "frame.outer": "",
+
+      "statement.outer": "",
+      "scopename.inner": "",
+      "number.inner": "",
+
+      "assignment.lhs": "",
+      "assignment.rhs": ""
+    }
+  },
+  "valid_predicates": {
+    "eq": {
+      "any": true,
+      "parameters": [
+        {
+          "type": "capture",
+          "arity": "required"
+        },
+        {
+          "type": "any",
+          "arity": "required"
+        }
+      ],
+      "description": "checks for equality between two nodes, or a node and a string"
+    },
+    "any-of": {
+      "parameters": [
+        {
+          "type": "capture",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "variadic"
+        }
+      ],
+      "description": "match any of the given strings against the text corresponding to a node"
+    },
+    "contains": {
+      "any": true,
+      "parameters": [
+        {
+          "type": "capture",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "variadic"
+        }
+      ],
+      "description": "match a string against parts of the text corresponding to a node"
+    },
+    "match": {
+      "any": true,
+      "parameters": [
+        {
+          "type": "capture",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        }
+      ],
+      "description": "Match a regexp against the text corresponding to a node"
+    },
+    "lua-match": {
+      "any": true,
+      "parameters": [
+        {
+          "type": "capture",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        }
+      ],
+      "description": "match a Lua pattern against the text corresponding to a node"
+    },
+    "has-ancestor": {
+      "parameters": [
+        {
+          "type": "capture",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "variadic"
+        }
+      ],
+      "description": "match any of the given node types against all ancestors of a node"
+    },
+    "has-parent": {
+      "parameters": [
+        {
+          "type": "capture",
+          "arity": "required"
+        },
+        {
+          "type": "any",
+          "arity": "required"
+        },
+        {
+          "type": "any",
+          "arity": "variadic"
+        }
+      ],
+      "description": "match any of the given node types against the direct ancestor of a node"
+    }
+  },
+  "valid_directives": {
+    "set": {
+      "parameters": [
+        {
+          "type": "any",
+          "arity": "required"
+        },
+        {
+          "type": "any",
+          "arity": "optional"
+        },
+        {
+          "type": "any",
+          "arity": "optional"
+        }
+      ],
+      "description": "sets key/value metadata for a specific match or capture"
+    },
+    "offset": {
+      "parameters": [
+        {
+          "type": "capture",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        }
+      ],
+      "description": "Takes the range of the captured node and applies an offset. This will set a new range in the form of a list like { {start_row}, {start_col}, {end_row}, {end_col} } for the captured node with `capture_id` as `metadata[capture_id].range`."
+    },
+    "gsub": {
+      "parameters": [
+        {
+          "type": "capture",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "required"
+        }
+      ],
+      "description": "Transforms the content of the node using a Lua pattern. This will set a new `metadata[capture_id].text`."
+    },
+    "trim": {
+      "parameters": [
+        {
+          "type": "capture",
+          "arity": "required"
+        },
+        {
+          "type": "string",
+          "arity": "optional"
+        },
+        {
+          "type": "string",
+          "arity": "optional"
+        },
+        {
+          "type": "string",
+          "arity": "optional"
+        },
+        {
+          "type": "string",
+          "arity": "optional"
+        }
+      ],
+      "description": "Trims whitespace from the node. Sets a new `metadata[capture_id].range`. Takes a capture ID and, optionally, four integers to customize trimming behavior (`1` meaning trim, `0` meaning don't trim). When only given a capture ID, trims blank lines (lines that contain only whitespace, or are empty) from the end of the node (for backwards compatibility). Can trim all whitespace from both sides of the node if parameters are given."
+    }
+  }
+}

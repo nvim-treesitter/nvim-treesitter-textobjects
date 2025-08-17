@@ -284,6 +284,28 @@
     ")"
     (#make-range! "call.inner" @_start @_end)))
 
+; variable assignment
+(expression_statement
+  (assignment_expression
+    left: (variable_name
+            (_) @assignment.lhs)
+    right: (_) @assignment.inner @assignment.rhs)) @assignment.outer
+
+(property_declaration
+  (property_element
+    name: (variable_name
+            (name) @assignment.lhs)
+    default_value: (_) @assignment.inner @assignment.rhs)) @assignment.outer
+
+(property_declaration
+  (property_element
+    name: (variable_name
+            (name) @assignment.lhs)))
+
+(array_element_initializer
+  (_) @assignment.lhs
+  (_) @assignment.inner @assignment.rhs) @assignment.outer
+
 ; statement
 [
   (expression_statement)

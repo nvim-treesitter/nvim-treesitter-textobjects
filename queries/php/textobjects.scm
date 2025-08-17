@@ -312,6 +312,10 @@
 
 (return_statement) @return.outer
 
+; number
+(integer) @number.inner
+
+(float) @number.inner
 
 ; statement
 [

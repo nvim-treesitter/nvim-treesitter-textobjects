@@ -306,6 +306,13 @@
   (_) @assignment.lhs
   (_) @assignment.inner @assignment.rhs) @assignment.outer
 
+; return
+(return_statement
+  (_) @return.inner) @return.outer
+
+(return_statement) @return.outer
+
+
 ; statement
 [
   (expression_statement)

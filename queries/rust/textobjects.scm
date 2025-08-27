@@ -108,7 +108,7 @@
     "}")) @loop.outer
 
 ; blocks
-(block 
+(block
   (_)? @block.inner) @block.outer
 
 (unsafe_block

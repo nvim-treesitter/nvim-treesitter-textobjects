@@ -33,9 +33,9 @@ M.repeat_last_move = function(opts_extend)
   end
   local opts = vim.tbl_deep_extend('force', M.last_move.opts, opts_extend or {})
   if M.last_move.func == 'f' or M.last_move.func == 't' then
-    vim.api.nvim_feedkeys(vim.v.count1 .. (opts.forward and ';' or ','), 'n', true)
+    vim.cmd([[normal! ]] .. vim.v.count1 .. (opts.forward and ';' or ','))
   elseif M.last_move.func == 'F' or M.last_move.func == 'T' then
-    vim.api.nvim_feedkeys(vim.v.count1 .. (opts.forward and ',' or ';'), 'n', true)
+    vim.cmd([[normal! ]] .. vim.v.count1 .. (opts.forward and ',' or ';'))
   else
     M.last_move.func(opts, unpack(M.last_move.additional_args))
   end

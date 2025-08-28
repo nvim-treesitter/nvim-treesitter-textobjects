@@ -109,10 +109,10 @@
 
 ; blocks
 (block
-  (_)? @block.inner) @block.outer
+  (_)* @block.inner) @block.outer
 
 (unsafe_block
-  (_)? @block.inner) @block.outer
+  (_)* @block.inner) @block.outer
 
 ; calls
 (macro_invocation) @call.outer

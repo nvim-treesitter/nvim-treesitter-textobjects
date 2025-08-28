@@ -114,7 +114,7 @@
 
 ; blocks
 (statement_block
-  (_)? @block.inner) @block.outer
+  (_)* @block.inner) @block.outer
 
 ; parameters
 ; function ({ x }) ...

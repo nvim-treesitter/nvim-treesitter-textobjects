@@ -7,6 +7,7 @@ class Test:
 
         self.my_list = my_list
 
+        # see https://github.com/nvim-treesitter/nvim-treesitter-textobjects/issues/700
         print(1, type('1'), ['1'])
         print(['1', '2'], 3)
         print(['1', '2'])

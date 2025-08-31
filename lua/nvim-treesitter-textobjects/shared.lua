@@ -214,7 +214,7 @@ end
 ---@param range Range4
 ---@param row integer
 ---@param col integer
----@param end_col_offset integer?
+---@param end_col_offset integer? nil (implies 0) or -1 - see tests/select/python/selection_mode.py
 ---@return boolean
 local function is_in_range(range, row, col, end_col_offset)
   local start_row, start_col, end_row, end_col = unpack(range) ---@type integer, integer, integer, integer

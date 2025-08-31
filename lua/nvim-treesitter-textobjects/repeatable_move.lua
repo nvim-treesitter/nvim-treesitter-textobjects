@@ -27,18 +27,17 @@ M.make_repeatable_move = function(move_fn)
 end
 
 ---@param opts_extend TSTextObjects.MoveOpts?
----@return string?
 M.repeat_last_move = function(opts_extend)
   if not M.last_move then
     return
   end
   local opts = vim.tbl_deep_extend('force', M.last_move.opts, opts_extend or {})
   if M.last_move.func == 'f' or M.last_move.func == 't' then
-    return opts.forward and ';' or ','
+    vim.cmd([[normal! ]] .. vim.v.count1 .. (opts.forward and ';' or ','))
   elseif M.last_move.func == 'F' or M.last_move.func == 'T' then
-    return opts.forward and ',' or ';'
+    vim.cmd([[normal! ]] .. vim.v.count1 .. (opts.forward and ',' or ';'))
   else
-    return M.last_move.func(opts, unpack(M.last_move.additional_args))
+    M.last_move.func(opts, unpack(M.last_move.additional_args))
   end
 end
 

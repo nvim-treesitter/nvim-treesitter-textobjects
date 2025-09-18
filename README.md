@@ -29,6 +29,21 @@ use({
 })
 ```
 
+If you are using [Lazy](https://github.com/folke/lazy.nvim), add this to your plugins list:
+
+```lua
+{
+  'nvim-treesitter/nvim-treesitter',
+  build = ':TSUpdate',
+  dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects' },
+  config = function()
+    require'nvim-treesitter.configs'.setup {
+      textobjects = {}
+    }
+  end,
+}
+```
+
 ## Text objects: select
 
 Define your own text objects mappings

@@ -20,3 +20,5 @@
   (statement_block) @class.inner)
 
 (column_declaration) @parameter.inner @parameter.outer
+
+(type_declaration) @class.outer

@@ -42,6 +42,7 @@
 
 (method_declaration
   body: (arrow_expression_clause
+    "=>"
     _+ @function.inner)) @function.outer
 
 (constructor_declaration

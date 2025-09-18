@@ -2,8 +2,7 @@
 
 Syntax aware text-objects, select, move, swap, and peek support.
 
-**Warning: tree-sitter and nvim-treesitter are an experimental feature of nightly versions of Neovim.
-Please consider the experience with this plug-in as experimental until tree-sitter support in Neovim is stable!
+**Warning: tree-sitter and nvim-treesitter are only available since Neovim 0.9 on stable releases, and since version 0.7 on nightly versions of Neovim.
 We recommend using the nightly builds of Neovim or the latest stable version.**
 
 ## Installation

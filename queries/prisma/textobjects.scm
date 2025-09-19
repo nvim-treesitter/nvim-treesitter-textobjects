@@ -9,9 +9,9 @@
 ] @block.outer
 
 [
- (enum_declaration)
- (model_declaration)
- (type_declaration)
+  (enum_declaration)
+  (model_declaration)
+  (type_declaration)
 ] @class.outer
 
 (enum_block) @class.inner
@@ -23,5 +23,7 @@
   (statement_block) @class.inner)
 
 (enumeral) @parameter.inner @parameter.outer
+
 (column_declaration) @parameter.inner @parameter.outer
+
 (block_attribute_declaration) @parameter.outer

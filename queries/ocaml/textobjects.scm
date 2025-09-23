@@ -1,6 +1,8 @@
-(value_definition
+((value_definition
   (let_binding
-    body: (_) @function.inner)) @function.outer
+    body: (_) @function.inner)) @_fun_start @_fun_end
+  ("in")? @_fun_end
+  (#make-range! "function.outer" @_fun_start @_fun_end))
 
 (method_definition
   body: (_) @function.inner) @function.outer

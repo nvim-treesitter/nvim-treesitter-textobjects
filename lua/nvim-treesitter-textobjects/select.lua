@@ -2,12 +2,37 @@ local api = vim.api
 local global_config = require('nvim-treesitter-textobjects.config')
 local shared = require('nvim-treesitter-textobjects.shared')
 
+--- Transforms TSNode range to (1,0)-indexed vim cursor range.
+---@param range Range4
+---@return Range4
+local function to_vim_cursor(range)
+  ---@type integer, integer, integer, integer
+  local start_row, start_col, end_row, end_col = unpack(range)
+  start_row = start_row + 1
+  end_row = end_row + 1
+
+  -- Use the ending of the previous row.
+  if end_col == 0 then
+    end_row = end_row - 1
+    end_col = #vim.api.nvim_buf_get_lines(0, end_row - 1, end_row, false)[1]
+  end
+
+  return { start_row, start_col, end_row, end_col }
+end
+
 ---@param range Range4
 ---@param selection_mode TSTextObjects.SelectionMode
 local function update_selection(range, selection_mode)
+  local cursor = to_vim_cursor(range)
+
   ---@type integer, integer, integer, integer
-  local start_row, start_col, end_row, end_col = unpack(range)
+  local start_row, start_col, end_row, end_col = unpack(cursor)
   selection_mode = selection_mode or 'v'
+
+  -- Adjust end column if selection mode is inclusive in visual mode.
+  if selection_mode ~= 'v' or vim.o.selection ~= 'exclusive' then
+    end_col = math.max(0, end_col - 1)
+  end
 
   -- enter visual mode if normal or operator-pending (no) mode
   -- Why? According to https://learnvimscriptthehardway.stevelosh.com/chapters/15.html
@@ -20,16 +45,10 @@ local function update_selection(range, selection_mode)
     vim.cmd.normal({ selection_mode, bang = true })
   end
 
-  local end_col_offset = 1
-
-  if selection_mode == 'v' and vim.o.selection == 'exclusive' then
-    end_col_offset = 0
-  end
-
   -- Position is 1, 0 indexed.
-  api.nvim_win_set_cursor(0, { start_row + 1, start_col })
+  api.nvim_win_set_cursor(0, { start_row, start_col })
   vim.cmd('normal! o')
-  api.nvim_win_set_cursor(0, { end_row + 1, end_col - end_col_offset })
+  api.nvim_win_set_cursor(0, { end_row, end_col })
 end
 
 local M = {}

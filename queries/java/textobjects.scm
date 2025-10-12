@@ -108,3 +108,9 @@
   (binary_integer_literal)
   (octal_integer_literal)
 ] @number.inner
+
+; scopename
+; statement
+(statement) @statement.outer
+
+(return_statement) @statement.outer

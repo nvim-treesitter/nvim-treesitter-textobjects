@@ -112,7 +112,7 @@ Supported options:
 - set_jumps: whether to set jumps in the jumplist
 - goto_next_start: map of keymaps to a list of tree-sitter capture groups (`{@function.outer, @class.outer}`).
   The one that starts closest to the cursor will be chosen, preferring row-proximity to column-proximity.
-- goto_next_end: same as goto_next_start, but it jumps to the start of
+- goto_next_end: same as goto_next_start, but it jumps to the end of
   the text object.
 - goto_previous_start: same as goto_next_start, but it jumps to the previous
   text object.

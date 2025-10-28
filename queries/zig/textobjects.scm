@@ -70,21 +70,23 @@
 ; arguments
 (call_expression
   function: (_)
-  "("
-  "," @_start
-  .
-  (_) @parameter.inner
-  ")"
+  arguments: (arguments
+    "("
+    "," @_start
+    .
+    (_) @parameter.inner
+    ")")
   (#make-range! "parameter.outer" @_start @parameter.inner))
 
 (call_expression
   function: (_)
-  "("
-  .
-  (_) @parameter.inner
-  .
-  ","? @_end
-  ")"
+  arguments: (arguments
+    "("
+    .
+    (_) @parameter.inner
+    .
+    ","? @_end
+    ")")
   (#make-range! "parameter.outer" @parameter.inner @_end))
 
 ; comments
@@ -122,10 +124,11 @@
 (call_expression) @call.outer
 
 (call_expression
-  "("
-  .
-  _ @_start
-  _? @_end
-  .
-  ")"
+  arguments: (arguments
+    "("
+    .
+    _ @_start
+    _? @_end
+    .
+    ")")
   (#make-range! "call.inner" @_start @_end))

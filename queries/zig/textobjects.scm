@@ -56,20 +56,22 @@
 ; arguments
 (call_expression
   function: (_)
-  "("
-  "," @parameter.outer
-  .
-  (_) @parameter.inner @parameter.outer
-  ")")
+  arguments: (arguments
+    "("
+    "," @parameter.outer
+    .
+    (_) @parameter.inner @parameter.outer
+    ")"))
 
 (call_expression
   function: (_)
-  "("
-  .
-  (_) @parameter.inner @parameter.outer
-  .
-  ","? @parameter.outer
-  ")")
+  arguments: (arguments
+    "("
+    .
+    (_) @parameter.inner @parameter.outer
+    .
+    ","? @parameter.outer
+    ")"))
 
 ; comments
 (comment) @comment.outer
@@ -102,6 +104,7 @@
 (call_expression) @call.outer
 
 (call_expression
-  "("
-  _+ @call.inner
-  ")")
+  arguments: (arguments
+    "("
+    _+ @call.inner
+    ")"))

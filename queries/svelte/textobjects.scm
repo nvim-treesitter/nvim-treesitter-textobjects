@@ -7,7 +7,6 @@
 (if_statement) @block.outer @conditional.outer
 
 ; TODO: rewrite without make-range!
-
 ; (if_statement
 ;   (if_start)
 ;   .
@@ -17,7 +16,6 @@
 ;   (if_end)
 ;   (#make-range! "block.inner" @_start @_end)
 ;   (#make-range! "conditional.inner" @_start @_end))
-
 ; each block
 (each_statement) @block.outer @loop.outer
 
@@ -30,7 +28,6 @@
 ;   (each_end)
 ;   (#make-range! "block.inner" @_start @_end)
 ;   (#make-range! "loop.inner" @_start @_end))
-
 ; key block
 (key_statement) @block.outer
 
@@ -42,7 +39,6 @@
 ;   .
 ;   (key_end)
 ;   (#make-range! "block.inner" @_start @_end))
-
 ; await block
 (await_statement) @block.outer
 
@@ -54,7 +50,6 @@
 ;   .
 ;   (await_end)
 ;   (#make-range! "block.inner" @_start @_end))
-
 ; snippet block
 (snippet_statement) @block.outer
 

@@ -30,7 +30,6 @@
     (_) @conditional.inner)) @conditional.outer
 
 ; TODO: rewrite without make-range!
-
 ; (function_expression
 ;   (match_case) @_start @_end
 ;   (match_case)* @_end
@@ -40,7 +39,6 @@
 ;   (match_case) @_start @_end
 ;   (match_case)* @_end
 ;   (#make-range! "conditional.inner" @_start @_end)) @conditional.outer
-
 (comment) @comment.outer
 
 (parameter) @parameter.outer
@@ -49,7 +47,6 @@
   argument: (_) @parameter.outer) @call.outer
 
 ; TODO: rewrite without make-range!
-
 ; (application_expression
 ;   argument: (_) @_start @_end
 ;   argument: (_)* @_end

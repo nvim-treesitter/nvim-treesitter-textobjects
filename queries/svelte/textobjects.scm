@@ -6,58 +6,49 @@
 ; if block
 (if_statement) @block.outer @conditional.outer
 
-; TODO: rewrite without make-range!
-; (if_statement
-;   (if_start)
-;   .
-;   (_) @_start
-;   (_)? @_end
-;   .
-;   (if_end)
-;   (#make-range! "block.inner" @_start @_end)
-;   (#make-range! "conditional.inner" @_start @_end))
+(if_statement
+  (if_start)
+  .
+  _+ @block.inner @conditional.inner
+  .
+  (if_end))
+
 ; each block
 (each_statement) @block.outer @loop.outer
 
-; (each_statement
-;   (each_start)
-;   .
-;   (_) @_start
-;   (_)? @_end
-;   .
-;   (each_end)
-;   (#make-range! "block.inner" @_start @_end)
-;   (#make-range! "loop.inner" @_start @_end))
+(each_statement
+  (each_start)
+  .
+  _+ @block.inner @loop.inner
+  .
+  (each_end))
+
 ; key block
 (key_statement) @block.outer
 
-; (key_statement
-;   (key_start)
-;   .
-;   (_) @_start
-;   (_)? @_end
-;   .
-;   (key_end)
-;   (#make-range! "block.inner" @_start @_end))
+(key_statement
+  (key_start)
+  .
+  _+ @block.inner
+  .
+  (key_end))
+
 ; await block
 (await_statement) @block.outer
 
-; (await_statement
-;   (await_start)
-;   .
-;   (_) @_start
-;   (_)? @_end
-;   .
-;   (await_end)
-;   (#make-range! "block.inner" @_start @_end))
+(await_statement
+  (await_start)
+  .
+  _+ @block.inner
+  .
+  (await_end))
+
 ; snippet block
 (snippet_statement) @block.outer
 
-; (snippet_statement
-;   (snippet_start)
-;   .
-;   (_) @_start
-;   (_)? @_end
-;   .
-;   (snippet_end)
-;   (#make-range! "block.inner" @_start @_end))
+(snippet_statement
+  (snippet_start)
+  .
+  _+ @block.inner
+  .
+  (snippet_end))

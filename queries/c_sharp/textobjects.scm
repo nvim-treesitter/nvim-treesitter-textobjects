@@ -37,7 +37,7 @@
   body: (block
     .
     "{"
-    _+ @function.inner
+    _* @function.inner
     "}")) @function.outer
 
 (method_declaration
@@ -115,7 +115,7 @@
   body: (block
     .
     "{"
-    _+ @function.inner
+    _* @function.inner
     "}")) @function.outer
 
 ; constructor without body(metadata)

@@ -29,15 +29,17 @@
   (then_clause
     (_) @conditional.inner)) @conditional.outer
 
-(function_expression
-  (match_case) @_start @_end
-  (match_case)* @_end
-  (#make-range! "conditional.inner" @_start @_end)) @conditional.outer
+; TODO: rewrite without make-range!
 
-(match_expression
-  (match_case) @_start @_end
-  (match_case)* @_end
-  (#make-range! "conditional.inner" @_start @_end)) @conditional.outer
+; (function_expression
+;   (match_case) @_start @_end
+;   (match_case)* @_end
+;   (#make-range! "conditional.inner" @_start @_end)) @conditional.outer
+;
+; (match_expression
+;   (match_case) @_start @_end
+;   (match_case)* @_end
+;   (#make-range! "conditional.inner" @_start @_end)) @conditional.outer
 
 (comment) @comment.outer
 
@@ -46,12 +48,14 @@
 (application_expression
   argument: (_) @parameter.outer) @call.outer
 
-(application_expression
-  argument: (_) @_start @_end
-  argument: (_)* @_end
-  (#make-range! "call.inner" @_start @_end))
+; TODO: rewrite without make-range!
 
-(parenthesized_expression
-  (_) @_start @_end
-  (_)? @_end
-  (#make-range! "block.inner" @_start @_end)) @block.outer
+; (application_expression
+;   argument: (_) @_start @_end
+;   argument: (_)* @_end
+;   (#make-range! "call.inner" @_start @_end))
+;
+; (parenthesized_expression
+;   (_) @_start @_end
+;   (_)? @_end
+;   (#make-range! "block.inner" @_start @_end)) @block.outer

@@ -31,27 +31,25 @@
 
 (invokation) @call.outer
 
-; TODO: rewrite without make-range!
-; (formal_parameters
-;   "," @_start
-;   .
-;   (formal_parameter) @parameter.inner
-;   (#make-range! "parameter.outer" @_start @parameter.inner))
-; (formal_parameters
-;   .
-;   (formal_parameter) @parameter.inner
-;   .
-;   ","? @_end
-;   (#make-range! "parameter.outer" @parameter.inner @_end))
-; (actual_parameters
-;   "," @_start
-;   .
-;   (actual_parameter) @parameter.inner
-;   (#make-range! "parameter.outer" @_start @parameter.inner))
-;
-; (actual_parameters
-;   .
-;   (actual_parameter) @parameter.inner
-;   .
-;   ","? @_end
-;   (#make-range! "parameter.outer" @parameter.inner @_end))
+(formal_parameters
+  "," @parameter.outer
+  .
+  (formal_parameter) @parameter.inner @parameter.outer)
+
+(formal_parameters
+  .
+  (formal_parameter) @parameter.inner @parameter.outer
+  .
+  ","? @parameter.outer)
+
+
+(actual_parameters
+  "," @parameter.outer
+  .
+  (actual_parameter) @parameter.inner @parameter.outer)
+
+(actual_parameters
+  .
+  (actual_parameter) @parameter.inner @parameter.outer
+  .
+  ","? @parameter.outer)

@@ -150,35 +150,31 @@
 (parameters
   "," @parameter.outer
   .
-  (self_parameter) @parameter.inner @parameter.outer)
+  [
+    (self_parameter)
+    (parameter)
+    (type_identifier)
+  ] @parameter.inner @parameter.outer)
 
 (parameters
   .
-  (self_parameter) @parameter.inner @parameter.outer
+  [
+    (self_parameter)
+    (parameter)
+    (type_identifier)
+  ] @parameter.inner @parameter.outer
   .
   ","? @parameter.outer)
 
+; last element, with trailing comma
 (parameters
-  "," @parameter.outer
+  [
+    (self_parameter)
+    (parameter)
+    (type_identifier)
+  ] @parameter.outer
   .
-  (parameter) @parameter.inner @parameter.outer)
-
-(parameters
-  .
-  (parameter) @parameter.inner @parameter.outer
-  .
-  ","? @parameter.outer)
-
-(parameters
-  "," @parameter.outer
-  .
-  (type_identifier) @parameter.inner @parameter.outer)
-
-(parameters
-  .
-  (type_identifier) @parameter.inner @parameter.outer
-  .
-  ","? @parameter.outer)
+  "," @parameter.outer .)
 
 (type_parameters
   "," @parameter.outer
@@ -191,6 +187,12 @@
   .
   ","? @parameter.outer)
 
+; last element, with trailing comma
+(type_parameters
+  (_) @parameter.outer
+  .
+  "," @parameter.outer .)
+
 (tuple_pattern
   "," @parameter.outer
   .
@@ -201,6 +203,12 @@
   (identifier) @parameter.inner @parameter.outer
   .
   ","? @parameter.outer)
+
+; last element, with trailing comma
+(tuple_pattern
+  (identifier) @parameter.outer
+  .
+  "," @parameter.outer .)
 
 (tuple_struct_pattern
   "," @parameter.outer
@@ -213,6 +221,12 @@
   .
   ","? @parameter.outer)
 
+; last element, with trailing comma
+(tuple_struct_pattern
+  (identifier) @parameter.outer
+  .
+  "," @parameter.outer .)
+
 (tuple_expression
   "," @parameter.outer
   .
@@ -224,6 +238,12 @@
   .
   ","? @parameter.outer)
 
+; last element, with trailing comma
+(tuple_expression
+  (_) @parameter.outer
+  .
+  "," @parameter.outer .)
+
 (tuple_type
   "," @parameter.outer
   .
@@ -234,6 +254,12 @@
   (_) @parameter.inner @parameter.outer
   .
   ","? @parameter.outer)
+
+; last element, with trailing comma
+(tuple_type
+  (_) @parameter.outer
+  .
+  "," @parameter.outer .)
 
 (struct_item
   body: (field_declaration_list
@@ -248,6 +274,13 @@
     .
     ","? @parameter.outer))
 
+; last element, with trailing comma
+(struct_item
+  body: (field_declaration_list
+    (_) @parameter.outer
+    .
+    "," @parameter.outer .))
+
 (struct_expression
   body: (field_initializer_list
     "," @parameter.outer
@@ -261,6 +294,13 @@
     .
     ","? @parameter.outer))
 
+; last element, with trailing comma
+(struct_expression
+  body: (field_initializer_list
+    (_) @parameter.outer
+    .
+    "," @parameter.outer .))
+
 (closure_parameters
   "," @parameter.outer
   .
@@ -271,6 +311,12 @@
   (_) @parameter.inner @parameter.outer
   .
   ","? @parameter.outer)
+
+; last element, with trailing comma
+(closure_parameters
+  (_) @parameter.outer
+  .
+  "," @parameter.outer .)
 
 (arguments
   "," @parameter.outer
@@ -283,6 +329,12 @@
   .
   ","? @parameter.outer)
 
+; last element, with trailing comma
+(arguments
+  (_) @parameter.outer
+  .
+  "," @parameter.outer .)
+
 (type_arguments
   "," @parameter.outer
   .
@@ -294,6 +346,12 @@
   .
   ","? @parameter.outer)
 
+; last element, with trailing comma
+(type_arguments
+  (_) @parameter.outer
+  .
+  "," @parameter.outer .)
+
 (token_tree
   "," @parameter.outer
   .
@@ -304,6 +362,12 @@
   (_) @parameter.inner @parameter.outer
   .
   ","? @parameter.outer)
+
+; last element, with trailing comma
+(token_tree
+  (_) @parameter.outer
+  .
+  "," @parameter.outer .)
 
 (scoped_use_list
   list: (use_list
@@ -317,6 +381,13 @@
     (_) @parameter.inner @parameter.outer
     .
     ","? @parameter.outer))
+
+; last element, with trailing comma
+(scoped_use_list
+  list: (use_list
+    (_) @parameter.outer
+    .
+    "," @parameter.outer .))
 
 [
   (integer_literal)

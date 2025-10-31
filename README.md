@@ -1,5 +1,8 @@
 # nvim-treesitter-textobjects
 
+>[!CAUTION]
+> The `master` branch is frozen and provided for backward compatibility only. All future updates happen on the [`main` branch](https://github.com/nvim-treesitter/nvim-treesitter-textobjects/tree/main), which will become the default branch in the future.
+
 Syntax aware text-objects, select, move, swap, and peek support.
 
 **Warning: tree-sitter and nvim-treesitter are an experimental feature of nightly versions of Neovim.

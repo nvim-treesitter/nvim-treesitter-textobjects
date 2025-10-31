@@ -41,38 +41,56 @@
   (property_signature) @parameter.outer .)
 
 ; 3. parameter.outer: Comma/semicolon before or after
-([
+[
   (object_type
-    ["," ";"] @parameter.outer
+    [
+      ","
+      ";"
+    ] @parameter.outer
     .
     (property_signature) @parameter.outer)
   (interface_body
-    ["," ";"] @parameter.outer
+    [
+      ","
+      ";"
+    ] @parameter.outer
     .
     (property_signature) @parameter.outer)
-])
+]
 
-([
+[
   (object_type
     .
     (property_signature) @parameter.outer
     .
-    ["," ";"] @parameter.outer)
+    [
+      ","
+      ";"
+    ] @parameter.outer)
   (interface_body
     .
     (property_signature) @parameter.outer
     .
-    ["," ";"] @parameter.outer)
-])
+    [
+      ","
+      ";"
+    ] @parameter.outer)
+]
 
 ; last element with trailing comma/semicolon
-([
+[
   (object_type
     (property_signature) @parameter.outer
     .
-    ["," ";"] @parameter.outer .)
+    [
+      ","
+      ";"
+    ] @parameter.outer .)
   (interface_body
     (property_signature) @parameter.outer
     .
-    ["," ";"] @parameter.outer .)
-])
+    [
+      ","
+      ";"
+    ] @parameter.outer .)
+]

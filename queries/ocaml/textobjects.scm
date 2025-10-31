@@ -34,6 +34,7 @@
 
 (match_expression
   (match_case)+ @conditional.inner) @conditional.outer
+
 (comment) @comment.outer
 
 (parameter) @parameter.outer

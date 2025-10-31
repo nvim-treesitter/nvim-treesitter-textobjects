@@ -24,7 +24,6 @@
   (simple_identifier)?
   .
   _+ @block.inner
-  (#not-kind-eq? @block.inner "simple_identifier")
   .
   "end")
 
@@ -33,7 +32,6 @@
   (simple_identifier)?
   .
   _+ @block.inner
-  (#not-kind-eq? @block.inner "simple_identifier")
   .
   "end")
 

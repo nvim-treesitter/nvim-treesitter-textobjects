@@ -19,6 +19,9 @@
     _+ @function.inner
     "}"))
 
+(return_statement
+  (_)? @return.inner) @return.outer
+
 (for_statement
   body: (_)? @loop.inner) @loop.outer
 

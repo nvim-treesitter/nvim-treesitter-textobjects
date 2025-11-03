@@ -130,8 +130,8 @@
     ")") @call.outer)
 
 ; blocks
-(_
-  (statement_block) @block.inner) @block.outer
+(statement_block
+  (_)* @block.inner) @block.outer
 
 ; parameters
 ; function ({ x }) ...

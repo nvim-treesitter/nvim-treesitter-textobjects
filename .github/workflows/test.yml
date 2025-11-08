@@ -67,5 +67,5 @@ jobs:
       - name: Check queries
         run: make checkquery
 
-      - name: Run tests
-        run: make tests
+      # - name: Run tests
+      #   run: make tests

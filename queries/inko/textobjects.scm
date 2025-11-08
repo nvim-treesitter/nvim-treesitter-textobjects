@@ -189,9 +189,9 @@
 ] @number.inner
 
 ; Variable definitions and assignments
-(define_variable
+(identifier_pattern
   name: (_) @assignment.lhs
-  value: (_) @assignment.inner @assignment.rhs) @assignment.outer
+  type: (_) @assignment.inner @assignment.rhs) @assignment.outer
 
 (define_constant
   name: (_) @assignment.lhs

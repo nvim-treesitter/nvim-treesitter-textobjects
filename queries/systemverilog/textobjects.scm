@@ -35,4 +35,7 @@
   .
   "end")
 
-(comment) @comment.outer
+[
+  (one_line_comment)
+  (block_comment)
+] @comment.outer

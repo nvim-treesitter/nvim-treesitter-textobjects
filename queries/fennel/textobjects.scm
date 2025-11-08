@@ -180,7 +180,7 @@
   .
   item: (_)
   item: (_)* @loop.inner
-  (#any-of? @_sym "while"))
+  (#eq? @_sym "while"))
 
 (list
   call: (symbol) @_sym

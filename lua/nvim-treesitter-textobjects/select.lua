@@ -20,16 +20,23 @@ local function update_selection(range, selection_mode)
     vim.cmd.normal({ selection_mode, bang = true })
   end
 
-  local end_col_offset = 1
+  -- end positions with `col=0` mean "up to the end of the previous line, including the newline character"
+  if end_col == 0 then
+    end_row = end_row - 1
+    -- +1 is needed because we are interpreting `end_col` to be exclusive afterwards
+    end_col = #api.nvim_buf_get_lines(0, end_row, end_row + 1, true)[1] + 1
+  end
 
+  local end_col_offset = 1
   if selection_mode == 'v' and vim.o.selection == 'exclusive' then
     end_col_offset = 0
   end
+  end_col = end_col - end_col_offset
 
   -- Position is 1, 0 indexed.
   api.nvim_win_set_cursor(0, { start_row + 1, start_col })
   vim.cmd('normal! o')
-  api.nvim_win_set_cursor(0, { end_row + 1, end_col - end_col_offset })
+  api.nvim_win_set_cursor(0, { end_row + 1, end_col })
 end
 
 local M = {}

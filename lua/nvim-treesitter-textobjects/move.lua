@@ -25,11 +25,19 @@ local function goto_node(range, goto_end, avoid_set_jump)
     vim.cmd('normal! v')
   end
 
+  -- end positions with `col=0` mean "up to the end of the previous line, including the newline character"
+  if end_col == 0 then
+    end_row = end_row - 1
+    end_col = #api.nvim_buf_get_lines(0, end_row, end_row + 1, true)[1]
+  else
+    end_col = end_col - 1
+  end
+
   -- Position is 1, 0 indexed.
   if not goto_end then
     api.nvim_win_set_cursor(0, { start_row + 1, start_col })
   else
-    api.nvim_win_set_cursor(0, { end_row + 1, end_col - 1 })
+    api.nvim_win_set_cursor(0, { end_row + 1, end_col })
   end
 end
 

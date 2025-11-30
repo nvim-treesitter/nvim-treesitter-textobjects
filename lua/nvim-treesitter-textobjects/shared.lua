@@ -214,21 +214,24 @@ end
 ---@param range Range4
 ---@param row integer
 ---@param col integer
+---@param end_col_offset integer? nil (implies 0) or -1 - see tests/select/python/selection_mode.py
 ---@return boolean
-local function is_in_range(range, row, col)
+local function is_in_range(range, row, col, end_col_offset)
   local start_row, start_col, end_row, end_col = unpack(range) ---@type integer, integer, integer, integer
-  end_col = end_col - 1
 
-  local is_in_rows = start_row <= row and end_row >= row
-  local is_after_start_col_if_needed = true
-  if start_row == row then
-    is_after_start_col_if_needed = col >= start_col
+  if start_row > row or end_row < row then
+    return false
   end
-  local is_before_end_col_if_needed = true
-  if end_row == row then
-    is_before_end_col_if_needed = col <= end_col
+
+  if start_row == row and col < start_col then
+    return false
   end
-  return is_in_rows and is_after_start_col_if_needed and is_before_end_col_if_needed
+
+  if end_row ~= row then
+    return true
+  end
+
+  return col <= end_col + (end_col_offset or 0)
 end
 
 ---@param range1 Range4
@@ -266,7 +269,7 @@ local function best_range_at_point(ranges, row, col, opts)
   local lookbehind_earliest_start ---@type integer
 
   for _, range in pairs(ranges) do
-    if range and is_in_range(M.torange4(range), row, col) then
+    if range and is_in_range(M.torange4(range), row, col, -1) then
       local length = range[6] - range[3]
       if not range_length or length < range_length then
         smallest_range = range

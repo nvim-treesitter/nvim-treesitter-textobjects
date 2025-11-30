@@ -27,7 +27,10 @@ describe('command equality Python:', function()
   run:compare_cmds('aligned_indent.py', { row = 1, col = 0, cmds = { 'd]a', 'v]ad', 'c]a' } })
   run:compare_cmds(
     'selection_mode.py',
-    { row = 2, col = 4, cmds = { 'dam', 'dVam', 'vamd', 'Vamd' } }
+    { row = 2, col = 4, cmds = { 'dam', 'dVam', 'vamd', 'Vamd', 'dG' } }
   )
   run:compare_cmds('selection_mode.py', { row = 5, col = 8, cmds = { 'dVao', 'dao' } }, nil, false)
+  run:compare_cmds('selection_mode.py', { row = 10, col = 17, cmds = { 'dia', 'dt,' } })
+  run:compare_cmds('selection_mode.py', { row = 11, col = 23, cmds = { 'dia', 'd%' } })
+  run:compare_cmds('selection_mode.py', { row = 12, col = 23, cmds = { 'dia', 'd%' } })
 end)

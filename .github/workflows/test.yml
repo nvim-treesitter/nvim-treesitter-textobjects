@@ -3,10 +3,10 @@ name: Tests
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
     branches:
-      - "main"
+      - 'main'
   workflow_dispatch:
 
 concurrency:
@@ -67,5 +67,5 @@ jobs:
       - name: Check queries
         run: make checkquery
 
-      # - name: Run tests
-      #   run: make tests
+      - name: Run tests
+        run: make tests

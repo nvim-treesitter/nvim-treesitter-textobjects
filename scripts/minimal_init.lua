@@ -10,8 +10,6 @@ vim.opt.runtimepath:append(os.getenv('PLENARY') or (test_root .. '/plenary.nvim'
 vim.opt.runtimepath:append(os.getenv('NVIM_TS') or (test_root .. '/nvim-treesitter'))
 vim.opt.runtimepath:append('.')
 
-local ts = require('nvim-treesitter')
-ts.setup({})
 require('nvim-treesitter').install({ 'python' }):wait(300000) -- wait max. 5 minutes
 
 local tsstart = vim.api.nvim_create_augroup('tsstart', { clear = true })

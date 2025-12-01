@@ -47,6 +47,7 @@ jobs:
           ref: main
           path: ${{ env.NVIM_TS_DIR }}
 
+      # FIXME: cache not functioning because of wrong key.
       - name: Setup Parsers Cache
         id: parsers-cache
         uses: actions/cache@v4

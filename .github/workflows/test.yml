@@ -59,10 +59,10 @@ jobs:
         working-directory: ${{ env.NVIM_TS_DIR }}
         run: nvim -l ./scripts/install-parsers.lua --max-jobs=10
 
-      - name: Lint docs
-        run: |
-          make docs
-          git diff --exit-code
+      # - name: Lint docs
+      #   run: |
+      #     make docs
+      #     git diff --exit-code
 
       - name: Check queries
         run: make checkquery

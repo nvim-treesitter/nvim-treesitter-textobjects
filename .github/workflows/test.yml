@@ -94,6 +94,14 @@ jobs:
                 cat "$f"
                 echo '```'
               done
+              echo
+              echo "### Git diff (patch-style)"
+              echo
+              echo "You can also apply these changes using a patch:"
+              echo
+              echo '```diff'
+              git diff
+              echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
 
             echo "::error::Documentation is out of date. Copy the generated docs from the job summary into your branch and commit them."

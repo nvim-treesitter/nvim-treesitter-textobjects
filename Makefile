@@ -121,7 +121,7 @@ checkquery: $(TSQUERYLS)
 
 .PHONY: docs
 docs: $(NVIM) $(NVIM_TS)
-	NVIM_TS=$(NVIM_TS) $(NVIM_BIN) -l scripts/update-readme.lua
+	NVIM_TS=$(NVIM_TS) $(NVIM_BIN) -l scripts/update-builtin-textobjects.lua
 
 .PHONY: tests
 tests: $(NVIM) $(PLENARY) $(NVIM_TS)

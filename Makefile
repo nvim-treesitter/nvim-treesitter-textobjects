@@ -121,12 +121,12 @@ checkquery: $(TSQUERYLS)
 
 .PHONY: docs
 docs: $(NVIM) $(NVIM_TS)
-	NVIM_TS=$(NVIM_TS) $(NVIM_BIN) -l scripts/update-readme.lua
+	NVIM_TS=$(NVIM_TS) $(NVIM_BIN) -l scripts/update-builtin-textobjects.lua
 
 .PHONY: tests
-tests: $(NVIM) $(PLENARY)
-	PLENARY=$(PLENARY) $(NVIM_BIN) --headless --clean -u scripts/minimal_init.lua \
-		-c "PlenaryBustedDirectory tests/$(TESTS) { minimal_init = './scripts/minimal_init.lua' }"
+tests: $(NVIM) $(PLENARY) $(NVIM_TS)
+	NVIM_TS=$(NVIM_TS) PLENARY=$(PLENARY) $(NVIM_BIN) --headless --clean -u scripts/minimal_init.lua \
+		-c "PlenaryBustedDirectory tests { minimal_init = './scripts/minimal_init.lua' }"
 
 .PHONY: all
 all: lua query docs tests

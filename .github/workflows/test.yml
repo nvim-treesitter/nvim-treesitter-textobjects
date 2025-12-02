@@ -3,10 +3,10 @@ name: Tests
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
     branches:
-      - "main"
+      - 'main'
   workflow_dispatch:
 
 concurrency:
@@ -47,6 +47,7 @@ jobs:
           ref: main
           path: ${{ env.NVIM_TS_DIR }}
 
+      # FIXME: cache not functioning because of wrong key.
       - name: Setup Parsers Cache
         id: parsers-cache
         uses: actions/cache@v4
@@ -62,10 +63,55 @@ jobs:
       - name: Lint docs
         run: |
           make docs
-          git diff --exit-code
+
+          if ! git diff --quiet; then
+            echo "::group::Docs diff"
+            git status --short
+            git diff
+            echo "::endgroup::"
+
+            changed_files=$(git diff --name-only)
+
+            {
+              echo "## Documentation needs to be updated"
+              echo
+              echo "CI regenerated documentation and found differences with what is committed."
+              echo
+              echo "You do **not** need to run \`make docs\` locally."
+              echo
+              echo "### How to fix this"
+              echo "1. Go to the **Summary** tab in this workflow run."
+              echo "2. Copy the updated content."
+              echo "3. Paste it into the corresponding file in your branch."
+              echo "4. Commit and push the changes."
+              echo
+              echo "### Generated content"
+              for f in $changed_files; do
+                echo
+                echo "#### \`$f\`"
+                echo
+                echo '```'
+                cat "$f"
+                echo '```'
+              done
+              echo
+              echo "### Git diff (patch-style)"
+              echo
+              echo "You can also apply these changes using a patch:"
+              echo
+              echo '```diff'
+              git diff
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            echo "::error::Documentation is out of date. Copy the generated docs from the job summary into your branch and commit them."
+            exit 1
+          fi
 
       - name: Check queries
+        if: ${{ always() }}
         run: make checkquery
 
-      # - name: Run tests
-      #   run: make tests
+      - name: Run tests
+        if: ${{ always() }}
+        run: make tests

@@ -80,11 +80,7 @@
     (_) @conditional.inner)?) @conditional.outer
 
 (if
-  alternative: (else
-    (block) @conditional.inner))
-
-(if
-  consequence: (block)? @conditional.inner)
+  consequence: (block) @conditional.inner)
 
 (if
   condition: (_) @conditional.inner)

@@ -22,7 +22,7 @@ If you are using [lazy.nvim](https://github.com/folke/lazy.nvim), add this to yo
     -- See https://github.com/neovim/neovim/tree/master/runtime/ftplugin for built-in ftplugins.
     vim.g.no_plugin_maps = true
 
-    -- Or, disable built-in vim keymaps to avoid conflicts (add as you like)
+    -- Or, disable per filetype (add as you like)
     -- vim.g.no_python_maps = true
     -- vim.g.no_ruby_maps = true
     -- vim.g.no_rust_maps = true

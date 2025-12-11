@@ -17,6 +17,7 @@ If you are using [lazy.nvim](https://github.com/folke/lazy.nvim), add this to yo
 ```lua
 {
   "nvim-treesitter/nvim-treesitter-textobjects",
+  branch = "main",
   init = function()
     -- Disable entire built-in ftplugin mappings to avoid conflicts.
     -- See https://github.com/neovim/neovim/tree/master/runtime/ftplugin for built-in ftplugins.

@@ -12,17 +12,25 @@ You can install nvim-treesitter-textobjects with your favorite package manager, 
 
 ### Using a package manager
 
-If you are using [vim-plug](https://github.com/junegunn/vim-plug), put this in your `init.vim` file:
-
-```vim
-Plug 'nvim-treesitter/nvim-treesitter-textobjects'
-```
-
 If you are using [lazy.nvim](https://github.com/folke/lazy.nvim), add this to your `init.lua` or `plugins.lua`.
 
 ```lua
 {
   "nvim-treesitter/nvim-treesitter-textobjects",
+  init = function()
+    -- Disable entire built-in ftplugin mappings to avoid conflicts.
+    -- See https://github.com/neovim/neovim/tree/master/runtime/ftplugin for built-in ftplugins.
+    vim.g.no_plugin_maps = true
+
+    -- Or, disable built-in vim keymaps to avoid conflicts (add as you like)
+    -- vim.g.no_python_maps = true
+    -- vim.g.no_ruby_maps = true
+    -- vim.g.no_rust_maps = true
+    -- vim.g.no_go_maps = true
+  end,
+  config = function()
+    -- put your config here
+  end,
 }
 ```
 
@@ -111,13 +119,6 @@ require("nvim-treesitter-textobjects").setup {
     set_jumps = true,
   },
 }
-
--- disable built-in vim keymaps to avoid conflicts (add as you like)
-vim.g.no_python_maps = true
-vim.g.no_ruby_maps = true
-vim.g.no_rust_maps = true
-vim.g.no_go_maps = true
--- vim.g.no_plugin_maps = true  -- disable entire ftplugin mappings if you know what you're doing
 
 -- keymaps
 -- You can use the capture groups defined in `textobjects.scm`

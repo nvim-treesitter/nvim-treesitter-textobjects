@@ -64,10 +64,10 @@ require("nvim-treesitter-textobjects").setup {
 
 -- keymaps
 -- You can use the capture groups defined in `textobjects.scm`
-vim.keymap.set({ "x", "o" }, "af", function()
+vim.keymap.set({ "x", "o" }, "am", function()
   require "nvim-treesitter-textobjects.select".select_textobject("@function.outer", "textobjects")
 end)
-vim.keymap.set({ "x", "o" }, "if", function()
+vim.keymap.set({ "x", "o" }, "im", function()
   require "nvim-treesitter-textobjects.select".select_textobject("@function.inner", "textobjects")
 end)
 vim.keymap.set({ "x", "o" }, "ac", function()
@@ -111,6 +111,13 @@ require("nvim-treesitter-textobjects").setup {
     set_jumps = true,
   },
 }
+
+-- disable built-in vim keymaps to avoid conflicts (add as you like)
+vim.g.no_python_maps = true
+vim.g.no_ruby_maps = true
+vim.g.no_rust_maps = true
+vim.g.no_go_maps = true
+-- vim.g.no_plugin_maps = true  -- disable entire ftplugin mappings if you know what you're doing
 
 -- keymaps
 -- You can use the capture groups defined in `textobjects.scm`
@@ -197,8 +204,6 @@ vim.keymap.set({ "n", "x", "o" }, "<end>", function()
   ts_repeat_move.repeat_last_move({forward = true, start = false})
 end)
 ```
-
-For a similar way of making arbitrary movements repeatable, see [nvim-next](https://github.com/ghostbuster91/nvim-next).
 
 # Overriding or extending textobjects
 

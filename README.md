@@ -12,17 +12,26 @@ You can install nvim-treesitter-textobjects with your favorite package manager, 
 
 ### Using a package manager
 
-If you are using [vim-plug](https://github.com/junegunn/vim-plug), put this in your `init.vim` file:
-
-```vim
-Plug 'nvim-treesitter/nvim-treesitter-textobjects'
-```
-
 If you are using [lazy.nvim](https://github.com/folke/lazy.nvim), add this to your `init.lua` or `plugins.lua`.
 
 ```lua
 {
   "nvim-treesitter/nvim-treesitter-textobjects",
+  branch = "main",
+  init = function()
+    -- Disable entire built-in ftplugin mappings to avoid conflicts.
+    -- See https://github.com/neovim/neovim/tree/master/runtime/ftplugin for built-in ftplugins.
+    vim.g.no_plugin_maps = true
+
+    -- Or, disable per filetype (add as you like)
+    -- vim.g.no_python_maps = true
+    -- vim.g.no_ruby_maps = true
+    -- vim.g.no_rust_maps = true
+    -- vim.g.no_go_maps = true
+  end,
+  config = function()
+    -- put your config here
+  end,
 }
 ```
 
@@ -64,10 +73,10 @@ require("nvim-treesitter-textobjects").setup {
 
 -- keymaps
 -- You can use the capture groups defined in `textobjects.scm`
-vim.keymap.set({ "x", "o" }, "af", function()
+vim.keymap.set({ "x", "o" }, "am", function()
   require "nvim-treesitter-textobjects.select".select_textobject("@function.outer", "textobjects")
 end)
-vim.keymap.set({ "x", "o" }, "if", function()
+vim.keymap.set({ "x", "o" }, "im", function()
   require "nvim-treesitter-textobjects.select".select_textobject("@function.inner", "textobjects")
 end)
 vim.keymap.set({ "x", "o" }, "ac", function()
@@ -197,8 +206,6 @@ vim.keymap.set({ "n", "x", "o" }, "<end>", function()
   ts_repeat_move.repeat_last_move({forward = true, start = false})
 end)
 ```
-
-For a similar way of making arbitrary movements repeatable, see [nvim-next](https://github.com/ghostbuster91/nvim-next).
 
 # Overriding or extending textobjects
 

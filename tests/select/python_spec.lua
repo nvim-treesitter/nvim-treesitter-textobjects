@@ -25,6 +25,9 @@ describe('command equality Python:', function()
   run:compare_cmds('aligned_indent.py', { row = 1, col = 0, cmds = { 'dfn', 'd;' } })
   -- select using move
   run:compare_cmds('aligned_indent.py', { row = 1, col = 0, cmds = { 'd]a', 'v]ad', 'c]a' } })
+
+  -- test correct @parameter.inner scoping
+  run:compare_cmds('selection_mode.py', { row = 10, col = 22, cmds = { 'dia', 'df)' } })
   run:compare_cmds(
     'selection_mode.py',
     { row = 2, col = 4, cmds = { 'dam', 'dVam', 'vamd', 'Vamd' } }

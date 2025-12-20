@@ -211,6 +211,7 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
   return best
 end
 
+-- TODO: replace with `vim.Range:has(vim.Pos)` when we drop support for nvim 0.11
 ---@param range Range4
 ---@param row integer
 ---@param col integer
@@ -231,11 +232,18 @@ local function is_in_range(range, row, col)
   return is_in_rows and is_after_start_col_if_needed and is_before_end_col_if_needed
 end
 
----@param range1 Range4
----@param range2 Range4
+-- TODO: replace with `vim.Range:has(vim.Range)` when we drop support for 0.11
+---@param outer Range4
+---@param inner Range4
 ---@return boolean
-local function contains(range1, range2)
-  return is_in_range(range1, range2[1], range2[2]) and is_in_range(range1, range2[3], range2[4])
+local function contains(outer, inner)
+  local start_row_o, start_col_o, end_row_o, end_col_o = unpack(outer) ---@type integer, integer, integer, integer
+  local start_row_i, start_col_i, end_row_i, end_col_i = unpack(inner) ---@type integer, integer, integer, integer
+
+  return start_row_o <= start_row_i
+    and start_col_o <= start_col_i
+    and end_row_o >= end_row_i
+    and end_col_o >= end_col_i
 end
 
 ---@param range Range6

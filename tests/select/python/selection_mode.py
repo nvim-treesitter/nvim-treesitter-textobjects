@@ -6,3 +6,5 @@ class Test:
             my_list.append(arg_)
 
         self.my_list = my_list
+
+        str.join(' ', map(lambda x: x + x, ['foo', 'bar', 'baz']))

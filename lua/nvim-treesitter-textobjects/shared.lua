@@ -212,18 +212,12 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
 end
 
 -- TODO: replace with `vim.Range:has(vim.Pos)` when we drop support for nvim 0.11
----@param range Range4
+---@param range Range
 ---@param line integer
 ---@param col integer
 ---@return boolean
 local function is_in_range(range, line, col)
   return ts_range.contains(range, { line, col, line, col + 1 })
-end
-
----@param range Range6
----@return Range4
-function M.torange4(range)
-  return { range[1], range[2], range[4], range[5] }
 end
 
 --- Get the best `TSTextObjects.Range` at a given point
@@ -248,7 +242,7 @@ local function best_range_at_point(ranges, row, col, opts)
   local lookbehind_earliest_start ---@type integer
 
   for _, range in pairs(ranges) do
-    if range and is_in_range(M.torange4(range), row, col) then
+    if range and is_in_range(range, row, col) then
       local length = range[6] - range[3]
       if not range_length or length < range_length then
         smallest_range = range
@@ -359,7 +353,7 @@ function M.textobject_at_point(query_string, query_group, bufnr, pos, opts)
 
     local ranges_within_outer = {}
     for _, range in ipairs(ranges) do
-      if ts_range.contains(M.torange4(range_outer), M.torange4(range)) then
+      if ts_range.contains(range_outer, range) then
         table.insert(ranges_within_outer, range)
       end
     end

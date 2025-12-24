@@ -3,8 +3,9 @@ local api = vim.api
 local shared = require('nvim-treesitter-textobjects.shared')
 local repeatable_move = require('nvim-treesitter-textobjects.repeatable_move')
 local global_config = require('nvim-treesitter-textobjects.config')
+local ts_range = require('nvim-treesitter-textobjects._range')
 
----@param range Range4?
+---@param range Range?
 ---@param goto_end boolean
 ---@param avoid_set_jump boolean
 local function goto_node(range, goto_end, avoid_set_jump)
@@ -16,7 +17,7 @@ local function goto_node(range, goto_end, avoid_set_jump)
     vim.cmd("normal! m'")
   end
   ---@type integer, integer, integer, integer
-  local start_row, start_col, end_row, end_col = unpack(range)
+  local start_row, start_col, end_row, end_col = ts_range.unpack4(range)
 
   -- Enter visual mode if we are in operator pending mode
   -- If we don't do this, it will miss the last character.
@@ -89,13 +90,13 @@ local function move(opts, query_strings, query_group)
   end
 
   ---@param start_ boolean
-  ---@param range Range6
+  ---@param range Range
   ---@return boolean
   local function filter_function(start_, range)
     local row, col = unpack(api.nvim_win_get_cursor(winid)) --[[@as integer, integer]]
     row = row - 1 -- nvim_win_get_cursor is (1,0)-indexed
     ---@type integer, integer, integer, integer, integer, integer
-    local start_row, start_col, _, end_row, end_col, _ = unpack(range)
+    local start_row, start_col, end_row, end_col = ts_range.unpack4(range)
 
     if not start_ then
       if end_col == 0 then
@@ -146,7 +147,7 @@ local function move(opts, query_strings, query_group)
         end
       end
     end
-    goto_node(best_range and shared.torange4(best_range), not best_start, not config.set_jumps)
+    goto_node(best_range and best_range, not best_start, not config.set_jumps)
   end
 end
 

@@ -1,5 +1,9 @@
 --- Copy of vim.treesitter._range
 --- TODO: replace with `vim.Range` when we drop support for 0.11
+
+---@diagnostic disable: duplicate-doc-field
+---@diagnostic disable: duplicate-doc-alias
+
 local api = vim.api
 
 local M = {}

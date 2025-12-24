@@ -1,5 +1,5 @@
 local ts = vim.treesitter
-local add_bytes = require('vim.treesitter._range').add_bytes
+local ts_range = require('nvim-treesitter-textobjects._range')
 
 -- lookup table for parserless queries
 local lang_to_parser = { ecma = 'javascript', jsx = 'javascript' }
@@ -75,7 +75,7 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
         if query_name ~= nil then
           local path = vim.split(query_name, '%.')
           if metadata[id] and metadata[id].range then
-            insert_to_path(prepared_match, path, add_bytes(bufnr, metadata[id].range))
+            insert_to_path(prepared_match, path, ts_range.add_bytes(bufnr, metadata[id].range))
           else
             local srow, scol, sbyte, erow, ecol, ebyte = nodes[1]:range(true)
             if #nodes > 1 then
@@ -213,37 +213,11 @@ end
 
 -- TODO: replace with `vim.Range:has(vim.Pos)` when we drop support for nvim 0.11
 ---@param range Range4
----@param row integer
+---@param line integer
 ---@param col integer
 ---@return boolean
-local function is_in_range(range, row, col)
-  local start_row, start_col, end_row, end_col = unpack(range) ---@type integer, integer, integer, integer
-  end_col = end_col - 1
-
-  local is_in_rows = start_row <= row and end_row >= row
-  local is_after_start_col_if_needed = true
-  if start_row == row then
-    is_after_start_col_if_needed = col >= start_col
-  end
-  local is_before_end_col_if_needed = true
-  if end_row == row then
-    is_before_end_col_if_needed = col <= end_col
-  end
-  return is_in_rows and is_after_start_col_if_needed and is_before_end_col_if_needed
-end
-
--- TODO: replace with `vim.Range:has(vim.Range)` when we drop support for 0.11
----@param outer Range4
----@param inner Range4
----@return boolean
-local function contains(outer, inner)
-  local start_row_o, start_col_o, end_row_o, end_col_o = unpack(outer) ---@type integer, integer, integer, integer
-  local start_row_i, start_col_i, end_row_i, end_col_i = unpack(inner) ---@type integer, integer, integer, integer
-
-  return start_row_o <= start_row_i
-    and start_col_o <= start_col_i
-    and end_row_o >= end_row_i
-    and end_col_o >= end_col_i
+local function is_in_range(range, line, col)
+  return ts_range.contains(range, { line, col, line, col + 1 })
 end
 
 ---@param range Range6
@@ -385,7 +359,7 @@ function M.textobject_at_point(query_string, query_group, bufnr, pos, opts)
 
     local ranges_within_outer = {}
     for _, range in ipairs(ranges) do
-      if contains(M.torange4(range_outer), M.torange4(range)) then
+      if ts_range.contains(M.torange4(range_outer), M.torange4(range)) then
         table.insert(ranges_within_outer, range)
       end
     end

@@ -217,19 +217,7 @@ end
 ---@param col integer
 ---@return boolean
 local function is_in_range(range, row, col)
-  local start_row, start_col, end_row, end_col = unpack(range) ---@type integer, integer, integer, integer
-  end_col = end_col - 1
-
-  local is_in_rows = start_row <= row and end_row >= row
-  local is_after_start_col_if_needed = true
-  if start_row == row then
-    is_after_start_col_if_needed = col >= start_col
-  end
-  local is_before_end_col_if_needed = true
-  if end_row == row then
-    is_before_end_col_if_needed = col <= end_col
-  end
-  return is_in_rows and is_after_start_col_if_needed and is_before_end_col_if_needed
+  return ts._range.contains(range, { row, col, row, col + 1 })
 end
 
 -- TODO: replace with `vim.Range:has(vim.Range)` when we drop support for 0.11
@@ -237,13 +225,7 @@ end
 ---@param inner Range4
 ---@return boolean
 local function contains(outer, inner)
-  local start_row_o, start_col_o, end_row_o, end_col_o = unpack(outer) ---@type integer, integer, integer, integer
-  local start_row_i, start_col_i, end_row_i, end_col_i = unpack(inner) ---@type integer, integer, integer, integer
-
-  return start_row_o <= start_row_i
-    and start_col_o <= start_col_i
-    and end_row_o >= end_row_i
-    and end_col_o >= end_col_i
+  return ts._range.contains(outer, inner)
 end
 
 ---@param range Range6

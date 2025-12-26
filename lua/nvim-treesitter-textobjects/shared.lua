@@ -1,5 +1,5 @@
 local ts = vim.treesitter
-local ts_range = require('nvim-treesitter-textobjects._range')
+local ts_range = ts._range or require('nvim-treesitter-textobjects._range')
 
 -- lookup table for parserless queries
 local lang_to_parser = { ecma = 'javascript', jsx = 'javascript' }

@@ -1,7 +1,7 @@
 local api = vim.api
 local global_config = require('nvim-treesitter-textobjects.config')
 local shared = require('nvim-treesitter-textobjects.shared')
-local ts_range = require('nvim-treesitter-textobjects._range')
+local ts_range = vim.treesitter._range or require('nvim-treesitter-textobjects._range')
 
 ---@param range Range
 ---@param selection_mode TSTextObjects.SelectionMode

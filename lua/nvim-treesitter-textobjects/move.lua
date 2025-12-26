@@ -3,7 +3,7 @@ local api = vim.api
 local shared = require('nvim-treesitter-textobjects.shared')
 local repeatable_move = require('nvim-treesitter-textobjects.repeatable_move')
 local global_config = require('nvim-treesitter-textobjects.config')
-local ts_range = require('nvim-treesitter-textobjects._range')
+local ts_range = vim.treesitter._range or require('nvim-treesitter-textobjects._range')
 
 ---@param range Range?
 ---@param goto_end boolean

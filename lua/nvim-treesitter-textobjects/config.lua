@@ -7,6 +7,7 @@
 ---@field lookbehind? boolean
 ---@field selection_modes? table<string, TSTextObjects.SelectionMode>|fun(opts: TSTextObjects.ConfigFunctionArgs): TSTextObjects.SelectionMode|table<string, TSTextObjects.SelectionMode>
 ---@field include_surrounding_whitespace? boolean|fun(opts: TSTextObjects.ConfigFunctionArgs): boolean
+---@field set_jumps? boolean
 
 ---@class (exact) TSTextObjects.Config.Move
 ---@field set_jumps? boolean
@@ -29,6 +30,7 @@ local default_config = {
     lookbehind = false,
     selection_modes = {},
     include_surrounding_whitespace = false,
+    set_jumps = false,
   },
   move = {
     set_jumps = true,

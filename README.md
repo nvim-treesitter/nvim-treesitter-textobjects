@@ -68,6 +68,8 @@ require("nvim-treesitter-textobjects").setup {
     -- * selection_mode: eg 'v'
     -- and should return true of false
     include_surrounding_whitespace = false,
+    -- whether to set jumps in the jumplist
+    set_jumps = false,
   },
 }
 

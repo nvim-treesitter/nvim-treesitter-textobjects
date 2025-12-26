@@ -4,7 +4,7 @@ local shared = require('nvim-treesitter-textobjects.shared')
 
 ---@param range Range4
 ---@param selection_mode TSTextObjects.SelectionMode
-local function update_selection(range, selection_mode)
+local function update_selection(range, selection_mode, set_jumps)
   ---@type integer, integer, integer, integer
   local start_row, start_col, end_row, end_col = unpack(range)
   selection_mode = selection_mode or 'v'
@@ -32,6 +32,10 @@ local function update_selection(range, selection_mode)
     end_col_offset = 0
   end
   end_col = end_col - end_col_offset
+
+  if set_jumps then
+    vim.cmd("normal! m'")
+  end
 
   -- Position is 1, 0 indexed.
   api.nvim_win_set_cursor(0, { start_row + 1, start_col })
@@ -158,6 +162,7 @@ function M.select_textobject(query_string, query_group)
   local lookahead = config.lookahead
   local lookbehind = config.lookbehind
   local surrounding_whitespace = config.include_surrounding_whitespace
+  local set_jumps = config.set_jumps
   local range6 = shared.textobject_at_point(
     query_string,
     query_group,
@@ -178,7 +183,7 @@ function M.select_textobject(query_string, query_group)
       range4 = include_surrounding_whitespace(bufnr, range4, selection_mode)
     end
     if range4 then
-      update_selection(range4, selection_mode)
+      update_selection(range4, selection_mode, set_jumps)
     end
   end
 end

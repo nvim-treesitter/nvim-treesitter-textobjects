@@ -1,16 +1,17 @@
 local api = vim.api
 
 local shared = require('nvim-treesitter-textobjects.shared')
+local ts_range = vim.treesitter._range or require('nvim-treesitter-textobjects._range')
 
 ---@class TSTextObjects.LspLocation
 ---@field line integer
 ---@field character integer
 
----@param range Range4
+---@param range Range
 ---@return lsp.Range
 local function to_lsp_range(range)
   ---@type integer, integer, integer, integer
-  local start_row, start_col, end_row, end_col = unpack(range)
+  local start_row, start_col, end_row, end_col = ts_range.unpack4(range)
   return {
     start = {
       line = start_row,
@@ -23,8 +24,8 @@ local function to_lsp_range(range)
   }
 end
 
----@param range1 Range4
----@param range2 Range4
+---@param range1 Range
+---@param range2 Range
 ---@param bufnr integer
 ---@param cursor_to_second any
 local function swap_nodes(range1, range2, bufnr, cursor_to_second)
@@ -32,8 +33,11 @@ local function swap_nodes(range1, range2, bufnr, cursor_to_second)
     return
   end
 
-  local text1 = api.nvim_buf_get_text(bufnr, range1[1], range1[2], range1[3], range1[4], {})
-  local text2 = api.nvim_buf_get_text(bufnr, range2[1], range2[2], range2[3], range2[4], {})
+  local start_row1, start_col1, end_row1, end_col1 = ts_range.unpack4(range1)
+  local start_row2, start_col2, end_row2, end_col2 = ts_range.unpack4(range2)
+
+  local text1 = api.nvim_buf_get_text(bufnr, start_row1, start_col1, end_row1, end_col1, {})
+  local text2 = api.nvim_buf_get_text(bufnr, start_row2, start_col2, end_row2, end_col2, {})
 
   local lsp_range1 = to_lsp_range(range1)
   local lsp_range2 = to_lsp_range(range2)
@@ -86,11 +90,11 @@ local function swap_nodes(range1, range2, bufnr, cursor_to_second)
   end
 end
 
----@param range1 Range6
----@param range2 Range6
+---@param range1 Range
+---@param range2 Range
 local function range_eq(range1, range2)
-  local srow1, scol1, _, erow1, ecol1, _ = unpack(range1) ---@type integer, integer, integer, integer, integer, integer
-  local srow2, scol2, _, erow2, ecol2, _ = unpack(range2) ---@type integer, integer, integer, integer, integer, integer
+  local srow1, scol1, erow1, ecol1 = ts_range.unpack4(range1) ---@type integer, integer, integer, integer, integer, integer
+  local srow2, scol2, erow2, ecol2 = ts_range.unpack4(range2) ---@type integer, integer, integer, integer, integer, integer
   return srow1 == srow2 and scol1 == scol2 and erow1 == erow2 and ecol1 == ecol2
 end
 
@@ -188,12 +192,7 @@ local function swap_textobject(query_strings, query_group, direction)
         and next_textobject(textobject_range, query_string, query_group, bufnr)
       or previous_textobject(textobject_range, query_string, query_group, bufnr)
     if adjacent then
-      swap_nodes(
-        shared.torange4(textobject_range),
-        shared.torange4(adjacent),
-        bufnr,
-        'yes, set cursor!'
-      )
+      swap_nodes(textobject_range, adjacent, bufnr, 'yes, set cursor!')
     end
   end
 end

@@ -1,12 +1,13 @@
 local api = vim.api
 local global_config = require('nvim-treesitter-textobjects.config')
 local shared = require('nvim-treesitter-textobjects.shared')
+local ts_range = vim.treesitter._range or require('nvim-treesitter-textobjects._range')
 
----@param range Range4
+---@param range Range
 ---@param selection_mode TSTextObjects.SelectionMode
 local function update_selection(range, selection_mode)
   ---@type integer, integer, integer, integer
-  local start_row, start_col, end_row, end_col = unpack(range)
+  local start_row, start_col, end_row, end_col = ts_range.unpack4(range)
   selection_mode = selection_mode or 'v'
 
   -- enter visual mode if normal or operator-pending (no) mode
@@ -105,11 +106,11 @@ local function previous_position(bufnr, row, col)
 end
 
 ---@param bufnr integer
----@param range Range4
+---@param range Range
 ---@param selection_mode string
 ---@return Range4?
 local function include_surrounding_whitespace(bufnr, range, selection_mode)
-  local start_row, start_col, end_row, end_col = unpack(range) ---@type integer, integer, integer, integer
+  local start_row, start_col, end_row, end_col = ts_range.unpack4(range) ---@type integer, integer, integer, integer
   local extended = false
   local position = { end_row, end_col - 1 }
   local next = next_position(bufnr, unpack(position))
@@ -166,7 +167,6 @@ function M.select_textobject(query_string, query_group)
     { lookahead = lookahead, lookbehind = lookbehind }
   )
   if range6 then
-    local range4 = shared.torange4(range6)
     local selection_mode = M.detect_selection_mode(query_string)
     if
       function_or_value_to_value(surrounding_whitespace, {
@@ -174,11 +174,12 @@ function M.select_textobject(query_string, query_group)
         selection_mode = selection_mode,
       })
     then
-      ---@diagnostic disable-next-line: cast-local-type
-      range4 = include_surrounding_whitespace(bufnr, range4, selection_mode)
-    end
-    if range4 then
-      update_selection(range4, selection_mode)
+      local range4 = include_surrounding_whitespace(bufnr, range6, selection_mode)
+      if range4 then
+        update_selection(range4, selection_mode)
+      end
+    else
+      update_selection(range6, selection_mode)
     end
   end
 end

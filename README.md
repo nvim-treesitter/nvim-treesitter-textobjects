@@ -35,6 +35,28 @@ If you are using [lazy.nvim](https://github.com/folke/lazy.nvim), add this to yo
 }
 ```
 
+**Make sure you have `vim.treesitter.start()` called before using this plugin!**  
+Although `nvim-treesitter` is not a strict dependency, the following is the usual way to set it up:
+
+```lua
+local treesitter_languages = {
+  "bash",
+  "c",
+  "python",
+  "javascript",
+  "typescript",
+  -- ...
+}
+require("nvim-treesitter").install(treesitter_languages)
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = treesitter_languages,
+  callback = function(ctx)
+    vim.treesitter.start()
+  end,
+})
+```
+
 ## Text objects: select
 
 Define your own text objects mappings

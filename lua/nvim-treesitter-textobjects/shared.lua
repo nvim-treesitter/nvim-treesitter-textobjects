@@ -148,6 +148,7 @@ local function get_capture_ranges_recursively(bufnr, query_string, query_group)
   if not parser then
     return {}
   end
+  parser:parse(true)
 
   local ranges = {} ---@type Range6[]
   parser:for_each_tree(function(tree, lang_tree)

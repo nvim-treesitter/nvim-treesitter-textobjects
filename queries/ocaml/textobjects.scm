@@ -25,6 +25,12 @@
 (method_definition
   body: (_) @function.inner) @function.outer
 
+; let x = expr (also matches let f x = expr due to grammar limits)
+(value_definition
+  (let_binding
+    pattern: (_) @assignment.lhs
+    body: (_) @assignment.rhs @assignment.inner)) @assignment.outer
+
 ; module M = struct ... end
 (module_definition
   (module_binding

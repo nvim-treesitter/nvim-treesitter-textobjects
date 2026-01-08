@@ -28,11 +28,11 @@
 ; module M = struct ... end
 (module_definition
   (module_binding
-    body: (structure) @module.inner)) @module.outer
+    body: (structure) @class.inner)) @class.outer
 
 ; struct ... end
 (structure
-  (_structure_item)+ @struct.inner) @struct.outer
+  (_structure_item)+ @block.inner) @block.outer
 
 (class_definition
   (class_binding
@@ -74,5 +74,4 @@
 (application_expression
   argument: (_)+ @call.inner)
 
-(parenthesized_expression
-  _+ @block.inner) @block.outer
+; parenthesized selections are handled well by vi(

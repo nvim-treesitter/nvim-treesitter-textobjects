@@ -25,6 +25,15 @@
 (method_definition
   body: (_) @function.inner) @function.outer
 
+; module M = struct ... end
+(module_definition
+  (module_binding
+    body: (structure) @module.inner)) @module.outer
+
+; struct ... end
+(structure
+  (_structure_item)+ @struct.inner) @struct.outer
+
 (class_definition
   (class_binding
     body: (_) @class.inner)) @class.outer

@@ -1,3 +1,5 @@
+# Contributing
+
 ### Textobjects
 
 You can define text objects based on nodes of the grammar by adding queries in
@@ -51,8 +53,19 @@ Some nodes have more captures available:
 
 ### Automatic README Generation
 
-To update the README after adding new textobjects, run `make docs`.
+To update the README after adding new textobjects, run `make docs`.  
+Or, you can manually change according to the CI output.
 
 ### Query file format
 
 To automatically format and check queries, run `make query` (Linux and macOS).
+
+## Tree-sitter Basics
+
+### Designing Queries
+
+You can design your queries by inspecting the syntax tree of your target language.
+
+1. open `:InspectTree` on a buffer with the target language
+2. press `o` to open the query editor
+3. write your query and test it interactively

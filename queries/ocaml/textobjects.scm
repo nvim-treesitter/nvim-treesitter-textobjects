@@ -6,12 +6,12 @@
 
 (value_definition
   (let_binding
-    ; let f = fun x -> body
+    ; let f = function | A | B -> body
     body: (function_expression) @function.inner)) @function.outer
 
 (value_definition
   (let_binding
-    ; let f = function | A | B -> body
+    ; let f = fun x -> body
     body: (fun_expression) @function.inner)) @function.outer
 
 ; standalone function expression, e.g. List.iter ~f:(function | A | B -> body)

@@ -1,12 +1,13 @@
 local api = vim.api
 local global_config = require('nvim-treesitter-textobjects.config')
 local shared = require('nvim-treesitter-textobjects.shared')
+local ts_range = vim.treesitter._range or require('nvim-treesitter-textobjects._range')
 
----@param range Range4
+---@param range Range
 ---@param selection_mode TSTextObjects.SelectionMode
 local function update_selection(range, selection_mode)
   ---@type integer, integer, integer, integer
-  local start_row, start_col, end_row, end_col = unpack(range)
+  local start_row, start_col, end_row, end_col = ts_range.unpack4(range)
   selection_mode = selection_mode or 'v'
 
   -- enter visual mode if normal or operator-pending (no) mode
@@ -20,16 +21,23 @@ local function update_selection(range, selection_mode)
     vim.cmd.normal({ selection_mode, bang = true })
   end
 
-  local end_col_offset = 1
+  -- end positions with `col=0` mean "up to the end of the previous line, including the newline character"
+  if end_col == 0 then
+    end_row = end_row - 1
+    -- +1 is needed because we are interpreting `end_col` to be exclusive afterwards
+    end_col = #api.nvim_buf_get_lines(0, end_row, end_row + 1, true)[1] + 1
+  end
 
+  local end_col_offset = 1
   if selection_mode == 'v' and vim.o.selection == 'exclusive' then
     end_col_offset = 0
   end
+  end_col = end_col - end_col_offset
 
   -- Position is 1, 0 indexed.
   api.nvim_win_set_cursor(0, { start_row + 1, start_col })
   vim.cmd('normal! o')
-  api.nvim_win_set_cursor(0, { end_row + 1, end_col - end_col_offset })
+  api.nvim_win_set_cursor(0, { end_row + 1, end_col })
 end
 
 local M = {}
@@ -98,11 +106,11 @@ local function previous_position(bufnr, row, col)
 end
 
 ---@param bufnr integer
----@param range Range4
+---@param range Range
 ---@param selection_mode string
 ---@return Range4?
 local function include_surrounding_whitespace(bufnr, range, selection_mode)
-  local start_row, start_col, end_row, end_col = unpack(range) ---@type integer, integer, integer, integer
+  local start_row, start_col, end_row, end_col = ts_range.unpack4(range) ---@type integer, integer, integer, integer
   local extended = false
   local position = { end_row, end_col - 1 }
   local next = next_position(bufnr, unpack(position))
@@ -159,7 +167,6 @@ function M.select_textobject(query_string, query_group)
     { lookahead = lookahead, lookbehind = lookbehind }
   )
   if range6 then
-    local range4 = shared.torange4(range6)
     local selection_mode = M.detect_selection_mode(query_string)
     if
       function_or_value_to_value(surrounding_whitespace, {
@@ -167,11 +174,12 @@ function M.select_textobject(query_string, query_group)
         selection_mode = selection_mode,
       })
     then
-      ---@diagnostic disable-next-line: cast-local-type
-      range4 = include_surrounding_whitespace(bufnr, range4, selection_mode)
-    end
-    if range4 then
-      update_selection(range4, selection_mode)
+      local range4 = include_surrounding_whitespace(bufnr, range6, selection_mode)
+      if range4 then
+        update_selection(range4, selection_mode)
+      end
+    else
+      update_selection(range6, selection_mode)
     end
   end
 end

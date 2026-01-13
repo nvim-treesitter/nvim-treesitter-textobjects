@@ -1,5 +1,9 @@
 -- Execute as `nvim --headless -c "luafile ./scripts/update-readme.lua"`
-vim.opt.runtimepath:append(os.getenv('NVIM_TS'))
+local test_root = '.test-deps'
+for _, name in ipairs({ 'config', 'data', 'state', 'cache' }) do
+  vim.env[('XDG_%s_HOME'):format(name:upper())] = test_root .. '/' .. name
+end
+vim.opt.runtimepath:append(os.getenv('NVIM_TS') or (test_root .. '/nvim-treesitter'))
 vim.opt.runtimepath:append('.')
 
 local parsers = require('nvim-treesitter.parsers')
@@ -67,17 +71,11 @@ for _, v in ipairs(sorted_parsers) do
 end
 generated_text = generated_text .. '</table>\n'
 
-local readme_text = table.concat(vim.fn.readfile('README.md'), '\n')
+local prev_builtin_textobjects_text = table.concat(vim.fn.readfile('BUILTIN_TEXTOBJECTS.md'), '\n')
+vim.fn.writefile(vim.fn.split(generated_text, '\n'), 'BUILTIN_TEXTOBJECTS.md')
 
-local new_readme_text = string.gsub(
-  readme_text,
-  '<!%-%-textobjectinfo%-%->.*<!%-%-textobjectinfo%-%->',
-  '<!--textobjectinfo-->\n' .. generated_text .. '<!--textobjectinfo-->'
-)
-vim.fn.writefile(vim.fn.split(new_readme_text, '\n'), 'README.md')
-
-if string.find(readme_text, generated_text, 1, true) then
-  print('README.md is up-to-date\n')
+if string.find(prev_builtin_textobjects_text, generated_text, 1, true) then
+  print('BUILTIN_TEXTOBJECTS.md is up-to-date\n')
 else
-  print('New README.md was written\n')
+  print('New BUILTIN_TEXTOBJECTS.md was written\n')
 end

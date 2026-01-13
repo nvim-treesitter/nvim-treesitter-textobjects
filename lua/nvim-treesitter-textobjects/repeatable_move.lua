@@ -26,6 +26,17 @@ M.make_repeatable_move = function(move_fn)
   end
 end
 
+--- Enter visual mode (nov) if operator-pending (no) mode (fixes #699)
+--- Why? According to https://learnvimscriptthehardway.stevelosh.com/chapters/15.html
+---   If your operator-pending mapping ends with some text visually selected, Vim will operate on that text.
+---   Otherwise, Vim will operate on the text between the original cursor position and the new position.
+local function force_operator_pending_visual_mode()
+  local mode = vim.api.nvim_get_mode()
+  if mode.mode == 'no' then
+    vim.cmd.normal({ 'v', bang = true })
+  end
+end
+
 ---@param opts_extend TSTextObjects.MoveOpts?
 M.repeat_last_move = function(opts_extend)
   if not M.last_move then
@@ -33,10 +44,13 @@ M.repeat_last_move = function(opts_extend)
   end
   local opts = vim.tbl_deep_extend('force', M.last_move.opts, opts_extend or {})
   if M.last_move.func == 'f' or M.last_move.func == 't' then
+    force_operator_pending_visual_mode()
     vim.cmd([[normal! ]] .. vim.v.count1 .. (opts.forward and ';' or ','))
   elseif M.last_move.func == 'F' or M.last_move.func == 'T' then
+    force_operator_pending_visual_mode()
     vim.cmd([[normal! ]] .. vim.v.count1 .. (opts.forward and ',' or ';'))
   else
+    -- we assume other textobjects (move) already handle operator-pending mode correctly
     M.last_move.func(opts, unpack(M.last_move.additional_args))
   end
 end

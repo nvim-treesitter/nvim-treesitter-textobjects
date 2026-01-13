@@ -3,10 +3,10 @@ name: Tests
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   pull_request:
     branches:
-      - "main"
+      - 'main'
   workflow_dispatch:
 
 concurrency:
@@ -30,8 +30,8 @@ jobs:
       NVIM_TS_DIR: .test-deps/nvim-treesitter
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: tree-sitter/setup-action/cli@v1
+      - uses: actions/checkout@v6
+      - uses: tree-sitter/setup-action/cli@v2
       - uses: ilammy/msvc-dev-cmd@v1
 
       - name: Install and prepare Neovim
@@ -41,7 +41,7 @@ jobs:
           bash ./scripts/ci-install.sh
 
       - name: Install nvim-treesitter
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: nvim-treesitter/nvim-treesitter
           ref: main
@@ -52,7 +52,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.local/share/nvim/site/parser/
-          key: parsers-${{ hashFiles('parsers.lua') }}
+          key: parsers-${{ hashFiles('.test-deps/nvim-treesitter/lua/nvim-treesitter/parsers.lua') }}
 
       - name: Compile parsers
         if: steps.parsers-cache.outputs.cache-hit != 'true'
@@ -62,10 +62,55 @@ jobs:
       - name: Lint docs
         run: |
           make docs
-          git diff --exit-code
+
+          if ! git diff --quiet; then
+            echo "::group::Docs diff"
+            git status --short
+            git diff
+            echo "::endgroup::"
+
+            changed_files=$(git diff --name-only)
+
+            {
+              echo "## Documentation needs to be updated"
+              echo
+              echo "CI regenerated documentation and found differences with what is committed."
+              echo
+              echo "You do **not** need to run \`make docs\` locally."
+              echo
+              echo "### How to fix this"
+              echo "1. Go to the **Summary** tab in this workflow run."
+              echo "2. Copy the updated content."
+              echo "3. Paste it into the corresponding file in your branch."
+              echo "4. Commit and push the changes."
+              echo
+              echo "### Generated content"
+              for f in $changed_files; do
+                echo
+                echo "#### \`$f\`"
+                echo
+                echo '```'
+                cat "$f"
+                echo '```'
+              done
+              echo
+              echo "### Git diff (patch-style)"
+              echo
+              echo "You can also apply these changes using a patch:"
+              echo
+              echo '```diff'
+              git diff
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            echo "::error::Documentation is out of date. Copy the generated docs from the job summary into your branch and commit them."
+            exit 1
+          fi
 
       - name: Check queries
+        if: ${{ always() }}
         run: make checkquery
 
       - name: Run tests
+        if: ${{ always() }}
         run: make tests

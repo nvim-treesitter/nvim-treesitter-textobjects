@@ -102,9 +102,8 @@
     rhs: (_) @assignment.rhs) @assignment.inner) @assignment.outer
 
 (set_form
-  (binding_pair
-    lhs: (_) @assignment.lhs
-    rhs: (_) @assignment.rhs) @assignment.inner) @assignment.outer
+  lhs: (_) @assignment.lhs @assignment.inner
+  rhs: (_) @assignment.rhs @assignment.inner) @assignment.outer
 
 (let_vars
   (binding_pair
@@ -181,7 +180,7 @@
   .
   item: (_)
   item: (_)* @loop.inner
-  (#any-of? @_sym "while"))
+  (#eq? @_sym "while"))
 
 (list
   call: (symbol) @_sym

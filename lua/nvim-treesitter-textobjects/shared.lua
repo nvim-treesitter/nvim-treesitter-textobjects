@@ -1,5 +1,5 @@
 local ts = vim.treesitter
-local add_bytes = require('vim.treesitter._range').add_bytes
+local ts_range = ts._range or require('nvim-treesitter-textobjects._range')
 
 -- lookup table for parserless queries
 local lang_to_parser = { ecma = 'javascript', jsx = 'javascript' }
@@ -75,7 +75,7 @@ local get_query_matches = memoize(function(bufnr, query_group, root, root_lang)
         if query_name ~= nil then
           local path = vim.split(query_name, '%.')
           if metadata[id] and metadata[id].range then
-            insert_to_path(prepared_match, path, add_bytes(bufnr, metadata[id].range))
+            insert_to_path(prepared_match, path, ts_range.add_bytes(bufnr, metadata[id].range))
           else
             local srow, scol, sbyte, erow, ecol, ebyte = nodes[1]:range(true)
             if #nodes > 1 then
@@ -148,6 +148,7 @@ local function get_capture_ranges_recursively(bufnr, query_string, query_group)
   if not parser then
     return {}
   end
+  parser:parse(true)
 
   local ranges = {} ---@type Range6[]
   parser:for_each_tree(function(tree, lang_tree)
@@ -211,37 +212,13 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
   return best
 end
 
----@param range Range4
----@param row integer
+-- TODO: replace with `vim.Range:has(vim.Pos)` when we drop support for nvim 0.11
+---@param range Range
+---@param line integer
 ---@param col integer
 ---@return boolean
-local function is_in_range(range, row, col)
-  local start_row, start_col, end_row, end_col = unpack(range) ---@type integer, integer, integer, integer
-  end_col = end_col - 1
-
-  local is_in_rows = start_row <= row and end_row >= row
-  local is_after_start_col_if_needed = true
-  if start_row == row then
-    is_after_start_col_if_needed = col >= start_col
-  end
-  local is_before_end_col_if_needed = true
-  if end_row == row then
-    is_before_end_col_if_needed = col <= end_col
-  end
-  return is_in_rows and is_after_start_col_if_needed and is_before_end_col_if_needed
-end
-
----@param range1 Range4
----@param range2 Range4
----@return boolean
-local function contains(range1, range2)
-  return is_in_range(range1, range2[1], range2[2]) and is_in_range(range1, range2[3], range2[4])
-end
-
----@param range Range6
----@return Range4
-function M.torange4(range)
-  return { range[1], range[2], range[4], range[5] }
+local function is_in_range(range, line, col)
+  return ts_range.contains(range, { line, col, line, col + 1 })
 end
 
 --- Get the best `TSTextObjects.Range` at a given point
@@ -266,7 +243,7 @@ local function best_range_at_point(ranges, row, col, opts)
   local lookbehind_earliest_start ---@type integer
 
   for _, range in pairs(ranges) do
-    if range and is_in_range(M.torange4(range), row, col) then
+    if range and is_in_range(range, row, col) then
       local length = range[6] - range[3]
       if not range_length or length < range_length then
         smallest_range = range
@@ -377,7 +354,7 @@ function M.textobject_at_point(query_string, query_group, bufnr, pos, opts)
 
     local ranges_within_outer = {}
     for _, range in ipairs(ranges) do
-      if contains(M.torange4(range_outer), M.torange4(range)) then
+      if ts_range.contains(range_outer, range) then
         table.insert(ranges_within_outer, range)
       end
     end

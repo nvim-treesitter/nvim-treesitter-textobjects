@@ -27,3 +27,5 @@
   (_) @parameter.inner @parameter.outer
   .
   ","? @parameter.outer)
+
+(comment) @comment.outer

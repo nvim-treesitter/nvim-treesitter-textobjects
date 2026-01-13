@@ -19,6 +19,9 @@
     _+ @function.inner
     "}"))
 
+(return_statement
+  (_)? @return.inner) @return.outer
+
 (for_statement
   body: (_)? @loop.inner) @loop.outer
 
@@ -89,3 +92,9 @@
   (binary_integer_literal)
   (octal_integer_literal)
 ] @number.inner
+
+; scopename
+; statement
+(statement) @statement.outer
+
+(return_statement) @statement.outer

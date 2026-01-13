@@ -2,7 +2,7 @@
   [
     (class_body)
     (enum_class_body)
-  ] @class.inner) @class.outer
+  ]? @class.inner) @class.outer
 
 [
   (function_declaration
@@ -22,6 +22,23 @@
   (class_parameter
     (simple_identifier) @parameter.inner)
 ] @parameter.outer
+
+(value_arguments
+  "," @parameter.outer
+  .
+  (value_argument) @parameter.inner @parameter.outer)
+
+(value_arguments
+  .
+  (value_argument) @parameter.inner @parameter.outer
+  .
+  ","? @parameter.outer)
+
+; last element, with trailing comma
+(value_arguments
+  (value_argument) @parameter.outer
+  .
+  "," @parameter.outer .)
 
 [
   (line_comment)

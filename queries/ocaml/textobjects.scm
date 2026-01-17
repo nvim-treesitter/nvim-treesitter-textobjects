@@ -28,7 +28,10 @@
 ; let x = expr (also matches let f x = expr due to grammar limits)
 (value_definition
   (let_binding
-    pattern: (_) @assignment.lhs @assignment.inner
+    pattern: (_) @assignment.lhs @assignment.inner)) @assignment.outer
+
+(value_definition
+  (let_binding
     body: (_) @assignment.rhs @assignment.inner)) @assignment.outer
 
 ; module M = struct ... end

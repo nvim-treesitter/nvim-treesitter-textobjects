@@ -25,14 +25,15 @@
 (method_definition
   body: (_) @function.inner) @function.outer
 
-; let x = expr (also matches let f x = expr due to grammar limits)
+; let pattern = body (also matches let f x = expr due to grammar limits)
+; Since we want @assignment.inner to match both pattern and body we have to split it into two:
 (value_definition
   (let_binding
     pattern: (_) @assignment.lhs @assignment.inner)) @assignment.outer
 
 (value_definition
   (let_binding
-    body: (_) @assignment.rhs @assignment.inner)) @assignment.outer
+    body: (_) @assignment.rhs @assignment.inner))
 
 ; module M = struct ... end
 (module_definition

@@ -1,5 +1,9 @@
 local M = {}
 
+---@class TSTextObjects.MovefFtTOpts
+---@field forward boolean If true, move forward, and false is for backward.
+---@field is_lower boolean If true, assume last move was f or t; otherwise, assume last move was F or T.
+
 ---@class TSTextObjects.MoveOpts
 ---@field forward boolean If true, move forward, and false is for backward.
 ---@field start? boolean If true, choose the start of the node, and false is for the end.
@@ -26,14 +30,42 @@ M.make_repeatable_move = function(move_fn)
   end
 end
 
---- Enter visual mode (nov) if operator-pending (no) mode (fixes #699)
---- Why? According to https://learnvimscriptthehardway.stevelosh.com/chapters/15.html
----   If your operator-pending mapping ends with some text visually selected, Vim will operate on that text.
----   Otherwise, Vim will operate on the text between the original cursor position and the new position.
-local function force_operator_pending_visual_mode()
-  local mode = vim.api.nvim_get_mode()
-  if mode.mode == 'no' then
-    vim.cmd.normal({ 'v', bang = true })
+--- Handle inclusive/exclusive behavior of the `;` and `,` motions used after fFtT motions.
+---
+--- Meaning, that the following operator-pending calls (with `y` operator in this case) behave
+--- exactly like in plain NeoVim:
+---
+--- - `yfn` and `y;` - inclusive.
+--- - `yfn` and `y,` - exclusive.
+--- - `yFn` and `y;` - exclusive.
+--- - `yFn` and `y,` - inclusive.
+--- - `ytn` and `y;` - inclusive.
+--- - `ytn` and `y,` - exclusive.
+--- - `yTn` and `y;` - exclusive.
+--- - `yTn` and `y,` - inclusive.
+---@param opts TSTextObjects.MovefFtTOpts
+---@return nil
+local function repeat_last_move_fFtT(opts)
+  local motion = ''
+
+  if opts.is_lower then
+    motion = opts.forward and ';' or ','
+  else
+    motion = opts.forward and ',' or ';'
+  end
+
+  local inclusive = (opts.forward and vim.api.nvim_get_mode().mode == 'no') and 'v' or ''
+
+  local cursor_before = vim.api.nvim_win_get_cursor(0)
+  vim.cmd([[normal! ]] .. inclusive .. vim.v.count1 .. motion)
+  local cursor_after = vim.api.nvim_win_get_cursor(0)
+
+  -- Handle a use case when a motion in an operator-pending doesn't visually selects any text
+  -- region. Without "turning off" the `v` a single character at the cursor's position is selected.
+  --
+  -- For example: `yfn` and `y2;` at the end of the line.
+  if inclusive == 'v' and vim.deep_equal(cursor_before, cursor_after) then
+    vim.cmd([[normal! ]] .. inclusive)
   end
 end
 
@@ -43,16 +75,10 @@ M.repeat_last_move = function(opts_extend)
     return
   end
   local opts = vim.tbl_deep_extend('force', M.last_move.opts, opts_extend or {})
-  -- The call to `normal` in `force_operator_pending_visual_mode` resets `vim.v.count1` to 1 while in
-  -- operator-pending (no) mode. Meaning, that the `vim.v.count1` must be saved before the
-  -- `force_operator_pending_visual_mode` call and used later on instead of new `vim.v.count1`.
-  local count1 = vim.v.count1
   if M.last_move.func == 'f' or M.last_move.func == 't' then
-    force_operator_pending_visual_mode()
-    vim.cmd([[normal! ]] .. count1 .. (opts.forward and ';' or ','))
+    repeat_last_move_fFtT({ forward = opts.forward, is_lower = true })
   elseif M.last_move.func == 'F' or M.last_move.func == 'T' then
-    force_operator_pending_visual_mode()
-    vim.cmd([[normal! ]] .. count1 .. (opts.forward and ',' or ';'))
+    repeat_last_move_fFtT({ forward = opts.forward, is_lower = false })
   else
     -- we assume other textobjects (move) already handle operator-pending mode correctly
     M.last_move.func(opts, unpack(M.last_move.additional_args))

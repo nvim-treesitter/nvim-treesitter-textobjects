@@ -39,10 +39,18 @@
 
 ; loops
 (for
-  (block) @loop.inner) @loop.outer
+  (block
+    .
+    "{"
+    _+ @loop.inner
+    "}")) @loop.outer
 
 (while
-  (block) @loop.inner) @loop.outer
+  (block
+    .
+    "{"
+    _+ @loop.inner
+    "}")) @loop.outer
 
 ; calls & parameters
 (call

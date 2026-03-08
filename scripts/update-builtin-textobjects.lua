@@ -1,4 +1,4 @@
--- Execute as `nvim --headless -c "luafile ./scripts/update-readme.lua"`
+-- Execute as `nvim --headless -c "luafile ./scripts/update-builtin-textobjects.lua"`
 local test_root = '.test-deps'
 for _, name in ipairs({ 'config', 'data', 'state', 'cache' }) do
   vim.env[('XDG_%s_HOME'):format(name:upper())] = test_root .. '/' .. name

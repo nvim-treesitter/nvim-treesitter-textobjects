@@ -7,11 +7,8 @@
     "}")) @function.outer
 
 (lambda
-  value: (_
-    .
-    "{"?
-    _+ @function.inner
-    "}"?)) @function.outer
+  value: (_) @function.inner
+  (#match? @function.inner "^[^{].*[^}]$")) @function.outer
 
 ; named functions (#let fn(x) = { ... })
 (let
@@ -24,11 +21,8 @@
 
 (let
   pattern: (call)
-  value: (_
-    .
-    "{"?
-    _+ @function.inner
-    "}"?)) @function.outer
+  value: (_) @function.inner
+  (#match? @function.inner "^[^{].*[^}]$")) @function.outer
 
 ; conditionals
 (while

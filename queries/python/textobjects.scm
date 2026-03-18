@@ -134,6 +134,17 @@
   .
   ","? @parameter.outer)
 
+(set
+  "," @parameter.outer
+  .
+  (_) @parameter.inner @parameter.outer)
+
+(set
+  .
+  (_) @parameter.inner @parameter.outer
+  .
+  ","? @parameter.outer)
+
 (dictionary
   .
   (pair) @parameter.inner @parameter.outer

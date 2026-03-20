@@ -82,3 +82,10 @@
 
 (new_expression
   (argument_list) @call.inner) @call.outer
+
+(lambda_expression
+  body: (compound_statement
+    .
+    "{"
+    _+ @function.inner
+    "}")) @function.outer

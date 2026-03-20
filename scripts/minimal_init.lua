@@ -1,14 +1,17 @@
 --- Usage:
----   1. Put plenary.nvim and nvim-treesitter in {repo_root}/.test-deps/
+---   1. Put plentest.nvim and nvim-treesitter in {repo_root}/.test-deps/
 ---   2. in repo root, run `nvim -u scripts/minimal_init.lua`
 --- or, just run `make tests`
 local test_root = '.test-deps'
 for _, name in ipairs({ 'config', 'data', 'state', 'cache' }) do
   vim.env[('XDG_%s_HOME'):format(name:upper())] = test_root .. '/' .. name
 end
-vim.opt.runtimepath:append(os.getenv('PLENARY') or (test_root .. '/plenary.nvim'))
-vim.opt.runtimepath:append(os.getenv('NVIM_TS') or (test_root .. '/nvim-treesitter'))
-vim.opt.runtimepath:append('.')
+vim.opt.runtimepath:prepend(os.getenv('PLENTEST') or (test_root .. '/plentest.nvim'))
+vim.opt.runtimepath:prepend(os.getenv('NVIM_TS') or (test_root .. '/nvim-treesitter'))
+vim.opt.runtimepath:prepend('.')
+
+--- ensure that parser directory is on rtp (with --clean)
+vim.opt.runtimepath:prepend(vim.fn.stdpath('data') .. '/site,')
 
 require('nvim-treesitter').install({ 'python' }):wait(300000) -- wait max. 5 minutes
 

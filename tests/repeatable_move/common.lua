@@ -1,7 +1,6 @@
 local M = {}
 
 local assert = require('luassert')
-local Path = require('plenary.path')
 
 -- Test in all possible col position
 -- f, F, t, T
@@ -155,7 +154,7 @@ Runner.__index = Runner
 function Runner:new(it, base_dir, buf_opts)
   local runner = {}
   runner.it = it
-  runner.base_dir = Path:new(base_dir)
+  runner.base_dir = base_dir
   runner.buf_opts = buf_opts
   return setmetatable(runner, self)
 end
@@ -163,8 +162,8 @@ end
 function Runner:builtin_find(file, spec, title)
   title = title and title or tostring(spec.row)
   self.it(string.format('%s[%s]', file, title), function()
-    local path = self.base_dir / file
-    M.run_builtin_find_test(path.filename, spec)
+    local path = vim.fs.joinpath(self.base_dir, file)
+    M.run_builtin_find_test(path, spec)
   end)
 end
 

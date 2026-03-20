@@ -81,13 +81,13 @@ nvim_ts: $(NVIM_TS)
 $(NVIM_TS):
 	git clone --filter=blob:none --single-branch https://github.com/nvim-treesitter/nvim-treesitter -b main $(NVIM_TS)
 
-PLENARY := $(DEPDIR)/plenary.nvim
+PLENTEST := $(DEPDIR)/plentest.nvim
 
-.PHONY: plenary
-plenary: $(PLENARY)
+.PHONY: plentest
+plentest: $(PLENTEST)
 
-$(PLENARY):
-	git clone --filter=blob:none https://github.com/nvim-lua/plenary.nvim $(PLENARY)
+$(PLENTEST):
+	git clone --filter=blob:none https://github.com/nvim-treesitter/plentest.nvim $(PLENTEST)
 
 # actual test targets
 
@@ -124,9 +124,9 @@ docs: $(NVIM) $(NVIM_TS)
 	NVIM_TS=$(NVIM_TS) $(NVIM_BIN) -l scripts/update-builtin-textobjects.lua
 
 .PHONY: tests
-tests: $(NVIM) $(PLENARY) $(NVIM_TS)
-	NVIM_TS=$(NVIM_TS) PLENARY=$(PLENARY) $(NVIM_BIN) --headless --clean -u scripts/minimal_init.lua \
-		-c "PlenaryBustedDirectory tests { minimal_init = './scripts/minimal_init.lua' }"
+tests: $(NVIM) $(PLENTEST) $(NVIM_TS)
+	NVIM_TS=$(NVIM_TS) PLENTEST=$(PLENTEST) $(NVIM_BIN) --headless --clean -u scripts/minimal_init.lua \
+		-c "lua require('plentest').test_directory('tests', { minimal_init = './scripts/minimal_init.lua' })"
 
 .PHONY: all
 all: lua query docs tests

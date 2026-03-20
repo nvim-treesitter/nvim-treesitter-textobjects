@@ -1,7 +1,6 @@
 local M = {}
 
 local assert = require('luassert')
-local Path = require('plenary.path')
 
 function M.run_compare_cmds_test(file, spec, equal)
   assert.are.same(1, vim.fn.filereadable(file), string.format('File "%s" not readable', file))
@@ -46,7 +45,7 @@ Runner.__index = Runner
 function Runner:new(it, base_dir, buf_opts)
   local runner = {}
   runner.it = it
-  runner.base_dir = Path:new(base_dir)
+  runner.base_dir = base_dir
   runner.buf_opts = buf_opts
   return setmetatable(runner, self)
 end
@@ -54,8 +53,8 @@ end
 function Runner:compare_cmds(file, spec, title, equal)
   title = title and title or string.format('%s,%s', spec.row, spec.col)
   self.it(string.format('%s[%s]', file, title), function()
-    local path = self.base_dir / file
-    M.run_compare_cmds_test(path.filename, spec, equal == nil and true or equal)
+    local path = vim.fs.joinpath(self.base_dir, file)
+    M.run_compare_cmds_test(path, spec, equal == nil and true or equal)
   end)
 end
 

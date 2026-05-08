@@ -167,7 +167,8 @@ local M = {}
 ---@param query_strings string|string[]
 ---@param query_group? string
 ---@param direction integer
-local function swap_textobject(query_strings, query_group, direction)
+---@param opts? {wrap?: boolean}
+local function swap_textobject(query_strings, query_group, direction, opts)
   if type(query_strings) == 'string' then
     query_strings = { query_strings }
   end
@@ -186,11 +187,43 @@ local function swap_textobject(query_strings, query_group, direction)
     return
   end
 
+  local scope = opts and opts.wrap and shared.get_scope_range(bufnr, textobject_range) or nil
+
   local step = direction > 0 and 1 or -1
   for _ = 1, math.abs(direction), step do
     local adjacent = direction > 0
         and next_textobject(textobject_range, query_string, query_group, bufnr)
       or previous_textobject(textobject_range, query_string, query_group, bufnr)
+
+    -- next/previous_textobject searched the whole file: if the found node is
+    -- outside our scope it is not a sibling, so discard it.
+    if adjacent and scope and not ts_range.contains(scope, adjacent) then
+      adjacent = nil
+    end
+
+    -- if no adjacent sibling found and wrap is requested, find the first/last
+    -- sibling within the enclosing scope and swap with that instead.
+    if not adjacent and scope then
+      local siblings = shared.ranges_in_scope(bufnr, query_string, query_group, scope)
+      if #siblings >= 2 then
+        if direction > 0 then
+          for _, sibling in ipairs(siblings) do
+            if not range_eq(sibling, textobject_range) then
+              adjacent = sibling
+              break
+            end
+          end
+        else
+          for i = #siblings, 1, -1 do
+            if not range_eq(siblings[i], textobject_range) then
+              adjacent = siblings[i]
+              break
+            end
+          end
+        end
+      end
+    end
+
     if adjacent then
       swap_nodes(textobject_range, adjacent, bufnr, 'yes, set cursor!')
     end
@@ -206,17 +239,19 @@ end
 
 ---@param query_strings string lua pattern describing the query string
 ---@param query_group? string
-function M.swap_next(query_strings, query_group)
+---@param opts? {wrap?: boolean}
+function M.swap_next(query_strings, query_group, opts)
   return make_dot_repeatable(function()
-    swap_textobject(query_strings, query_group, 1)
+    swap_textobject(query_strings, query_group, 1, opts)
   end)
 end
 
 ---@param query_strings string lua pattern describing the query string
 ---@param query_group? string
-function M.swap_previous(query_strings, query_group)
+---@param opts? {wrap?: boolean}
+function M.swap_previous(query_strings, query_group, opts)
   return make_dot_repeatable(function()
-    swap_textobject(query_strings, query_group, -1)
+    swap_textobject(query_strings, query_group, -1, opts)
   end)
 end
 

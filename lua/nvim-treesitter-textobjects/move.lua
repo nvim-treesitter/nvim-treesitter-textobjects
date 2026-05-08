@@ -114,6 +114,21 @@ local function move(opts, query_strings, query_group)
     end
   end
 
+  -- precompute enclosing scope once so we can discard out-of-scope results
+  -- during wrap-around without re-walking the tree each iteration.
+  local scope ---@type Range6?
+  if opts.wrap then
+    for _, query_string in ipairs(query_strings) do
+      local current = shared.textobject_at_point(query_string, query_group, bufnr)
+      if current then
+        scope = shared.get_scope_range(bufnr, current)
+        if scope then
+          break
+        end
+      end
+    end
+  end
+
   for _ = 1, vim.v.count1 do
     local best_range ---@type Range6?
     local best_score ---@type integer
@@ -133,6 +148,12 @@ local function move(opts, query_strings, query_group)
         )
 
         if current_range then
+          if scope and not ts_range.contains(scope, current_range) then
+            current_range = nil
+          end
+        end
+
+        if current_range then
           local score = scoring_function(start_, current_range)
           if not best_range then
             best_range = current_range
@@ -147,6 +168,19 @@ local function move(opts, query_strings, query_group)
         end
       end
     end
+
+    -- no direct successor/precursor was found => pick first/last of siblings
+    if not best_range and scope then
+      for _, query_string in ipairs(query_strings) do
+        local siblings = shared.ranges_in_scope(bufnr, query_string, query_group, scope)
+        if #siblings > 0 then
+          best_range = forward and siblings[1] or siblings[#siblings]
+          best_start = starts[1]
+          break
+        end
+      end
+    end
+
     goto_node(best_range and best_range, not best_start, not config.set_jumps)
   end
 end
@@ -156,51 +190,61 @@ local move_repeatable = repeatable_move.make_repeatable_move(move)
 
 ---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_next_start = function(query_strings, query_group)
+---@param opts? {wrap?: boolean}
+M.goto_next_start = function(query_strings, query_group, opts)
   move_repeatable({
     forward = true,
     start = true,
+    wrap = opts and opts.wrap,
   }, query_strings, query_group)
 end
 ---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_next_end = function(query_strings, query_group)
+---@param opts? {wrap?: boolean}
+M.goto_next_end = function(query_strings, query_group, opts)
   move_repeatable({
     forward = true,
     start = false,
+    wrap = opts and opts.wrap,
   }, query_strings, query_group)
 end
 ---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_previous_start = function(query_strings, query_group)
+---@param opts? {wrap?: boolean}
+M.goto_previous_start = function(query_strings, query_group, opts)
   move_repeatable({
     forward = false,
     start = true,
+    wrap = opts and opts.wrap,
   }, query_strings, query_group)
 end
 ---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_previous_end = function(query_strings, query_group)
+---@param opts? {wrap?: boolean}
+M.goto_previous_end = function(query_strings, query_group, opts)
   move_repeatable({
     forward = false,
     start = false,
+    wrap = opts and opts.wrap,
   }, query_strings, query_group)
 end
 
 ---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_next = function(query_strings, query_group)
+---@param opts? {wrap?: boolean}
+M.goto_next = function(query_strings, query_group, opts)
   move_repeatable({
     forward = true,
+    wrap = opts and opts.wrap,
   }, query_strings, query_group)
 end
 ---@param query_strings string|string[]
 ---@param query_group? string
-M.goto_previous = function(query_strings, query_group)
+---@param opts? {wrap?: boolean}
+M.goto_previous = function(query_strings, query_group, opts)
   move_repeatable({
     forward = false,
-    query_strings = query_strings,
-    query_group = query_group,
+    wrap = opts and opts.wrap,
   }, query_strings, query_group)
 end
 

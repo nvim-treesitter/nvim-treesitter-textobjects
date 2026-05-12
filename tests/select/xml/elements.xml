@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <item id="1" class="foo">
+    <name>Hello</name>
+    <value>World</value>
+  </item>
+  <!-- a comment -->
+  <empty/>
+  <hyphen-element data-id="2" aria-label="bar">
+    <child-name>World</child-name>
+  </hyphen-element>
+</root>

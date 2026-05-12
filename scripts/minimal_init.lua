@@ -13,7 +13,7 @@ vim.opt.runtimepath:prepend('.')
 --- ensure that parser directory is on rtp (with --clean)
 vim.opt.runtimepath:prepend(vim.fn.stdpath('data') .. '/site,')
 
-require('nvim-treesitter').install({ 'python' }):wait(300000) -- wait max. 5 minutes
+require('nvim-treesitter').install({ 'python', 'xml' }):wait(300000) -- wait max. 5 minutes
 
 local tsstart = vim.api.nvim_create_augroup('tsstart', { clear = true })
 vim.api.nvim_create_autocmd('FileType', {

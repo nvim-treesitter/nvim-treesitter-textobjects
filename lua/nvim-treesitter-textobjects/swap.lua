@@ -204,7 +204,7 @@ local function make_dot_repeatable(fn)
   api.nvim_feedkeys('g@l', 'n', false)
 end
 
----@param string|string[] lua pattern(s) describing the query string(s)
+---@param query_strings string|string[] lua pattern(s) describing the query string(s)
 ---@param query_group? string
 function M.swap_next(query_strings, query_group)
   return make_dot_repeatable(function()

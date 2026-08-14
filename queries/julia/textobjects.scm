@@ -148,6 +148,7 @@
   "," @parameter.outer
   .
   (_) @parameter.inner @parameter.outer)
+
 (argument_list
   ";"?
   .

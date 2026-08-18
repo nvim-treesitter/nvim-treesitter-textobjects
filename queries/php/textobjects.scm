@@ -17,6 +17,11 @@
 
 (anonymous_function) @function.outer
 
+(arrow_function
+  body: (_) @function.inner)
+
+(arrow_function) @function.outer
+
 ; methods
 (method_declaration
   body: (compound_statement

@@ -212,6 +212,56 @@ function M.find_best_range(bufnr, capture_string, query_group, filter_predicate,
   return best
 end
 
+---Get the Range6 of the treesitter parent node that encloses the given range.
+---Used to derive the "scope" (e.g. argument list) for a textobject capture.
+---@param bufnr integer
+---@param range Range6
+---@return Range6?
+function M.get_scope_range(bufnr, range)
+  local srow, scol, erow, ecol = range[1], range[2], range[4], range[5]
+  local node = ts.get_node({ bufnr = bufnr, pos = { srow, scol } })
+  if not node then
+    return nil
+  end
+
+  -- walk up until we find a node that fully contains the textobject range,
+  -- then return its parent's range as the scope
+  while node do
+    local nsr, nsc, ner, nec = node:range()
+    if ts_range.cmp_pos.le(nsr, nsc, srow, scol) and ts_range.cmp_pos.ge(ner, nec, erow, ecol) then
+      local parent = node:parent()
+      if not parent then
+        return nil
+      end
+      local psr, psc, per, pec = parent:range()
+      return ts_range.add_bytes(bufnr, { psr, psc, per, pec })
+    end
+    node = node:parent()
+  end
+  return nil
+end
+
+---Get all capture ranges for `capture_string` that fall within `scope_range`,
+---sorted by start byte. Used to enumerate siblings for wrap-around navigation.
+---@param bufnr integer
+---@param capture_string string
+---@param query_group string
+---@param scope_range Range6
+---@return Range6[]
+function M.ranges_in_scope(bufnr, capture_string, query_group, scope_range)
+  local ranges = get_capture_ranges_recursively(bufnr, capture_string, query_group)
+  local result = {} ---@type Range6[]
+  for _, r in ipairs(ranges) do
+    if ts_range.contains(scope_range, r) then
+      result[#result + 1] = r
+    end
+  end
+  table.sort(result, function(a, b)
+    return a[3] < b[3]
+  end)
+  return result
+end
+
 -- TODO: replace with `vim.Range:has(vim.Pos)` when we drop support for nvim 0.11
 ---@param range Range
 ---@param line integer

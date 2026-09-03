@@ -6,6 +6,7 @@ local M = {}
 ---@class TSTextObjects.MoveOpts
 ---@field forward boolean If true, move forward, and false is for backward.
 ---@field start? boolean If true, choose the start of the node, and false is for the end.
+---@field wrap? boolean If true, wrap around within the enclosing scope (e.g. argument list) when reaching the first or last sibling.
 
 ---@alias TSTextObjects.MoveFunction fun(opts: TSTextObjects.MoveOpts, ...: any)
 

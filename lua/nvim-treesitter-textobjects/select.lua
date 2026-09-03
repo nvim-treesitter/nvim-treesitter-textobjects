@@ -105,36 +105,52 @@ local function previous_position(bufnr, row, col)
   return { row, col }
 end
 
+---@param position { [1]: integer, [2]: integer }
+---@param advance fun(bufnr: integer, row: integer, col: integer): { [1]: integer, [2]: integer }
+---@param bufnr integer
+---@param selection_mode string
+---@return { [1]: integer, [2]: integer } position
+local function include_whitespace_oneway(position, advance, bufnr, selection_mode)
+  local last_confirmed_position = position
+  local next = advance(bufnr, unpack(position))
+  while next do
+    if next[1] ~= position[1] then -- Line switch.
+      if selection_mode == 'v' then
+        last_confirmed_position = position
+        break -- Don't select across lines for charwise mode.
+      elseif selection_mode == 'V' then
+        -- For linewise mode, confirm whenever a line is scanned fully,
+        -- but not when a line is partially scanned.
+        -- This way we avoid erroneously selecting a line
+        -- outside of the current node with leading/trailing whitespaces.
+        last_confirmed_position = position
+      end
+    end
+    if not is_whitespace(bufnr, unpack(next)) then
+      break
+    end
+    position = next ---@type {[1]: integer, [2]: integer}
+    next = advance(bufnr, unpack(position))
+  end
+  return last_confirmed_position
+end
+
 ---@param bufnr integer
 ---@param range Range
 ---@param selection_mode string
 ---@return Range4?
 local function include_surrounding_whitespace(bufnr, range, selection_mode)
   local start_row, start_col, end_row, end_col = ts_range.unpack4(range) ---@type integer, integer, integer, integer
-  local extended = false
   local position = { end_row, end_col - 1 }
-  local next = next_position(bufnr, unpack(position))
-  while next and is_whitespace(bufnr, unpack(next)) do
-    extended = true
-    position = next ---@type {[1]: integer, [2]: integer}
-    next = next_position(bufnr, unpack(position))
-  end
-  if extended then
+  local new_position = include_whitespace_oneway(position, next_position, bufnr, selection_mode)
+  if new_position ~= position then
     -- don't extend in both directions
-    return { start_row, start_col, position[1], position[2] + 1 }
+    return { start_row, start_col, new_position[1], new_position[2] + 1 }
   end
 
   position = { start_row, start_col }
-  local previous = previous_position(bufnr, unpack(position))
-
-  while previous and is_whitespace(bufnr, unpack(previous)) do
-    position = previous
-    previous = previous_position(bufnr, unpack(position))
-  end
-  if selection_mode == 'linewise' then
-    position = assert(next_position(bufnr, unpack(position)))
-  end
-  return { position[1], position[2], end_row, end_col }
+  new_position = include_whitespace_oneway(position, previous_position, bufnr, selection_mode)
+  return { new_position[1], new_position[2], end_row, end_col }
 end
 
 ---@generic T

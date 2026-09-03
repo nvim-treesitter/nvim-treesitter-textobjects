@@ -176,7 +176,7 @@ end
 function M.find_best_range(bufnr, capture_string, query_group, filter_predicate, scoring_function)
   local parser = ts.get_parser(bufnr)
   if not parser then
-    return {}
+    return nil
   end
   parser:parse(true)
 

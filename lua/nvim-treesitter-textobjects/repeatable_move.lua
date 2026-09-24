@@ -96,7 +96,7 @@ M.repeat_last_move = function(opts_extend)
   if not M.last_move then
     return
   end
-  local opts = vim.tbl_deep_extend('force', M.last_move.opts, opts_extend or {})
+  local opts = vim.tbl_deep_extend('force', M.last_move.opts or {}, opts_extend or {})
   if vim.list_contains({ 'f', 'F', 't', 'T' }, M.last_move.func) then
     repeat_last_move_fFtT({ forward = opts.forward })
   else

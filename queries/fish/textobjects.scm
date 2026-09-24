@@ -39,6 +39,9 @@
 (if_statement
   (command) @conditional.inner) @conditional.outer
 
+; To always add when conditional doesn't have a command (e.g. return, break, empty)
+(if_statement) @conditional.outer
+
 (switch_statement
   (_) @conditional.inner) @conditional.outer
 

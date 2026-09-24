@@ -86,7 +86,11 @@
   (_)? @function.inner .)
 
 (assignment
-  (call_expression)
+  [
+    (call_expression)
+    (where_expression
+      (call_expression))
+  ]
   (operator)
   (_) @function.inner) @function.outer
 
@@ -144,20 +148,23 @@
     ")"))
 
 ; Parameters
-((argument_list
+(argument_list
   [
     ","
     ";"
   ] @parameter.outer
   .
   (_) @parameter.inner @parameter.outer)
-  (argument_list
-    (_) @parameter.inner @parameter.outer
-    .
-    [
-      ","
-      ";"
-    ] @parameter.outer))
+
+(argument_list
+  "("
+  .
+  (_) @parameter.inner @parameter.outer
+  .
+  [
+    ","
+    ";"
+  ]? @parameter.outer)
 
 (tuple_expression
   [

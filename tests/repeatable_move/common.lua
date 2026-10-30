@@ -144,6 +144,66 @@ function M.run_builtin_find_test(file, spec)
   vim.cmd('edit!')
 end
 
+-- Test the *forced-motion* (`:h forced-motion`) `v` typed before a `;` or `,` repeat in
+-- operator-pending mode, like in `yfn` and `yv;`.
+--
+-- The `v` inverts the inclusive/exclusive behavior of the repeated fFtT motion.
+function M.run_forced_find_test(file, spec)
+  assert.are.same(1, vim.fn.filereadable(file), string.format('File "%s" not readable', file))
+
+  -- load reference file
+  vim.cmd(string.format('edit %s', file))
+
+  vim.api.nvim_win_set_cursor(0, { spec.row, 0 })
+  local line = vim.api.nvim_get_current_line()
+  local num_cols = #line
+
+  for col = 0, num_cols - 1 do
+    for _, cmd in pairs({ 'f', 'F', 't', 'T' }) do
+      for _, repeat_cmd in pairs({ ';', ',' }) do
+        for _, count in pairs({ '', '2' }) do
+          -- Check whether the repeat finds anything at all, using vim's built-in search and repeat
+          vim.api.nvim_win_set_cursor(0, { spec.row, col })
+          vim.cmd([[normal! ]] .. cmd .. spec.char)
+          local found_from = vim.fn.col('.')
+          vim.cmd([[normal! ]] .. count .. repeat_cmd)
+          local found_to = vim.fn.col('.')
+
+          if found_from ~= found_to then
+            -- Get ground truth using vim's built-in search and repeat (operator-pending mode)
+            vim.api.nvim_win_set_cursor(0, { spec.row, col })
+            vim.cmd([[normal! ]] .. cmd .. spec.char)
+            vim.fn.setreg('0', '')
+            vim.cmd([[normal! yv]] .. count .. repeat_cmd)
+            local gt_reg = vim.fn.getreg('0')
+
+            -- test using tstextobj repeatable_move.lua (operator-pending mode)
+            vim.api.nvim_win_set_cursor(0, { spec.row, col })
+            vim.cmd([[normal ]] .. cmd .. spec.char)
+            vim.fn.setreg('0', '')
+            vim.cmd([[normal yv]] .. count .. repeat_cmd)
+            local ts_reg = vim.fn.getreg('0')
+
+            assert.are.same(
+              gt_reg,
+              ts_reg,
+              string.format(
+                "Command %s with forced repeat v%s%s works differently than vim's built-in find, col: %d",
+                cmd,
+                count,
+                repeat_cmd,
+                col
+              )
+            )
+          end
+        end
+      end
+    end
+  end
+  -- clear any changes to avoid 'No write since last change (add ! to override)'
+  vim.cmd('edit!')
+end
+
 local Runner = {}
 Runner.__index = Runner
 
@@ -164,6 +224,14 @@ function Runner:builtin_find(file, spec, title)
   self.it(string.format('%s[%s]', file, title), function()
     local path = vim.fs.joinpath(self.base_dir, file)
     M.run_builtin_find_test(path, spec)
+  end)
+end
+
+function Runner:forced_find(file, spec, title)
+  title = title and title or tostring(spec.row)
+  self.it(string.format('%s[%s]', file, title), function()
+    local path = vim.fs.joinpath(self.base_dir, file)
+    M.run_forced_find_test(path, spec)
   end)
 end
 

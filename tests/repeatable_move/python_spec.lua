@@ -11,4 +11,8 @@ describe('builtin find Python:', function()
   describe('repeat:', function()
     run:builtin_find('aligned_indent.py', { row = 1, char = 'n' })
   end)
+
+  describe('forced repeat:', function()
+    run:forced_find('aligned_indent.py', { row = 1, char = 'n' })
+  end)
 end)

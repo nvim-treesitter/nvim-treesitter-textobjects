@@ -53,21 +53,41 @@ local function repeat_last_move_fFtT(opts)
     motion = opts.forward and ',' or ';'
   end
 
+  local mode = vim.api.nvim_get_mode().mode
+  local operator_pending = mode:sub(1, 2) == 'no'
+  -- *forced-motion* character typed by the user before the `;` or `,` motion: `v`, `V`, `CTRL-V`
+  -- or an empty string when the motion wasn't forced.
+  local forced = mode:sub(3)
+
   -- This changes operator-pending (no) mode to operator-pending-visual (nov) mode to include last
   -- character in the region when going forward. In other words, going forward will include current
   -- cursor and found character.
-  local inclusive = (opts.forward and vim.api.nvim_get_mode().mode == 'no') and 'v' or ''
+  local inclusive = (opts.forward and operator_pending and forced == '') and 'v' or ''
 
   local cursor_before = vim.api.nvim_win_get_cursor(0)
   vim.cmd([[normal! ]] .. inclusive .. vim.v.count1 .. motion)
   local cursor_after = vim.api.nvim_win_get_cursor(0)
 
-  -- Handle a use case when a motion in an operator-pending doesn't visually selects any text
-  -- region. Without "turning off" the `v` a single character at the cursor's position is selected.
+  if vim.deep_equal(cursor_before, cursor_after) then
+    -- Handle a use case when a motion in an operator-pending doesn't visually selects any text
+    -- region. Without "turning off" the `v` a single character at the cursor's position is selected.
+    --
+    -- For example: `yfn` and `y2;` at the end of the line.
+    if inclusive == 'v' then
+      vim.cmd([[normal! ]] .. inclusive)
+    end
+
+    return
+  end
+
+  -- Handle a *forced-motion* (`:h forced-motion`) typed by the user, like in `yfn` and `yv;`.
   --
-  -- For example: `yfn` and `y2;` at the end of the line.
-  if inclusive == 'v' and vim.deep_equal(cursor_before, cursor_after) then
-    vim.cmd([[normal! ]] .. inclusive)
+  -- The `;` and `,` motions above are performed by `normal!`, so Neovim applies the force to a
+  -- plain cursor movement (exclusive) instead of an `fFtT` repeat (inclusive when going forward).
+  -- The force can't be undone with another `v` so shrink the region by a single character instead
+  -- to make the forward motion exclusive.
+  if opts.forward and operator_pending and forced == 'v' then
+    vim.api.nvim_win_set_cursor(0, { cursor_after[1], cursor_after[2] - 1 })
   end
 end
 
